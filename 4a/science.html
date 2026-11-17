@@ -130,6 +130,9 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setQuestionCount('ALL')" id="qcount-ALL" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border-2 border-amber-300 hover:bg-amber-200">
+                                🌟 全題型制霸 <span class="opacity-80">(每種都練)</span>
+                            </button>
                             <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-emerald-600 text-white shadow">
                                 5 題 <span class="opacity-85 font-bold">(暖身)</span>
                             </button>
@@ -385,11 +388,11 @@
     <!-- 期末綜合模擬考題數選擇 Modal -->
     <div id="mock-exam-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-emerald-400 animate-pop">
-            <div class="text-5xl mb-2 animate-float">👑</div>
-            <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-1">期末考自然科學綜合模擬考</h3>
-            <p class="text-xs sm:text-sm text-slate-500 font-medium mb-4">將從第三、四單元共 5 大實驗主題平均抽題，請選擇本次模擬考題數：</p>
-
-            <div class="grid grid-cols-3 gap-2.5 mb-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+                <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 30 題型</span>
+                </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
                     <span class="text-[11px] font-bold text-slate-500">每主題 2 題</span>
@@ -398,8 +401,8 @@
                     <span class="text-lg font-black text-emerald-700">20 題</span>
                     <span class="text-[11px] font-bold text-slate-500">每主題 4 題</span>
                 </button>
-                <button onclick="launchMockExam(25)" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
-                    <span class="text-lg font-black text-amber-700">25 題</span>
+                <button onclick="launchMockExam(25)" class="btn-3d bg-rose-50 hover:bg-rose-100 border-2 border-rose-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-rose-700">25 題</span>
                     <span class="text-[11px] font-bold text-slate-500">正式份量</span>
                 </button>
             </div>
@@ -553,32 +556,41 @@
 
         function setQuestionCount(count, playSnd = true) {
             if (playSnd) SoundEngine.click();
-            const validCount = Math.max(1, Math.min(50, parseInt(count, 10) || 5));
+            const isAll = count === 'ALL';
+            const validCount = isAll ? 'ALL' : Math.max(1, Math.min(60, parseInt(count, 10) || 5));
             gameState.questionCountPref = validCount;
 
-            const presets = [5, 10, 15, 20, 25];
+            const presets = ['ALL', 5, 10, 15, 20, 25];
             presets.forEach(c => {
                 const btn = document.getElementById(`qcount-${c}`);
                 if (!btn) return;
                 if (c === validCount) {
-                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-emerald-600 text-white shadow transition';
+                    btn.className = c === 'ALL'
+                        ? 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-amber-500 text-white shadow ring-2 ring-amber-300 transition'
+                        : 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-emerald-600 text-white shadow transition';
                 } else {
-                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 transition';
+                    btn.className = c === 'ALL'
+                        ? 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-50 text-amber-900 border-2 border-amber-300 hover:bg-amber-100 transition'
+                        : 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 transition';
                 }
             });
 
             const customInput = document.getElementById('custom-qcount-input');
-            if (customInput) customInput.value = validCount;
+            if (customInput && !isAll) customInput.value = validCount;
 
-            const estMinutes = Math.max(1, Math.round(validCount * 0.4));
-            const modeLabel = validCount <= 5 ? '快速暖身'
-                : validCount <= 10 ? '標準練習'
-                : validCount <= 15 ? '進階挑戰'
-                : validCount <= 20 ? '考前特訓'
-                : '完整模擬考';
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
-                estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+                if (isAll) {
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單主題 6 題／總模擬 30 題型全掃描）';
+                } else {
+                    const estMinutes = Math.max(1, Math.round(validCount * 0.4));
+                    const modeLabel = validCount <= 5 ? '快速暖身'
+                        : validCount <= 10 ? '標準練習'
+                        : validCount <= 15 ? '進階挑戰'
+                        : validCount <= 20 ? '考前特訓'
+                        : '完整模擬考';
+                    estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+                }
             }
 
             saveProgress();
@@ -768,10 +780,41 @@
                         ]),
                         explanation: '音量過大或不悅耳的聲音就是「噪音」，透過輕聲交談、加裝隔音牆／軟墊與種樹，都能有效降低噪音干擾。'
                     };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 31,
+                        hint: '空氣柱越短、琴弦越緊越細越短時，振動得越快，發出的聲音就越「高」喔！',
+                        text: `${who}用吸管製作簡易吸管笛，當他用剪刀把吸管剪得「越來越短」並用力吹氣時，吹出來的聲音會有什麼變化？`,
+                        correct: '空氣柱變短、振動變快，聲音變得更「高（音調變高）」',
+                        options: shuffle([
+                            '空氣柱變短、振動變快，聲音變得更「高（音調變高）」',
+                            '聲音會變得越來越低沉',
+                            '吸管剪短後就完全發不出任何聲音',
+                            '聲音會變成雷射光射出來'
+                        ]),
+                        explanation: '管樂器（如直笛、吸管笛）發聲時，管內的空氣柱越短，振動頻率越快，發出的聲音音調就越「高」！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 31,
+                        hint: '聲音不只能透過空氣傳播，還能透過固體（如木桌、紙杯棉線）和水（液體）傳播，而且在固體裡傳得最快喔！',
+                        text: `玩「紙杯傳聲筒」遊戲時，兩位同學把棉線拉直後，小聲說話對方也能聽得很清楚，這主要是因為聲音透過什麼傳播過去？`,
+                        correct: '拉直的棉線（固體介質）振動傳遞聲音',
+                        options: shuffle([
+                            '拉直的棉線（固體介質）振動傳遞聲音',
+                            '紙杯裡面裝了隱形的藍牙無線電波',
+                            '靠陽光折射把字傳到對面的杯子裡',
+                            '完全不需要任何物質，靠心電感應傳播'
+                        ]),
+                        explanation: '聲音可以透過氣體（空氣）、液體（水）和固體（棉線、桌面）傳播；拉直的棉線能有效傳遞聲波振動。'
+                    };
                 }
             ],
 
-            // 3-2 & 3-3：光的特性與應用
+            // 3-2 & 3-3：光的特性與應用（擴充至 6 題型）
             32: [
                 () => {
                     return {
@@ -834,10 +877,40 @@
                         ]),
                         explanation: '太陽光其實是由多種色光混合而成的！當陽光穿過小水滴時，會發生折射與反射並分散出紅、橙、黃、綠、藍、靛、紫等色光，形成彩虹。'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '轉彎處的「凸面鏡」和潛水艇的「潛望鏡」，都是利用鏡子把光線反射到我們的眼睛裡喔！',
+                        text: `山路急轉彎處常設置一面大圓鏡（凸面鏡），讓駕駛人能提前看見對向來車，這是利用了光的哪一種原理？`,
+                        correct: '光的反射原理',
+                        options: shuffle([
+                            '光的反射原理',
+                            '光的折射原理',
+                            '聲音的共振原理',
+                            '電路並聯原理'
+                        ]),
+                        explanation: '轉彎處的反射鏡（凸面鏡）能擴大視野，利用「光的反射」讓駕駛看到視線死角的來車，保障行車安全。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '在室內也能用「噴霧器噴水霧」或「三稜鏡」配合陽光製造出彩虹喔！',
+                        text: `在晴朗的戶外，如果想用裝水的噴霧器噴出小水霧來製造人工彩虹，應該面向哪一個方向噴水最容易成功？`,
+                        correct: '背對太陽的方向噴水霧',
+                        options: shuffle([
+                            '背對太陽的方向噴水霧',
+                            '正對著刺眼的太陽眼睛直視噴水',
+                            '躲在完全沒有陽光的地下室裡噴水',
+                            '在半夜沒有月亮的時候往天空噴水'
+                        ]),
+                        explanation: '製造彩虹時必須「背對太陽」，讓太陽光從背後射入前方的小水滴中，經過折射與反射後進入眼睛，就能看見七彩光譜！'
+                    };
                 }
             ],
 
-            // 4-1：如何讓燈泡發亮（通路、斷路、短路）
+            // 4-1：如何讓燈泡發亮（擴充至 6 題型）
             41: [
                 () => {
                     return {
@@ -901,10 +974,40 @@
                         ]),
                         explanation: '開關接通時，電路形成完整的封閉迴路，電流可以順暢流通使燈泡發亮，這就叫做「通路」；切斷開關時則成為「斷路」。'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        hint: '觀察乾電池的外觀，凸起的那一端是「正極（＋）」，平平的那一端是「負極（－）」喔！',
+                        text: `觀察一般圓筒形的乾電池，外觀上「有金屬凸起帽子」的一端和「平平的底部」分別代表電池的哪一極？`,
+                        correct: '凸起端是「正極（＋）」，平平的一端是「負極（－）」',
+                        options: shuffle([
+                            '凸起端是「正極（＋）」，平平的一端是「負極（－）」',
+                            '凸起端是「負極（－）」，平平的一端是「正極（＋）」',
+                            '兩端都是正極，沒有負極',
+                            '只有包著塑膠紙的側面才能導電'
+                        ]),
+                        explanation: '乾電池凸起端為「正極（＋）」，平底端為「負極（－）」，裝入電器時必須看清楚正負極方向才能形成正確通路。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        hint: '燈泡裡面通電後會發光發熱的細金屬絲叫作「燈絲」，外面的「玻璃罩」則是為了保護燈絲！',
+                        text: `小燈泡通電形成通路時，真正會發出光亮與熱度的構造是燈泡內部的哪一個部分？`,
+                        correct: '燈絲',
+                        options: shuffle([
+                            '燈絲',
+                            '玻璃罩',
+                            '黑色的絕緣體環',
+                            '外面的塑膠電線皮'
+                        ]),
+                        explanation: '小燈泡通電時，電流通過內部的金屬「燈絲」，使燈絲達到高溫而發光；玻璃罩則用來隔絕空氣保護燈絲不易燒斷。'
+                    };
                 }
             ],
 
-            // 4-2：電路的連接方式（電池串聯/並聯、燈泡串聯/並聯）
+            // 4-2：電路的連接方式（擴充至 6 題型）
             42: [
                 () => {
                     return {
@@ -954,6 +1057,21 @@
                 () => {
                     return {
                         unitId: 42,
+                        hint: '只用一顆電池卻要同時推亮串成一排的兩顆燈泡，電力分給兩顆燈泡後，每顆燈泡會變暗喔！',
+                        text: `用「一顆電池」串聯連接「兩顆小燈泡」（燈泡串聯），和只接一顆小燈泡相比，這兩顆燈泡的亮度會如何？`,
+                        correct: '兩顆燈泡都會變暗（電力由兩顆燈泡共同分擔）',
+                        options: shuffle([
+                            '兩顆燈泡都會變暗（電力由兩顆燈泡共同分擔）',
+                            '兩顆燈泡都會變得比原來亮兩倍',
+                            '只有靠近正極的那顆會亮，另一顆完全不亮',
+                            '燈泡會自己旋轉起來'
+                        ]),
+                        explanation: '一顆電池電力固定，當「燈泡串聯」時，電力要同時供給兩顆串在一起的燈泡，因此每顆燈泡分到的電力減少，亮度會變暗！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 42,
                         hint: '家裡的電燈和教室的日光燈，關掉一盞燈時其他燈還是亮著，因為它們是「並聯」各自有獨立的通路！',
                         text: `教室裡有好幾盞電燈，當老師關掉講台上的電燈時，同學座位上方的電燈依然亮著。請問教室裡的電燈是採用哪一種連接方式？`,
                         correct: '燈泡並聯（各自形成獨立迴路，互不影響）',
@@ -965,10 +1083,25 @@
                         ]),
                         explanation: '「燈泡並聯」讓每顆燈泡各自與電源形成獨立迴路，因此其中一顆熄滅或損壞時，其他燈泡依然能正常發亮，居家與教室照明都採用並聯！'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        hint: '裝玩具遙控車的電池盒時，如果有一顆電池正負極裝反了（正極對正極），電流就無法順利通過囉！',
+                        text: `遙控器需要裝兩顆串聯的乾電池（正極接負極）才能啟動，如果小朋友不小心把其中一顆電池裝反了，會發生什麼事？`,
+                        correct: '電路無法形成正常通路，遙控器不會運作',
+                        options: shuffle([
+                            '電路無法形成正常通路，遙控器不會運作',
+                            '遙控器會變成兩倍超強電力',
+                            '遙控器會自動把電池方向轉正',
+                            '遙控器會變成手電筒發光'
+                        ]),
+                        explanation: '串聯電池時必須「一顆的正極接另一顆的負極」，若裝反導致正極對正極（或負極對負極），電力互相抵消就無法讓電器正常運作。'
+                    };
                 }
             ],
 
-            // 4-3：導體與安全用電
+            // 4-3：導體與安全用電（擴充至 6 題型）
             43: [
                 () => {
                     const conductors = ['鐵製迴紋針', '銅製硬幣', '鋁箔紙', '不鏽鋼湯匙'];
@@ -983,6 +1116,21 @@
                         correct: good,
                         options: shuffle([good, ...bads]),
                         explanation: `「${good}」是金屬製品，容易讓電流通過，稱為「導體」；而塑膠、橡膠、乾木頭與玻璃則是不易導電的「不良導體（絕緣體）」。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 43,
+                        hint: '鉛筆中間黑色的「筆芯」是用石墨做的，雖然不是金屬，但石墨其實也能導電讓燈泡微微發亮喔！',
+                        text: `用通路檢測器測試各種文具的導電性時，下列哪一種文具<strong>也能導電</strong>讓燈泡發亮？`,
+                        correct: '鉛筆中間黑色的石墨筆芯',
+                        options: shuffle([
+                            '鉛筆中間黑色的石墨筆芯',
+                            '全新的白色橡皮擦',
+                            '透明的壓克力塑膠尺',
+                            '乾燥的木頭鉛筆外殼'
+                        ]),
+                        explanation: '除了銅、鐵、鋁等金屬之外，鉛筆芯的原料「石墨」也是容易導電的導體，接進電路中也能讓燈泡發亮！'
                     };
                 },
                 () => {
@@ -1019,6 +1167,21 @@
                 () => {
                     return {
                         unitId: 43,
+                        hint: '高壓電塔、變電箱附近電力非常強大，絕對不能在附近放風箏或釣魚，以免發生觸電危險！',
+                        text: `假日到戶外放風箏或釣魚時，應該特別注意周遭環境的哪一項安全原則？`,
+                        correct: '遠離高壓電線、電線桿與變電箱，選擇空曠安全的場地',
+                        options: shuffle([
+                            '遠離高壓電線、電線桿與變電箱，選擇空曠安全的場地',
+                            '故意把風箏線繞在電線桿上比較不會飛走',
+                            '爬上路邊的變電箱頂端看風景',
+                            '下雨打雷時撐著金屬傘柄的雨傘站在大樹下'
+                        ]),
+                        explanation: '戶外活動時必須遠離高壓電塔與電線，若風箏卡在電線上千萬不可自行拉扯或攀爬，應通知電力公司人員處理。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 43,
                         hint: '用完的廢乾電池含有重金屬與化學物質，隨便丟進一般垃圾會污染土壤和地下水喔！',
                         text: `玩具車裡的乾電池沒電了，換下來的廢乾電池應該如何處理才符合環保與安全原則？`,
                         correct: '交給超商、學校或資源回收車的「廢電池回收筒」回收',
@@ -1035,9 +1198,19 @@
         };
 
         function generateStageQuestions(stageId, count) {
+            const units = [31, 32, 41, 42, 43];
+
+            if (count === 'ALL') {
+                const targetUnits = stageId === 99 ? units : [stageId];
+                const allTemplates = [];
+                targetUnits.forEach(uid => {
+                    QuestionBank[uid].forEach(fn => allTemplates.push(fn()));
+                });
+                return shuffle(allTemplates);
+            }
+
             const list = [];
             const usedTexts = new Set();
-            const units = [31, 32, 41, 42, 43];
             let attempts = 0;
 
             let unitSchedule = [];
@@ -1096,11 +1269,15 @@
                     `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
                 ).join('');
                 const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
-                const countHint = stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（可自選）` : `每次 ${gameState.questionCountPref} 題`;
+                const unitTotal = stage.id === 99
+                    ? [31, 32, 41, 42, 43].reduce((acc, u) => acc + QuestionBank[u].length, 0)
+                    : QuestionBank[stage.id].length;
+                const countHint = gameState.questionCountPref === 'ALL'
+                    ? `🌟 全部 ${unitTotal} 種題型`
+                    : (stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（共 ${unitTotal} 題型）` : `每次 ${gameState.questionCountPref} 題（共 ${unitTotal} 題型）`);
 
                 return `
-                    <div onclick="${clickHandler}" 
-                         class="btn-3d cursor-pointer bg-white rounded-3xl p-5 border-4 ${stage.border} hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden group">
+                    <div onclick="${clickHandler}" class="btn-3d cursor-pointer bg-white hover:bg-emerald-50/40 rounded-2xl p-5 border-3 ${stage.border} flex flex-col justify-between transition-all group">
                         <div>
                             <div class="flex items-center justify-between mb-3">
                                 <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
@@ -1135,8 +1312,14 @@
         }
 
         function launchMockExam(rawCount) {
+            if (rawCount === 'ALL') {
+                closeMockExamModal();
+                setQuestionCount('ALL', false);
+                startStage(99);
+                return;
+            }
             const num = parseInt(rawCount, 10);
-            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(50, num));
+            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(60, num));
             closeMockExamModal();
             setQuestionCount(validCount, false);
             startStage(99);

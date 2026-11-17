@@ -172,6 +172,9 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setQuestionCount('ALL')" id="qcount-ALL" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border-2 border-amber-300 hover:bg-amber-200">
+                                🌟 全題型制霸 <span class="opacity-80">(每種都練)</span>
+                            </button>
                             <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow">
                                 5 題 <span class="opacity-85 font-bold">(暖身)</span>
                             </button>
@@ -506,11 +509,11 @@
     <!-- 期末綜合模擬考題數選擇 Modal -->
     <div id="mock-exam-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-amber-400 animate-pop">
-            <div class="text-5xl mb-2 animate-float">👑</div>
-            <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-1">期末考綜合模擬考</h3>
-            <p class="text-xs sm:text-sm text-slate-500 font-medium mb-4">將從第 6～10 單元平均抽題，請選擇本次模擬考題數：</p>
-
-            <div class="grid grid-cols-3 gap-2.5 mb-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+                <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 24 題型</span>
+                </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
                     <span class="text-[11px] font-bold text-slate-500">每單元 2 題</span>
@@ -791,34 +794,43 @@
 
         function setQuestionCount(count, playSnd = true) {
             if (playSnd) SoundEngine.click();
-            const validCount = Math.max(1, Math.min(50, parseInt(count, 10) || 5));
+            const isAll = count === 'ALL';
+            const validCount = isAll ? 'ALL' : Math.max(1, Math.min(60, parseInt(count, 10) || 5));
             gameState.questionCountPref = validCount;
 
             // 更新預設按鈕樣式
-            const presets = [5, 10, 15, 20, 25];
+            const presets = ['ALL', 5, 10, 15, 20, 25];
             presets.forEach(c => {
                 const btn = document.getElementById(`qcount-${c}`);
                 if (!btn) return;
                 if (c === validCount) {
-                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition';
+                    btn.className = c === 'ALL'
+                        ? 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-amber-500 text-white shadow ring-2 ring-amber-300 transition'
+                        : 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition';
                 } else {
-                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 transition';
+                    btn.className = c === 'ALL'
+                        ? 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-50 text-amber-900 border-2 border-amber-300 hover:bg-amber-100 transition'
+                        : 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 transition';
                 }
             });
 
             // 同步更新自訂輸入框與預估時間標籤
             const customInput = document.getElementById('custom-qcount-input');
-            if (customInput) customInput.value = validCount;
+            if (customInput && !isAll) customInput.value = validCount;
 
-            const estMinutes = Math.max(1, Math.round(validCount * 0.6));
-            const modeLabel = validCount <= 5 ? '快速暖身'
-                : validCount <= 10 ? '標準練習'
-                : validCount <= 15 ? '進階挑戰'
-                : validCount <= 20 ? '考前特訓'
-                : '完整模擬考';
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
-                estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+                if (isAll) {
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單單元 4～6 題／總模擬 24 題型全掃描）';
+                } else {
+                    const estMinutes = Math.max(1, Math.round(validCount * 0.6));
+                    const modeLabel = validCount <= 5 ? '快速暖身'
+                        : validCount <= 10 ? '標準練習'
+                        : validCount <= 15 ? '進階挑戰'
+                        : validCount <= 20 ? '考前特訓'
+                        : '完整模擬考';
+                    estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+                }
             }
 
             saveProgress();
@@ -1846,28 +1858,51 @@
                             autoScratchpad: false,
                             inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
                             unitSuffix: '℃',
-                            hint: `找到折線圖中最高的那個圓點和最低的那個圓點，把兩個氣溫數字相減！`,
-                            text: `觀察這張氣溫折線圖，這一天當中<strong>最高氣溫</strong>和<strong>最低氣溫</strong>相差多少度（℃）？`,
+                            hint: `找出折線圖裡最高的氣溫（${maxT}℃）和最低的氣溫（${minT}℃），用減法算出它們相差幾度！`,
+                            text: `根據這張折線圖，這段時間內<strong>最高氣溫</strong>和<strong>最低氣溫</strong>相差多少度（℃）？`,
                             visual: svg,
                             correct: String(diff),
                             options: buildOptions(diff, [
+                                () => maxT + minT,
                                 () => maxT,
                                 () => diff + 2,
-                                () => Math.max(1, diff - 2),
-                                () => maxT + minT
+                                () => Math.max(1, diff - 1)
                             ]),
-                            explanation: `折線圖中最高點是 ${maxT}℃，最低點是 ${minT}℃，兩者相差 ${maxT} － ${minT} = ${diff}℃。`
+                            explanation: `圖中最高氣溫是 ${maxT}℃，最低氣溫是 ${minT}℃，兩者相差 ${maxT} － ${minT} = ${diff}℃。`
                         };
                     }
                 }
             }
         };
 
-        // 為指定關卡生成 N 題不重複題目（期末模擬考 99 會平均分配第 6～10 單元）
+        // 為指定關卡生成 N 題不重複題目（支援 'ALL' 全題型制霸，確保每種題型模板各練習 1 題）
         function generateStageQuestions(stageId, count) {
+            const units = [6, 7, 8, 9, 10];
+            const templateCounts = { 6: 6, 7: 5, 8: 4, 9: 5, 10: 4 }; // 合計 24 種核心題型
+
+            if (count === 'ALL') {
+                const targetUnits = stageId === 99 ? units : [stageId];
+                const allTemplates = [];
+                targetUnits.forEach(uid => {
+                    const maxT = templateCounts[uid];
+                    const seenForUnit = new Set();
+                    let guard = 0;
+                    while (seenForUnit.size < maxT && guard < 120) {
+                        guard++;
+                        const q = QuestionGenerators[uid]();
+                        // 依據題目提示文字作為題型指紋，確保每種題型模板各抽 1 題
+                        const fingerprint = q.hint.slice(0, 12);
+                        if (!seenForUnit.has(fingerprint)) {
+                            seenForUnit.add(fingerprint);
+                            allTemplates.push(q);
+                        }
+                    }
+                });
+                return shuffle(allTemplates);
+            }
+
             const list = [];
             const usedTexts = new Set();
-            const units = [6, 7, 8, 9, 10];
             let attempts = 0;
 
             // 若為期末模擬考，建立輪流平均分配的單元序列並打亂順序
@@ -1926,11 +1961,14 @@
                     `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
                 ).join('');
                 const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
-                const countHint = stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（可自選）` : `每次 ${gameState.questionCountPref} 題`;
+                const unitTemplateMap = { 6: 6, 7: 5, 8: 4, 9: 5, 10: 4, 99: 24 };
+                const unitTotal = unitTemplateMap[stage.id] || 5;
+                const countHint = gameState.questionCountPref === 'ALL'
+                    ? `🌟 全部 ${unitTotal} 種題型`
+                    : (stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（共 ${unitTotal} 題型）` : `每次 ${gameState.questionCountPref} 題（共 ${unitTotal} 題型）`);
 
                 return `
-                    <div onclick="${clickHandler}" 
-                         class="btn-3d cursor-pointer bg-white rounded-3xl p-5 border-4 ${stage.border} hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden group">
+                    <div onclick="${clickHandler}" class="btn-3d cursor-pointer bg-white hover:bg-indigo-50/40 rounded-2xl p-5 border-3 ${stage.border} flex flex-col justify-between transition-all group">
                         <div>
                             <div class="flex items-center justify-between mb-3">
                                 <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
@@ -1965,8 +2003,14 @@
         }
 
         function launchMockExam(rawCount) {
+            if (rawCount === 'ALL') {
+                closeMockExamModal();
+                setQuestionCount('ALL', false);
+                startStage(99);
+                return;
+            }
             const num = parseInt(rawCount, 10);
-            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(50, num));
+            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(60, num));
             closeMockExamModal();
             setQuestionCount(validCount, false);
             startStage(99);
