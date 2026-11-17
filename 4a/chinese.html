@@ -740,18 +740,21 @@
 
                 const getPos = (e) => {
                     const rect = this.canvas.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    const logicalW = (this.canvas.width / dpr) || rect.width;
+                    const logicalH = (this.canvas.height / dpr) || rect.height;
+                    const scaleX = rect.width > 0 ? logicalW / rect.width : 1;
+                    const scaleY = rect.height > 0 ? logicalH / rect.height : 1;
                     return {
-                        x: e.clientX - rect.left,
-                        y: e.clientY - rect.top
+                        x: (e.clientX - rect.left) * scaleX,
+                        y: (e.clientY - rect.top) * scaleY
                     };
                 };
 
                 const startDraw = (e) => {
                     if (currentSession.answered) return;
-                    const rect = this.canvas.getBoundingClientRect();
-                    const dpr = window.devicePixelRatio || 1;
-                    if (Math.abs(this.canvas.width - Math.round(rect.width * dpr)) > 2) {
-                        this.resize();
+                    if (this.canvas.width === 0 || this.canvas.height === 0) {
+                        this.resize(false);
                     }
                     this.drawing = true;
                     this.hasStrokes = true;
@@ -793,17 +796,34 @@
                 this.canvas.addEventListener('pointermove', moveDraw);
                 this.canvas.addEventListener('pointerup', endDraw);
                 this.canvas.addEventListener('pointercancel', endDraw);
-                window.addEventListener('resize', () => this.resize());
+                window.addEventListener('resize', () => this.resize(true));
             },
 
-            resize() {
+            resize(preserveDrawing = false) {
                 if (!this.canvas || !this.canvas.parentElement) return;
                 const rect = this.canvas.parentElement.getBoundingClientRect();
                 if (rect.width <= 0 || rect.height <= 0) return;
                 const dpr = window.devicePixelRatio || 1;
-                this.canvas.width = Math.round(rect.width * dpr);
-                this.canvas.height = Math.round(rect.height * dpr);
+                const targetW = Math.round(rect.width * dpr);
+                const targetH = Math.round(rect.height * dpr);
+
+                if (this.canvas.width === targetW && this.canvas.height === targetH) return;
+
+                let tempCanvas = null;
+                if (preserveDrawing && this.canvas.width > 0 && this.canvas.height > 0) {
+                    tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = this.canvas.width;
+                    tempCanvas.height = this.canvas.height;
+                    tempCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
+                }
+
+                this.canvas.width = targetW;
+                this.canvas.height = targetH;
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                if (tempCanvas) {
+                    this.ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+                }
             },
 
             clear() {
