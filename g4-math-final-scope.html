@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翰林四上期末考數學冒險島｜勇者刷題大挑戰</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Google Fonts 繁體中文圓體與英數字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 自訂遊戲字體與活潑背景 */
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #dcfce7 100%);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.88); opacity: 0; }
+            70% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* 立體遊戲按鈕 */
+        .btn-3d {
+            transition: all 0.12s ease;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+        }
+
+        /* 標準數學上下橫線分數排版 */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 4px;
+            font-weight: 700;
+            line-height: 1.08;
+        }
+        .frac-num {
+            border-bottom: 2.5px solid currentColor;
+            padding: 0 4px 2px 4px;
+        }
+        .frac-den {
+            padding: 2px 4px 0 4px;
+        }
+        .mixed-num {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+        }
+
+        /* 手寫草稿畫布 */
+        #scratch-canvas {
+            touch-action: none;
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 頂部狀態列 -->
+    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-amber-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
+        <!-- 遊戲標題與回首頁 -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
+                🏰
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-2xl font-black text-amber-600 tracking-wide leading-tight">翰林四上期末考冒險島</h1>
+                <p class="text-xs sm:text-sm text-slate-500 font-bold">第 6～10 單元無限刷題特訓</p>
+            </div>
+        </div>
+
+        <!-- 積分、星星與功能按鈕 -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- 總星星數 -->
+            <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-amber-800 text-sm sm:text-base">
+                <span>⭐</span>
+                <span id="total-stars">0</span>
+                <span class="text-xs text-amber-600">/ 18</span>
+            </div>
+
+            <!-- 總積分 -->
+            <div class="bg-sky-100 border-2 border-sky-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-sky-800 text-sm sm:text-base">
+                <span>🏆</span>
+                <span id="total-score">0</span>
+            </div>
+
+            <!-- 錯題本與弱點分析按鈕 -->
+            <button onclick="openMistakeModal()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1 relative" title="家長陪讀：錯題本與弱點分析">
+                <span>📖</span>
+                <span class="hidden sm:inline">錯題本</span>
+                <span id="mistake-badge" class="hidden absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+            </button>
+
+            <!-- 音效開關 -->
+            <button id="sound-toggle" onclick="toggleSound()" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-2 sm:px-3 sm:py-2 rounded-2xl text-sm flex items-center gap-1" title="切換音效">
+                <span id="sound-icon">🔊</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主畫面容器 -->
+    <main class="w-full max-w-5xl flex-1 flex flex-col justify-center my-4">
+        
+        <!-- 1. 關卡選擇大廳 (Lobby Screen) -->
+        <section id="lobby-screen" class="animate-pop">
+            <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-5 sm:p-7 shadow-xl border-4 border-sky-200">
+                <div class="flex flex-col gap-4 mb-6 border-b-2 border-slate-100 pb-5">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
+                            <span>🗺️</span> 選擇期末考特訓單元（翰林版四上）
+                        </h2>
+                        <p class="text-sm text-slate-500 font-medium mt-1">每次點選都會自動生成全新數字、圖表與生活情境題！</p>
+                    </div>
+
+                    <!-- 醒目版：自訂刷題題數選擇器（含預設檔位與 1~50 自訂輸入） -->
+                    <div class="bg-gradient-to-r from-indigo-50 via-sky-50 to-amber-50 p-3.5 sm:p-4 rounded-2xl border-2 border-indigo-200 shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                            <span class="text-sm sm:text-base font-black text-indigo-900 flex items-center gap-1.5">
+                                <span>🎯</span> 設定每次練習題數：
+                            </span>
+                            <span id="qcount-estimate" class="text-xs sm:text-sm font-black text-amber-800 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full">
+                                目前設定：5 題（快速暖身・約 3 分鐘）
+                            </span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow">
+                                5 題 <span class="opacity-85 font-bold">(暖身)</span>
+                            </button>
+                            <button onclick="setQuestionCount(10)" id="qcount-10" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
+                                10 題 <span class="opacity-75">(標準)</span>
+                            </button>
+                            <button onclick="setQuestionCount(15)" id="qcount-15" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
+                                15 題 <span class="opacity-75">(進階)</span>
+                            </button>
+                            <button onclick="setQuestionCount(20)" id="qcount-20" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
+                                20 題 <span class="opacity-75">(特訓)</span>
+                            </button>
+                            <button onclick="setQuestionCount(25)" id="qcount-25" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
+                                25 題 <span class="opacity-75">(模擬考)</span>
+                            </button>
+
+                            <!-- 自訂題數輸入框 (1~50 題) -->
+                            <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border-2 border-indigo-200 focus-within:border-indigo-500 ml-auto sm:ml-0">
+                                <label for="custom-qcount-input" class="text-xs font-black text-indigo-700 whitespace-nowrap">自訂：</label>
+                                <input id="custom-qcount-input" type="number" min="1" max="50" value="5"
+                                    onchange="applyCustomQuestionCount(this.value)"
+                                    onkeydown="if(event.key==='Enter') applyCustomQuestionCount(this.value)"
+                                    class="w-14 text-center text-sm font-black text-indigo-900 bg-indigo-50/70 rounded-lg py-0.5 focus:outline-none">
+                                <span class="text-xs font-bold text-slate-500">題</span>
+                                <button onclick="applyCustomQuestionCount(document.getElementById('custom-qcount-input').value)"
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black px-2.5 py-1 rounded-lg transition">
+                                    套用
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6 個關卡網格 (第 6~10 單元 + 期末模擬考) -->
+                <div id="stages-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- 關卡卡片由 JS 動態生成 -->
+                </div>
+
+                <div class="mt-5 flex justify-between items-center text-xs text-slate-400">
+                    <span>💡 小提示：答題時可隨時開啟「手寫草稿板」直接列式計算！</span>
+                    <button onclick="resetProgressConfirm()" class="hover:text-rose-500 underline font-bold">
+                        重置所有紀錄
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 遊戲答題畫面 (Quiz Screen) -->
+        <section id="quiz-screen" class="hidden animate-pop">
+            <div class="bg-white rounded-3xl p-4 sm:p-7 shadow-2xl border-4 border-indigo-200 relative overflow-hidden">
+                
+                <!-- 頂部進度、草稿板開關與連擊列 -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5 pb-4 border-b-2 border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <button onclick="goHome()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm transition">
+                            ⬅️ 返回地圖
+                        </button>
+                        <span id="stage-badge" class="bg-indigo-100 text-indigo-700 font-black px-3 py-1.5 rounded-xl text-xs sm:text-base">
+                            第六單元：兩步驟問題與併式
+                        </span>
+                    </div>
+
+                    <!-- 題號進度顯示 -->
+                    <div class="flex items-center gap-2">
+                        <span id="progress-text" class="text-xs sm:text-sm font-black text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                            第 1 / 5 題
+                        </span>
+                        <div class="w-20 sm:w-28 h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 20%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 草稿板按鈕 & 連擊 -->
+                    <div class="flex items-center gap-2">
+                        <div id="combo-badge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-3 py-1 rounded-full text-xs sm:text-sm shadow animate-bounce">
+                            🔥 2 連擊!
+                        </div>
+                        <button onclick="toggleScratchpad()" id="scratch-toggle-btn" class="btn-3d bg-amber-400 hover:bg-amber-500 text-slate-900 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
+                            <span>✏️</span>
+                            <span>手寫草稿板 ▾</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 題目顯示區 -->
+                <div id="question-container" class="mb-6">
+                    <!-- 題型標籤 -->
+                    <div class="mb-2 flex items-center gap-2">
+                        <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-700">
+                            四選一挑戰
+                        </span>
+                        <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
+                            第六單元
+                        </span>
+                    </div>
+
+                    <!-- 題目敘述 -->
+                    <div id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed mb-4">
+                        題目載入中...
+                    </div>
+
+                    <!-- 視覺輔助圖形區 (SVG 三角形幾何、長條圖、折線圖、小數/分數圖示) -->
+                    <div id="question-visual" class="hidden flex justify-center items-center my-4 bg-slate-50/80 rounded-2xl p-3 sm:p-5 border-2 border-dashed border-slate-200 overflow-x-auto">
+                    </div>
+                </div>
+
+                <!-- 作答區 A：4 個選擇題選項按鈕 -->
+                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                    <!-- 選項由 JS 動態生成 -->
+                </div>
+
+                <!-- 作答區 B：虛擬數字鍵盤填充題 -->
+                <div id="keypad-container" class="hidden max-w-md mx-auto bg-slate-50 p-4 sm:p-5 rounded-3xl border-2 border-indigo-200">
+                    <div class="text-xs font-bold text-slate-500 mb-1.5 text-center">請點擊下方數字鍵輸入答案：</div>
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <div id="keypad-display" class="flex-1 bg-white border-3 border-indigo-300 rounded-2xl px-4 py-3 text-right text-2xl sm:text-3xl font-black text-indigo-700 min-h-[56px] tracking-wider shadow-inner">
+                            
+                        </div>
+                        <span id="keypad-unit" class="text-base sm:text-lg font-black text-slate-600 shrink-0"></span>
+                    </div>
+
+                    <!-- 數字鍵盤網格 -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <button onclick="pressKey('7')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">7</button>
+                        <button onclick="pressKey('8')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">8</button>
+                        <button onclick="pressKey('9')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">9</button>
+                        <button onclick="pressKey('4')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">4</button>
+                        <button onclick="pressKey('5')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">5</button>
+                        <button onclick="pressKey('6')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">6</button>
+                        <button onclick="pressKey('1')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">1</button>
+                        <button onclick="pressKey('2')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">2</button>
+                        <button onclick="pressKey('3')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">3</button>
+                        <button onclick="pressKey('.')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-2xl py-3 text-xl font-black text-amber-800">.</button>
+                        <button onclick="pressKey('0')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">0</button>
+                        <button onclick="pressKey('BACK')" class="btn-3d bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 rounded-2xl py-3 text-lg font-black text-rose-700">⌫ 退格</button>
+                    </div>
+
+                    <button id="keypad-submit-btn" onclick="submitKeypadAnswer()" class="mt-4 w-full btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3.5 rounded-2xl text-lg flex items-center justify-center gap-2">
+                        <span>✅ 送出答案</span>
+                    </button>
+                </div>
+
+                <!-- 手寫計算草稿板區 (置於題目與答案選項的下方，手寫直式計算完全不遮擋題目與選項) -->
+                <div id="scratchpad-panel" class="hidden mt-6 bg-slate-50 rounded-2xl border-2 border-amber-300 p-3 animate-pop shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="text-xs sm:text-sm font-black text-amber-800 flex items-center gap-1">
+                            <span>📝</span> 勇者計算草稿紙（看著上方題目與選項直接寫直式，完全不會遮擋喔！）
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="setPenColor('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white shadow" title="黑筆"></button>
+                            <button onclick="setPenColor('#e11d48')" class="w-6 h-6 rounded-full bg-rose-600 border-2 border-white shadow" title="紅筆"></button>
+                            <button onclick="setPenColor('#0284c7')" class="w-6 h-6 rounded-full bg-sky-600 border-2 border-white shadow" title="藍筆"></button>
+                            <button onclick="clearScratchpad()" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg">
+                                🧹 擦乾淨
+                            </button>
+                            <button onclick="toggleScratchpad()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg">
+                                收起 ▴
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full h-44 sm:h-52 bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                        <canvas id="scratch-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                    </div>
+                </div>
+
+                <!-- 答題回饋與詳解區 -->
+                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
+                        <div class="flex-1">
+                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
+                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                            <span>下一題</span>
+                            <span>➡️</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. 過關結算畫面 (Result Screen) -->
+        <section id="result-screen" class="hidden animate-pop">
+            <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-amber-300 text-center max-w-2xl mx-auto">
+                <div id="result-trophy" class="text-6xl sm:text-7xl mb-3 animate-float">🏆</div>
+                <h2 id="result-title" class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">單元特訓完成！</h2>
+                <p id="result-badge-name" class="inline-block bg-amber-100 text-amber-800 font-black px-4 py-1 rounded-full text-sm sm:text-base mb-4">
+                    稱號：期末考數學小勇者
+                </p>
+
+                <!-- 星星評等展示 -->
+                <div id="result-stars" class="flex justify-center gap-3 text-5xl sm:text-6xl my-3">
+                    <span>⭐</span><span>⭐</span><span>⭐</span>
+                </div>
+
+                <!-- 數據統計卡片 -->
+                <div class="grid grid-cols-3 gap-3 my-6 bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">答對率</div>
+                        <div id="result-correct" class="text-xl sm:text-2xl font-black text-emerald-600">5 / 5</div>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">本輪得分</div>
+                        <div id="result-score" class="text-xl sm:text-2xl font-black text-sky-600">+500</div>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">最高連擊</div>
+                        <div id="result-combo" class="text-xl sm:text-2xl font-black text-orange-500">5 連擊</div>
+                    </div>
+                </div>
+
+                <!-- 結算按鈕區 -->
+                <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
+                    <button onclick="retryStage()" class="btn-3d bg-amber-500 hover:bg-amber-600 text-white font-black px-6 py-3.5 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                        <span>🔄</span>
+                        <span>再刷一輪（全新題目）</span>
+                    </button>
+                    <button onclick="goHome()" class="btn-3d bg-sky-500 hover:bg-sky-600 text-white font-black px-6 py-3.5 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                        <span>🗺️</span>
+                        <span>返回冒險地圖</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾資訊 -->
+    <footer class="text-center text-xs sm:text-sm text-slate-500 font-medium py-2">
+        依據台灣國小四年級上學期「翰林版數學期末考範圍（第 6～10 單元）」設計｜每次題目動態生成 ✨
+    </footer>
+
+    <!-- 錯題回顧與弱點分析 Modal -->
+    <div id="mistake-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl border-4 border-rose-300 animate-pop">
+            <div class="p-5 border-b-2 border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📖</span>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-800">勇者錯題本 & 弱點分析</h3>
+                        <p class="text-xs text-slate-500">自動統計各單元錯誤次數，點擊即可重新生成同單元題目特訓！</p>
+                    </div>
+                </div>
+                <button onclick="closeMistakeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 w-9 h-9 rounded-full font-black flex items-center justify-center">✕</button>
+            </div>
+
+            <!-- 弱點單元分析摘要 -->
+            <div id="weakness-summary" class="px-5 pt-4 pb-2 bg-rose-50/70 border-b border-rose-100">
+                <!-- 由 JS 動態填入 -->
+            </div>
+            
+            <div id="mistake-list" class="p-5 overflow-y-auto flex-1 space-y-4">
+                <!-- 錯題列表由 JS 動態生成 -->
+            </div>
+
+            <div class="p-4 border-t-2 border-slate-100 flex flex-wrap justify-between items-center gap-2 bg-slate-50 rounded-b-3xl">
+                <button onclick="clearMistakes()" class="text-xs sm:text-sm text-rose-500 hover:text-rose-700 font-bold px-3 py-1.5">
+                    🗑️ 清空錯題紀錄
+                </button>
+                <div class="flex gap-2">
+                    <button id="practice-weakest-btn" onclick="practiceWeakestUnit()" class="hidden btn-3d bg-amber-500 hover:bg-amber-600 text-white font-black px-4 py-2 rounded-xl text-xs sm:text-sm">
+                        🔥 一鍵重練最弱單元
+                    </button>
+                    <button onclick="closeMistakeModal()" class="btn-3d bg-slate-800 text-white font-bold px-5 py-2 rounded-xl text-sm">
+                        關閉視窗
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂確認對話框 -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl border-4 border-amber-300 animate-pop">
+            <div class="text-4xl mb-2">⚠️</div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">確定要重置所有紀錄嗎？</h3>
+            <p class="text-sm text-slate-500 mb-5">所有的星星數、積分與錯題紀錄都會歸零喔！</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="closeConfirmModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl">取消</button>
+                <button onclick="executeResetProgress()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl">確定重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 期末綜合模擬考題數選擇 Modal -->
+    <div id="mock-exam-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-amber-400 animate-pop">
+            <div class="text-5xl mb-2 animate-float">👑</div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-1">期末考綜合模擬考</h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mb-4">將從第 6～10 單元平均抽題，請選擇本次模擬考題數：</p>
+
+            <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-sky-700">10 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">每單元 2 題</span>
+                </button>
+                <button onclick="launchMockExam(20)" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-amber-700">20 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">每單元 4 題</span>
+                </button>
+                <button onclick="launchMockExam(25)" class="btn-3d bg-rose-50 hover:bg-rose-100 border-2 border-rose-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-rose-700">25 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">正式份量</span>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 mb-5">
+                <span class="text-xs sm:text-sm font-black text-slate-700">或自訂題數：</span>
+                <input id="mock-custom-input" type="number" min="5" max="50" value="15"
+                    class="w-16 text-center text-base font-black text-indigo-700 bg-white border-2 border-indigo-200 rounded-xl py-1 focus:outline-none focus:border-indigo-500">
+                <span class="text-xs sm:text-sm font-bold text-slate-500">題</span>
+                <button onclick="launchMockExam(document.getElementById('mock-custom-input').value)"
+                    class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">
+                    開始模擬考 ➔
+                </button>
+            </div>
+
+            <button onclick="closeMockExamModal()" class="text-xs sm:text-sm text-slate-400 hover:text-slate-600 font-bold">
+                先返回地圖
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. Web Audio API 音效合成引擎 (無外部音檔依賴)
+           ========================================================================== */
+        const SoundEngine = {
+            ctx: null,
+            enabled: true,
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+
+            playTone(freq, type, duration, delay = 0, volume = 0.22) {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(this.ctx.currentTime + delay);
+                osc.stop(this.ctx.currentTime + delay + duration);
+            },
+
+            click() {
+                this.playTone(620, 'sine', 0.07, 0, 0.14);
+            },
+
+            correct(combo = 1) {
+                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
+                this.playTone(base, 'triangle', 0.13, 0, 0.25);
+                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
+                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
+            },
+
+            wrong() {
+                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
+                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
+            },
+
+            victory() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, idx) => {
+                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
+                });
+            }
+        };
+
+        function toggleSound() {
+            SoundEngine.enabled = !SoundEngine.enabled;
+            const icon = document.getElementById('sound-icon');
+            const btn = document.getElementById('sound-toggle');
+            if (SoundEngine.enabled) {
+                icon.textContent = '🔊';
+                btn.classList.replace('bg-slate-400', 'bg-emerald-500');
+                SoundEngine.click();
+            } else {
+                icon.textContent = '🔇';
+                btn.classList.replace('bg-emerald-500', 'bg-slate-400');
+            }
+        }
+
+        /* ==========================================================================
+           2. 手寫計算草稿板 (Canvas 支援觸控與滑鼠)
+           ========================================================================== */
+        const Scratchpad = {
+            canvas: null,
+            ctx: null,
+            drawing: false,
+            color: '#1e293b',
+
+            init() {
+                this.canvas = document.getElementById('scratch-canvas');
+                if (!this.canvas) return;
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+
+                const getPos = (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return {
+                        x: clientX - rect.left,
+                        y: clientY - rect.top
+                    };
+                };
+
+                const startDraw = (e) => {
+                    this.drawing = true;
+                    const pos = getPos(e);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(pos.x, pos.y);
+                };
+
+                const moveDraw = (e) => {
+                    if (!this.drawing) return;
+                    if (e.cancelable) e.preventDefault();
+                    const pos = getPos(e);
+                    this.ctx.lineWidth = 3;
+                    this.ctx.lineCap = 'round';
+                    this.ctx.lineJoin = 'round';
+                    this.ctx.strokeStyle = this.color;
+                    this.ctx.lineTo(pos.x, pos.y);
+                    this.ctx.stroke();
+                };
+
+                const endDraw = () => {
+                    this.drawing = false;
+                };
+
+                this.canvas.addEventListener('mousedown', startDraw);
+                this.canvas.addEventListener('mousemove', moveDraw);
+                window.addEventListener('mouseup', endDraw);
+
+                this.canvas.addEventListener('touchstart', startDraw, { passive: true });
+                this.canvas.addEventListener('touchmove', moveDraw, { passive: false });
+                this.canvas.addEventListener('touchend', endDraw);
+            },
+
+            resize() {
+                if (!this.canvas) return;
+                const parent = this.canvas.parentElement;
+                if (parent && parent.clientWidth > 0) {
+                    this.canvas.width = parent.clientWidth;
+                    this.canvas.height = parent.clientHeight;
+                }
+            }
+        };
+
+        function toggleScratchpad() {
+            SoundEngine.click();
+            const panel = document.getElementById('scratchpad-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                Scratchpad.resize();
+            }
+        }
+
+        function setPenColor(hex) {
+            SoundEngine.click();
+            Scratchpad.color = hex;
+        }
+
+        function clearScratchpad() {
+            SoundEngine.click();
+            if (Scratchpad.ctx && Scratchpad.canvas) {
+                Scratchpad.ctx.clearRect(0, 0, Scratchpad.canvas.width, Scratchpad.canvas.height);
+            }
+        }
+
+        /* ==========================================================================
+           3. 翰林版四上期末考關卡定義（第 6～10 單元 + 期末模擬考）
+           ========================================================================== */
+        const STAGES = [
+            { id: 6, title: '第 6 單元：除法', subtitle: '三、四位數除以二位數直式與商數估算', icon: '➗', color: 'from-sky-400 to-blue-600', border: 'border-sky-300' },
+            { id: 7, title: '第 7 單元：三角形與全等', subtitle: '三角形分類、角度計算與全等對應邊角', icon: '📐', color: 'from-purple-400 to-indigo-600', border: 'border-purple-300' },
+            { id: 8, title: '第 8 單元：兩步驟問題與併式', subtitle: '括號優先、先乘除後加減與購物應用', icon: '🧮', color: 'from-pink-400 to-rose-600', border: 'border-pink-300' },
+            { id: 9, title: '第 9 單元：二位小數', subtitle: '百分位化聚、大小比較與直式加減法', icon: '🪙', color: 'from-emerald-400 to-teal-600', border: 'border-emerald-300' },
+            { id: 10, title: '第 10 單元：統計圖表', subtitle: '報讀長條圖與折線圖、數據比較與趨勢', icon: '📊', color: 'from-amber-400 to-orange-600', border: 'border-amber-300' },
+            { id: 99, title: '期末考綜合模擬考', subtitle: '混合第 6～10 單元全範圍隨機出題', icon: '👑', color: 'from-yellow-400 via-orange-500 to-red-600', border: 'border-yellow-400' }
+        ];
+
+        // 遊戲儲存狀態
+        let gameState = {
+            stars: { 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 99: 0 },
+            totalScore: 0,
+            questionCountPref: 5,
+            mistakes: [] // { unitId, stageTitle, questionText, wrongAnswer, correctAnswer, explanation }
+        };
+
+        // 當前刷題狀態
+        let currentSession = {
+            stageId: 6,
+            questions: [],
+            currentIndex: 0,
+            correctCount: 0,
+            sessionScore: 0,
+            combo: 0,
+            maxCombo: 0,
+            answered: false,
+            keypadInput: ''
+        };
+
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('hanlin_math_4a_final_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                }
+            } catch (e) {
+                console.warn('無法讀取存檔', e);
+            }
+            setQuestionCount(gameState.questionCountPref || 5, false);
+            updateHeaderStats();
+            renderLobby();
+        }
+
+        function saveProgress() {
+            try {
+                localStorage.setItem('hanlin_math_4a_final_v2', JSON.stringify(gameState));
+            } catch (e) {
+                console.warn('無法儲存進度', e);
+            }
+            updateHeaderStats();
+        }
+
+        function setQuestionCount(count, playSnd = true) {
+            if (playSnd) SoundEngine.click();
+            const validCount = Math.max(1, Math.min(50, parseInt(count, 10) || 5));
+            gameState.questionCountPref = validCount;
+
+            // 更新預設按鈕樣式
+            const presets = [5, 10, 15, 20, 25];
+            presets.forEach(c => {
+                const btn = document.getElementById(`qcount-${c}`);
+                if (!btn) return;
+                if (c === validCount) {
+                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition';
+                } else {
+                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 transition';
+                }
+            });
+
+            // 同步更新自訂輸入框與預估時間標籤
+            const customInput = document.getElementById('custom-qcount-input');
+            if (customInput) customInput.value = validCount;
+
+            const estMinutes = Math.max(1, Math.round(validCount * 0.6));
+            const modeLabel = validCount <= 5 ? '快速暖身'
+                : validCount <= 10 ? '標準練習'
+                : validCount <= 15 ? '進階挑戰'
+                : validCount <= 20 ? '考前特訓'
+                : '完整模擬考';
+            const estEl = document.getElementById('qcount-estimate');
+            if (estEl) {
+                estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+            }
+
+            saveProgress();
+            renderLobby();
+        }
+
+        function applyCustomQuestionCount(rawVal) {
+            const num = parseInt(rawVal, 10);
+            const clamped = isNaN(num) ? 5 : Math.max(1, Math.min(50, num));
+            setQuestionCount(clamped, true);
+        }
+
+        function updateHeaderStats() {
+            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            document.getElementById('total-stars').textContent = totalStars;
+            document.getElementById('total-score').textContent = gameState.totalScore;
+
+            const badge = document.getElementById('mistake-badge');
+            if (gameState.mistakes.length > 0) {
+                badge.textContent = gameState.mistakes.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           4. 數學工具函式與動態 SVG 圖表/幾何生成器
+           ========================================================================== */
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 精準小數格式化，避免浮點數誤差 (例如 1.2 + 0.3 = 1.5000000000000002)
+        function formatDecFromCents(cents) {
+            const sign = cents < 0 ? '-' : '';
+            const abs = Math.abs(Math.round(cents));
+            const whole = Math.floor(abs / 100);
+            const rem = abs % 100;
+            if (rem === 0) return `${sign}${whole}`;
+            if (rem % 10 === 0) return `${sign}${whole}.${rem / 10}`;
+            return `${sign}${whole}.${String(rem).padStart(2, '0')}`;
+        }
+
+        // 生成 4 個不重複選項
+        function buildOptions(correctVal, distractorGenerators) {
+            const set = new Set([String(correctVal)]);
+            let safety = 0;
+            while (set.size < 4 && safety < 60) {
+                safety++;
+                const gen = distractorGenerators[safety % distractorGenerators.length];
+                const candidate = String(gen());
+                if (candidate && candidate !== 'NaN' && candidate !== 'undefined') {
+                    set.add(candidate);
+                }
+            }
+            let pad = 1;
+            while (set.size < 4) {
+                set.add(String(Number(correctVal) + pad || `選項 ${pad}`));
+                pad++;
+            }
+            return shuffle(Array.from(set));
+        }
+
+        // 標準上下橫線分數 HTML
+        function fmtFrac(num, den) {
+            return `<span class="frac"><span class="frac-num">${num}</span><span class="frac-den">${den}</span></span>`;
+        }
+        function fmtMixed(whole, num, den) {
+            return `<span class="mixed-num"><span>${whole}</span>${fmtFrac(num, den)}</span>`;
+        }
+
+        // 動態繪製三角形 SVG（含角度標示）
+        function createTriangleSVG({ type, topAngle, leftAngle, rightAngle, sideLabel }) {
+            // 依據不同類型選擇美觀的 SVG 頂點座標
+            let pts = '130,22 45,145 215,145'; // 預設等腰/銳角
+            let fill = '#e0e7ff';
+            let stroke = '#4f46e5';
+
+            if (type === 'right') {
+                pts = '65,25 65,145 215,145';
+                fill = '#fce7f3';
+                stroke = '#db2777';
+            } else if (type === 'obtuse') {
+                pts = '35,45 95,145 225,145';
+                fill = '#fef3c7';
+                stroke = '#d97706';
+            } else if (type === 'equilateral') {
+                pts = '130,24 55,145 205,145';
+                fill = '#dcfce7';
+                stroke = '#059669';
+            }
+
+            const [p1, p2, p3] = pts.split(' ').map(s => s.split(',').map(Number));
+
+            // 右角符號
+            const rightBox = type === 'right'
+                ? `<rect x="${p2[0]}" y="${p2[1] - 16}" width="16" height="16" fill="none" stroke="${stroke}" stroke-width="2.5"/>`
+                : '';
+
+            return `
+                <svg width="260" height="175" viewBox="0 0 260 175" class="max-w-full">
+                    <polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="3.5" stroke-linejoin="round"/>
+                    ${rightBox}
+                    ${topAngle ? `<text x="${p1[0]}" y="${p1[1] + 28}" text-anchor="middle" font-weight="bold" fill="#1e293b" font-size="14">${topAngle}</text>` : ''}
+                    ${leftAngle ? `<text x="${p2[0] + 28}" y="${p2[1] - 8}" text-anchor="start" font-weight="bold" fill="#1e293b" font-size="14">${leftAngle}</text>` : ''}
+                    ${rightAngle ? `<text x="${p3[0] - 28}" y="${p3[1] - 8}" text-anchor="end" font-weight="bold" fill="#1e293b" font-size="14">${rightAngle}</text>` : ''}
+                    ${sideLabel ? `<text x="130" y="166" text-anchor="middle" font-weight="bold" fill="${stroke}" font-size="13">${sideLabel}</text>` : ''}
+                </svg>
+            `;
+        }
+
+        // 動態繪製雙全等三角形 SVG（含旋轉/翻轉對應頂點、邊長與角度標示）
+        function createCongruentTrianglesSVG({ sideAB, sideBC, sideAC, angleA, angleB, angleC, showTarget }) {
+            // 左圖：三角形 ABC（正立）
+            // 右圖：三角形 DEF（左右翻轉或旋轉呈現，對應關係：A↔D, B↔E, C↔F）
+            return `
+                <svg width="360" height="185" viewBox="0 0 360 185" class="max-w-full">
+                    <!-- 左側：△ABC -->
+                    <polygon points="55,32 30,148 150,148" fill="#e0e7ff" stroke="#4f46e5" stroke-width="3" stroke-linejoin="round"/>
+                    <text x="52" y="24" text-anchor="middle" font-weight="900" fill="#312e81" font-size="14">A</text>
+                    <text x="18" y="156" text-anchor="middle" font-weight="900" fill="#312e81" font-size="14">B</text>
+                    <text x="160" y="156" text-anchor="middle" font-weight="900" fill="#312e81" font-size="14">C</text>
+                    
+                    <!-- △ABC 邊長與角度標示 -->
+                    ${sideAB ? `<text x="30" y="92" text-anchor="end" font-weight="bold" fill="#4338ca" font-size="12">${sideAB}</text>` : ''}
+                    ${sideBC ? `<text x="90" y="166" text-anchor="middle" font-weight="bold" fill="#4338ca" font-size="12">${sideBC}</text>` : ''}
+                    ${sideAC ? `<text x="112" y="86" text-anchor="start" font-weight="bold" fill="#4338ca" font-size="12">${sideAC}</text>` : ''}
+                    ${angleA ? `<text x="61" y="58" text-anchor="middle" font-weight="bold" fill="#1e293b" font-size="12">${angleA}</text>` : ''}
+                    ${angleB ? `<text x="48" y="140" text-anchor="start" font-weight="bold" fill="#1e293b" font-size="12">${angleB}</text>` : ''}
+                    ${angleC ? `<text x="128" y="140" text-anchor="end" font-weight="bold" fill="#1e293b" font-size="12">${angleC}</text>` : ''}
+
+                    <!-- 全等符號提示 -->
+                    <text x="180" y="95" text-anchor="middle" font-weight="900" fill="#94a3b8" font-size="16">≌</text>
+
+                    <!-- 右側：△DEF（水平翻轉全等呈現：D在右上、E在右下、F在左下） -->
+                    <polygon points="305,32 330,148 210,148" fill="#fce7f3" stroke="#db2777" stroke-width="3" stroke-linejoin="round"/>
+                    <text x="308" y="24" text-anchor="middle" font-weight="900" fill="#831843" font-size="14">D</text>
+                    <text x="342" y="156" text-anchor="middle" font-weight="900" fill="#831843" font-size="14">E</text>
+                    <text x="200" y="156" text-anchor="middle" font-weight="900" fill="#831843" font-size="14">F</text>
+
+                    <!-- △DEF 題目問號標示 -->
+                    ${showTarget === 'DE' ? `<text x="330" y="92" text-anchor="start" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+                    ${showTarget === 'EF' ? `<text x="270" y="166" text-anchor="middle" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+                    ${showTarget === 'DF' ? `<text x="248" y="86" text-anchor="end" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+                    ${showTarget === 'angleD' ? `<text x="299" y="58" text-anchor="middle" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+                    ${showTarget === 'angleE' ? `<text x="312" y="140" text-anchor="end" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+                    ${showTarget === 'angleF' ? `<text x="232" y="140" text-anchor="start" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+                </svg>
+            `;
+        }
+
+        // 動態繪製長條圖 SVG (第十單元)
+        function createBarChartSVG(title, yUnit, labels, values, maxAxis, step) {
+            const w = 360;
+            const h = 215;
+            const padL = 48;
+            const padR = 20;
+            const padT = 34;
+            const padB = 38;
+            const plotW = w - padL - padR;
+            const plotH = h - padT - padB;
+
+            let gridLines = '';
+            for (let v = 0; v <= maxAxis; v += step) {
+                const y = padT + plotH - (v / maxAxis) * plotH;
+                gridLines += `
+                    <line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="${v === 0 ? '0' : '3,3'}"/>
+                    <text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#475569">${v}</text>
+                `;
+            }
+
+            const colors = ['#38bdf8', '#fb7185', '#34d399', '#fbbf24'];
+            const barSlot = plotW / labels.length;
+            const barW = Math.min(38, barSlot * 0.55);
+
+            let bars = '';
+            labels.forEach((lbl, idx) => {
+                const val = values[idx];
+                const barH = (val / maxAxis) * plotH;
+                const x = padL + idx * barSlot + (barSlot - barW) / 2;
+                const y = padT + plotH - barH;
+                bars += `
+                    <rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${colors[idx % colors.length]}" stroke="#0f172a" stroke-width="1.5" rx="4"/>
+                    <text x="${x + barW / 2}" y="${y - 5}" text-anchor="middle" font-size="11" font-weight="bold" fill="#0f172a">${val}</text>
+                    <text x="${x + barW / 2}" y="${h - 14}" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">${lbl}</text>
+                `;
+            });
+
+            return `
+                <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <text x="${w / 2}" y="20" text-anchor="middle" font-size="13" font-weight="900" fill="#0f172a">${title}（單位：${yUnit}）</text>
+                    ${gridLines}
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#334155" stroke-width="2"/>
+                    <line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="#334155" stroke-width="2"/>
+                    ${bars}
+                </svg>
+            `;
+        }
+
+        // 動態繪製折線圖 SVG (第十單元)
+        function createLineChartSVG(title, yUnit, labels, values, minAxis, maxAxis, step) {
+            const w = 360;
+            const h = 215;
+            const padL = 48;
+            const padR = 25;
+            const padT = 34;
+            const padB = 38;
+            const plotW = w - padL - padR;
+            const plotH = h - padT - padB;
+            const range = maxAxis - minAxis;
+
+            let gridLines = '';
+            for (let v = minAxis; v <= maxAxis; v += step) {
+                const y = padT + plotH - ((v - minAxis) / range) * plotH;
+                gridLines += `
+                    <line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="${v === minAxis ? '0' : '3,3'}"/>
+                    <text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#475569">${v}</text>
+                `;
+            }
+
+            const slot = plotW / (labels.length - 1 || 1);
+            const coords = values.map((val, idx) => ({
+                x: padL + idx * slot,
+                y: padT + plotH - ((val - minAxis) / range) * plotH,
+                val,
+                lbl: labels[idx]
+            }));
+
+            const polyPts = coords.map(c => `${c.x},${c.y}`).join(' ');
+            const pointsSvg = coords.map(c => `
+                <circle cx="${c.x}" cy="${c.y}" r="5" fill="#f97316" stroke="#ffffff" stroke-width="2"/>
+                <text x="${c.x}" y="${c.y - 9}" text-anchor="middle" font-size="11" font-weight="bold" fill="#c2410c">${c.val}</text>
+                <text x="${c.x}" y="${h - 14}" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">${c.lbl}</text>
+            `).join('');
+
+            return `
+                <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <text x="${w / 2}" y="20" text-anchor="middle" font-size="13" font-weight="900" fill="#0f172a">${title}（單位：${yUnit}）</text>
+                    ${gridLines}
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#334155" stroke-width="2"/>
+                    <line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="#334155" stroke-width="2"/>
+                    <polyline points="${polyPts}" fill="none" stroke="#f97316" stroke-width="3" stroke-linejoin="round"/>
+                    ${pointsSvg}
+                </svg>
+            `;
+        }
+
+        /* ==========================================================================
+           5. 翰林版四上第 6～10 單元高度動態題庫引擎
+           六、除法 | 七、三角形與全等 | 八、兩步驟問題與併式 | 九、二位小數 | 十、統計圖表
+           ========================================================================== */
+        const QuestionGenerators = {
+            // 第六單元：除法（三、四位數除以二位數直式計算、餘數應用、商的位數估算、逆推被除數）
+            6: () => {
+                const template = randInt(1, 4);
+
+                if (template === 1) {
+                    // 題型 A：三、四位數除以二位數整除商數計算（支援數字鍵盤輸入）
+                    const divisor = randInt(14, 38);
+                    const quotient = randInt(16, 48);
+                    const dividend = divisor * quotient;
+                    const isKeypad = Math.random() < 0.6;
+
+                    return {
+                        unitId: 6,
+                        inputType: isKeypad ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        text: `算算看，<strong>${dividend} ÷ ${divisor}</strong> 的商是多少？（可開啟右上角草稿板列直式喔！）`,
+                        correct: String(quotient),
+                        options: buildOptions(quotient, [
+                            () => quotient + 1,
+                            () => quotient - 1,
+                            () => quotient + 10,
+                            () => Math.max(2, quotient - 10)
+                        ]),
+                        explanation: `直式除法計算：先看被除數前兩位「${String(dividend).slice(0, 2)}」除以 ${divisor}，逐步試商得出 ${divisor} × ${quotient} = ${dividend}，所以商是 ${quotient}。`
+                    };
+                } else if (template === 2) {
+                    // 題型 B：有餘數除法生活應用題（求最多可裝滿幾盒，或還剩下幾個）
+                    const divisor = randInt(15, 32);
+                    const quotient = randInt(12, 28);
+                    const remainder = randInt(2, divisor - 2);
+                    const dividend = divisor * quotient + remainder;
+                    const askRemainder = Math.random() < 0.45;
+
+                    const scenarios = [
+                        { item: '鳳梨酥', container: '禮盒', unit: '顆' },
+                        { item: '手工餅乾', container: '袋子', unit: '片' },
+                        { item: '色鉛筆', container: '筆筒', unit: '枝' }
+                    ];
+                    const sc = pickRandom(scenarios);
+
+                    if (askRemainder) {
+                        return {
+                            unitId: 6,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: sc.unit,
+                            text: `烘焙坊做了 <strong>${dividend} ${sc.unit}</strong>${sc.item}，每 <strong>${divisor} ${sc.unit}</strong>裝成 1 個${sc.container}，全部裝完後，<strong>還剩下</strong>幾${sc.unit}？`,
+                            correct: String(remainder),
+                            options: buildOptions(remainder, [
+                                () => quotient,
+                                () => divisor - remainder,
+                                () => remainder + 1,
+                                () => Math.max(1, remainder - 1)
+                            ]),
+                            explanation: `列式：${dividend} ÷ ${divisor} = ${quotient} ⋯ ${remainder}，商 ${quotient} 代表裝滿 ${quotient} 個${sc.container}，餘數 ${remainder} 就是還剩下的數量！`
+                        };
+                    } else {
+                        return {
+                            unitId: 6,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: '個',
+                            text: `烘焙坊做了 <strong>${dividend} ${sc.unit}</strong>${sc.item}，每 <strong>${divisor} ${sc.unit}</strong>裝成 1 個${sc.container}，<strong>最多可以裝滿</strong>幾個${sc.container}？`,
+                            correct: String(quotient),
+                            options: buildOptions(quotient, [
+                                () => quotient + 1,
+                                () => remainder,
+                                () => Math.max(2, quotient - 1),
+                                () => quotient + 2
+                            ]),
+                            explanation: `列式：${dividend} ÷ ${divisor} = ${quotient} ⋯ ${remainder}，剩下的 ${remainder} ${sc.unit}不夠再裝滿 1 個${sc.container}，所以最多可以裝滿 ${quotient} 個！`
+                        };
+                    }
+                } else if (template === 3) {
+                    // 題型 C：商的位數判斷與估算（三位數除以二位數）
+                    const isTwoDigitQuotient = Math.random() < 0.5;
+                    const divisor = randInt(24, 58);
+                    let dividend;
+                    if (isTwoDigitQuotient) {
+                        // 前兩位 >= 除數 -> 商是二位數
+                        const prefix = randInt(divisor, 98);
+                        dividend = prefix * 10 + randInt(0, 9);
+                    } else {
+                        // 前兩位 < 除數 -> 商是一位數
+                        const prefix = randInt(12, divisor - 1);
+                        dividend = prefix * 10 + randInt(0, 9);
+                    }
+                    const correctAns = isTwoDigitQuotient ? '二位數' : '一位數';
+                    const prefixStr = String(dividend).slice(0, 2);
+
+                    return {
+                        unitId: 6,
+                        inputType: 'choice',
+                        text: `不用直接算出答案，判斷看看「<strong>${dividend} ÷ ${divisor}</strong>」的商是幾位數？`,
+                        correct: correctAns,
+                        options: shuffle(['一位數', '二位數', '三位數', '四位數']),
+                        explanation: `比較被除數的前兩位「${prefixStr}」和除數「${divisor}」：因為 ${prefixStr} ${isTwoDigitQuotient ? '≥' : '<'} ${divisor}，夠除在十位寫商（或不夠除要看到個位），所以商是「${correctAns}」！`
+                    };
+                } else {
+                    // 題型 D：被除數、除數、商與餘數關係逆推
+                    const divisor = randInt(16, 35);
+                    const quotient = randInt(11, 24);
+                    const remainder = randInt(3, divisor - 2);
+                    const dividend = divisor * quotient + remainder;
+
+                    return {
+                        unitId: 6,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        text: `有一道除法算式：「<strong>( ？ ) ÷ ${divisor} = ${quotient} ⋯ ${remainder}</strong>」，請問括號裡的被除數是多少？`,
+                        correct: String(dividend),
+                        options: buildOptions(dividend, [
+                            () => divisor * quotient,
+                            () => divisor * quotient - remainder,
+                            () => dividend + divisor,
+                            () => (quotient + remainder) * divisor
+                        ]),
+                        explanation: `利用除法驗算公式：「被除數 = 除數 × 商 + 餘數」，先算 ${divisor} × ${quotient} = ${divisor * quotient}，再加上餘數 ${remainder}，得到 ${dividend}。`
+                    };
+                }
+            },
+
+            // 第七單元：三角形與全等（三角形分類與內角計算、全等三角形對應邊/角/頂點、周長反推邊長）
+            7: () => {
+                const template = randInt(1, 4);
+
+                if (template === 1) {
+                    // 題型 A：全等三角形對應邊與對應角（附雙全等三角形 SVG 圖形）
+                    const askAngle = Math.random() < 0.5;
+                    const sAB = randInt(6, 11);
+                    const sBC = randInt(8, 14);
+                    const sAC = randInt(9, 15);
+                    const aA = randInt(50, 75);
+                    const aB = randInt(55, 80);
+                    const aC = 180 - aA - aB;
+
+                    if (askAngle) {
+                        const targetPick = pickRandom([
+                            { target: 'angleD', name: '∠D', matchName: '∠A', ans: aA },
+                            { target: 'angleE', name: '∠E', matchName: '∠B', ans: aB },
+                            { target: 'angleF', name: '∠F', matchName: '∠C', ans: aC }
+                        ]);
+                        return {
+                            unitId: 7,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: '度',
+                            text: `下圖中，<strong>△ABC 和 △DEF 是全等三角形</strong>（頂點 A 對 D、B 對 E、C 對 F），請問 <strong>${targetPick.name}（？）</strong>是多少度？`,
+                            visual: createCongruentTrianglesSVG({
+                                angleA: `${aA}°`,
+                                angleB: `${aB}°`,
+                                angleC: `${aC}°`,
+                                showTarget: targetPick.target
+                            }),
+                            correct: String(targetPick.ans),
+                            options: buildOptions(targetPick.ans, [
+                                () => aA,
+                                () => aB,
+                                () => aC,
+                                () => 180 - targetPick.ans
+                            ]),
+                            explanation: `全等三角形疊合時完全重合，對應角一樣大！${targetPick.name} 的對應角是 ${targetPick.matchName}，所以 ${targetPick.name} = ${targetPick.ans} 度。`
+                        };
+                    } else {
+                        const targetPick = pickRandom([
+                            { target: 'DE', name: '邊 DE', matchName: '邊 AB', ans: sAB },
+                            { target: 'EF', name: '邊 EF', matchName: '邊 BC', ans: sBC },
+                            { target: 'DF', name: '邊 DF', matchName: '邊 AC', ans: sAC }
+                        ]);
+                        return {
+                            unitId: 7,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: '公分',
+                            text: `下圖中，<strong>△ABC 和 △DEF 是全等三角形</strong>（頂點 A 對 D、B 對 E、C 對 F），請問 <strong>${targetPick.name}（？）</strong>長多少公分？`,
+                            visual: createCongruentTrianglesSVG({
+                                sideAB: `${sAB}cm`,
+                                sideBC: `${sBC}cm`,
+                                sideAC: `${sAC}cm`,
+                                showTarget: targetPick.target
+                            }),
+                            correct: String(targetPick.ans),
+                            options: buildOptions(targetPick.ans, [
+                                () => sAB,
+                                () => sBC,
+                                () => sAC,
+                                () => sAB + sBC
+                            ]),
+                            explanation: `全等三角形的對應邊一樣長！${targetPick.name} 的對應邊是 ${targetPick.matchName}，所以長度是 ${targetPick.ans} 公分。`
+                        };
+                    }
+                } else if (template === 2) {
+                    // 題型 B：等腰三角形已知頂角求底角（或已知底角求頂角）
+                    const isFindBase = Math.random() < 0.5;
+                    const baseAngle = randInt(35, 75);
+                    const topAngle = 180 - baseAngle * 2;
+
+                    if (isFindBase) {
+                        return {
+                            unitId: 7,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: '度',
+                            text: `下圖是一個<strong>等腰三角形</strong>，已知頂角是 <strong>${topAngle} 度</strong>，請問它的其中一個底角（★）是多少度？`,
+                            visual: createTriangleSVG({ type: 'iso', topAngle: `${topAngle}°`, leftAngle: '★', rightAngle: '★', sideLabel: '兩腰等長' }),
+                            correct: String(baseAngle),
+                            options: buildOptions(baseAngle, [
+                                () => 180 - topAngle,
+                                () => topAngle,
+                                () => baseAngle + 10,
+                                () => 90 - Math.floor(topAngle / 2)
+                            ]),
+                            explanation: `三角形內角和是 180 度，且等腰三角形的兩個底角一樣大！所以 (180 － ${topAngle}) ÷ 2 = ${180 - topAngle} ÷ 2 = ${baseAngle} 度。`
+                        };
+                    } else {
+                        return {
+                            unitId: 7,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: '度',
+                            text: `下圖是一個<strong>等腰三角形</strong>，已知底角是 <strong>${baseAngle} 度</strong>，請問它的頂角（★）是多少度？`,
+                            visual: createTriangleSVG({ type: 'iso', topAngle: '★', leftAngle: `${baseAngle}°`, rightAngle: `${baseAngle}°`, sideLabel: '兩腰等長' }),
+                            correct: String(topAngle),
+                            options: buildOptions(topAngle, [
+                                () => 180 - baseAngle,
+                                () => baseAngle,
+                                () => topAngle + 15,
+                                () => 90 - baseAngle
+                            ]),
+                            explanation: `等腰三角形兩個底角都是 ${baseAngle} 度，三角形內角和是 180 度，所以頂角 = 180 － ${baseAngle} － ${baseAngle} = ${topAngle} 度。`
+                        };
+                    }
+                } else if (template === 3) {
+                    // 題型 C：直角 / 銳角 / 鈍角三角形分類辨識
+                    const sub = randInt(1, 3);
+                    if (sub === 1) {
+                        const a1 = randInt(25, 65);
+                        const a2 = 90 - a1;
+                        return {
+                            unitId: 7,
+                            inputType: 'choice',
+                            text: `觀察下圖的三角形，它有一個 90 度的直角，另外兩個角分別是 ${a1} 度和 ${a2} 度，請問它是什麼三角形？`,
+                            visual: createTriangleSVG({ type: 'right', topAngle: `${a1}°`, rightAngle: `${a2}°` }),
+                            correct: '直角三角形',
+                            options: shuffle(['直角三角形', '銳角三角形', '鈍角三角形', '正三角形']),
+                            explanation: `只要三角形中有「1 個直角（90度）」和 2 個銳角，就叫做「直角三角形」。`
+                        };
+                    } else if (sub === 2) {
+                        const obtuse = randInt(100, 135);
+                        const a1 = randInt(15, 180 - obtuse - 15);
+                        const a2 = 180 - obtuse - a1;
+                        return {
+                            unitId: 7,
+                            inputType: 'choice',
+                            text: `一個三角形的三個角分別是 <strong>${obtuse} 度、${a1} 度、${a2} 度</strong>，請問它是哪一種三角形？`,
+                            visual: createTriangleSVG({ type: 'obtuse', topAngle: `${a1}°`, leftAngle: `${obtuse}°`, rightAngle: `${a2}°` }),
+                            correct: '鈍角三角形',
+                            options: shuffle(['鈍角三角形', '銳角三角形', '直角三角形', '正三角形']),
+                            explanation: `因為 ${obtuse} 度大於 90 度（是一個鈍角），有一個鈍角的三角形叫做「鈍角三角形」。`
+                        };
+                    } else {
+                        return {
+                            unitId: 7,
+                            inputType: 'choice',
+                            text: `一個三角形的三個角都是 <strong>60 度</strong>，而且三條邊都一樣長，請問下面敘述哪一個<strong>錯誤</strong>？`,
+                            visual: createTriangleSVG({ type: 'equilateral', topAngle: '60°', leftAngle: '60°', rightAngle: '60°', sideLabel: '三邊等長' }),
+                            correct: '它是鈍角三角形',
+                            options: shuffle(['它是鈍角三角形', '它是正三角形', '它是銳角三角形', '它也是等腰三角形的一種']),
+                            explanation: `正三角形的三個角都是 60 度（都小於 90 度），所以它同時是「正三角形」也是「銳角三角形」，不可能是鈍角三角形喔！`
+                        };
+                    }
+                } else {
+                    // 題型 D：等腰與正三角形周長反推邊長
+                    const leg = randInt(10, 18);
+                    const base = randInt(6, leg - 2);
+                    const perim = leg * 2 + base;
+                    return {
+                        unitId: 7,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '公分',
+                        text: `用一條長 <strong>${perim} 公分</strong>的繩子圍成一個<strong>等腰三角形</strong>，已知它的底邊長 <strong>${base} 公分</strong>，請問它的一條「腰」長多少公分？`,
+                        correct: String(leg),
+                        options: buildOptions(leg, [
+                            () => perim - base,
+                            () => Math.floor((perim - base * 2)),
+                            () => leg + 2,
+                            () => Math.floor(perim / 3)
+                        ]),
+                        explanation: `等腰三角形有兩條一樣長的腰！先從周長減掉底邊：${perim} － ${base} = ${perim - base} 公分，再平分成 2 條腰：${perim - base} ÷ 2 = ${leg} 公分。`
+                    };
+                }
+            },
+
+            // 第八單元：兩步驟問題與併式（四則運算順序、括號優先、生活應用題）
+            8: () => {
+                const template = randInt(1, 4);
+
+                if (template === 1) {
+                    // 題型 A：生活購物找零併式
+                    const money = pickRandom([500, 1000]);
+                    const items = [
+                        { name: '彩色筆', price: randInt(45, 85), qty: randInt(3, 5) },
+                        { name: '故事書', price: randInt(110, 160), qty: randInt(2, 4) },
+                        { name: '自動鉛筆', price: randInt(25, 45), qty: randInt(4, 6) }
+                    ];
+                    const item = pickRandom(items);
+                    const ans = money - item.price * item.qty;
+                    const isKeypad = Math.random() < 0.45;
+
+                    return {
+                        unitId: 8,
+                        inputType: isKeypad ? 'keypad' : 'choice',
+                        unitSuffix: '元',
+                        text: `小宇帶了 <strong>${money} 元</strong>去文具店，買了 <strong>${item.qty} 盒</strong>每盒 <strong>${item.price} 元</strong>的${item.name}，請問還剩下多少元？`,
+                        correct: String(ans),
+                        options: buildOptions(ans, [
+                            () => (money - item.price) * item.qty,
+                            () => money - item.price - item.qty,
+                            () => ans + item.price,
+                            () => ans - 10
+                        ]),
+                        explanation: `列成併式：${money} － ${item.price} × ${item.qty}。要先算買${item.name}共花了 ${item.price} × ${item.qty} = ${item.price * item.qty} 元，再用 ${money} － ${item.price * item.qty} = ${ans} 元。`
+                    };
+                } else if (template === 2) {
+                    // 題型 B：括號優先平分應用題
+                    const b1 = randInt(24, 48);
+                    const b2 = randInt(16, 36);
+                    const divisor = pickRandom([4, 5, 6, 8]);
+                    const rem = (b1 + b2) % divisor;
+                    const adjB2 = rem === 0 ? b2 : b2 + (divisor - rem);
+                    const ans = (b1 + adjB2) / divisor;
+
+                    return {
+                        unitId: 8,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '顆',
+                        text: `園遊會上，甲班做了 <strong>${b1} 顆</strong>手工餅乾，乙班做了 <strong>${adjB2} 顆</strong>，兩班合起來平分裝成 <strong>${divisor} 袋</strong>，每袋有幾顆餅乾？`,
+                        correct: String(ans),
+                        options: buildOptions(ans, [
+                            () => Math.floor(b1 + adjB2 / divisor),
+                            () => ans + 2,
+                            () => ans - 1,
+                            () => (b1 + adjB2) * divisor
+                        ]),
+                        explanation: `要先算兩班合起來的總數，所以要加括號：(${b1} + ${adjB2}) ÷ ${divisor} = ${b1 + adjB2} ÷ ${divisor} = ${ans} 顆。`
+                    };
+                } else if (template === 3) {
+                    // 題型 C：四則運算算式計算（括號與先乘除後加減）
+                    const a = randInt(4, 9);
+                    const b = randInt(15, 32);
+                    const c = randInt(6, 14);
+                    const ans = a * (b - c);
+                    const wrongNoParen = a * b - c;
+
+                    return {
+                        unitId: 8,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        text: `算算看： <strong>${a} × (${b} － ${c}) = ？</strong>`,
+                        correct: String(ans),
+                        options: buildOptions(ans, [
+                            () => wrongNoParen,
+                            () => a * (b + c),
+                            () => ans + a,
+                            () => ans - c
+                        ]),
+                        explanation: `四則運算規則：「有括號時，括號裡面的算式要先算」！先算 ${b} － ${c} = ${b - c}，再算 ${a} × ${b - c} = ${ans}。`
+                    };
+                } else {
+                    // 題型 D：併式邏輯判斷
+                    const p1 = randInt(35, 65);
+                    const p2 = randInt(20, 40);
+                    const n = randInt(3, 6);
+                    const correctExpr = `(${p1} + ${p2}) × ${n}`;
+                    return {
+                        unitId: 8,
+                        inputType: 'choice',
+                        text: `一碗滷肉飯 ${p1} 元，一碗貢丸湯 ${p2} 元，爸爸買了 ${n} 組「滷肉飯加貢丸湯」，下面哪一個算式可以算出總共要付多少元？`,
+                        correct: correctExpr,
+                        options: shuffle([
+                            correctExpr,
+                            `${p1} + ${p2} × ${n}`,
+                            `${p1} × ${n} + ${p2}`,
+                            `(${p1} － ${p2}) × ${n}`
+                        ]),
+                        explanation: `一組套餐是「${p1} + ${p2}」元，買了 ${n} 組要先算一組多少錢再乘以 ${n}，所以要用括號寫成 (${p1} + ${p2}) × ${n}。`
+                    };
+                }
+            },
+
+            // 第九單元：二位小數（百分位位值與化聚、大小比較、加減法直式與生活應用）
+            9: () => {
+                const template = randInt(1, 4);
+
+                if (template === 1) {
+                    // 題型 A：二位小數加法生活應用（含單位換算如 1 公尺 8 公分 = 1.08 公尺）
+                    const m1 = randInt(1, 3);
+                    const cm1 = randInt(4, 9); // 故意用個位數公分，考 1.08 概念
+                    const c1 = m1 * 100 + cm1;
+                    const c2 = randInt(125, 385);
+                    const sumC = c1 + c2;
+                    const s1 = formatDecFromCents(c1);
+                    const s2 = formatDecFromCents(c2);
+                    const ans = formatDecFromCents(sumC);
+
+                    return {
+                        unitId: 9,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '公尺',
+                        text: `紅緞帶長 <strong>${m1} 公尺 ${cm1} 公分</strong>，藍緞帶長 <strong>${s2} 公尺</strong>，把兩條緞帶接在一起（不重疊），總共長多少<strong>公尺</strong>？`,
+                        correct: ans,
+                        options: buildOptions(ans, [
+                            () => formatDecFromCents(m1 * 100 + cm1 * 10 + c2), // 誤把 8 公分當 0.8
+                            () => formatDecFromCents(sumC + 10),
+                            () => formatDecFromCents(sumC - 10),
+                            () => formatDecFromCents(Math.abs(c1 - c2))
+                        ]),
+                        explanation: `先換成相同單位：${cm1} 公分 = 0.0${cm1} 公尺，所以 ${m1} 公尺 ${cm1} 公分 = ${s1} 公尺。再對齊小數點相加：${s1} + ${s2} = ${ans} 公尺。`
+                    };
+                } else if (template === 2) {
+                    // 題型 B：二位小數減法（整數減二位小數，易錯題型！）
+                    const whole = randInt(4, 10);
+                    const subC = randInt(125, (whole - 1) * 100 - 15);
+                    const ansC = whole * 100 - subC;
+                    const subStr = formatDecFromCents(subC);
+                    const ans = formatDecFromCents(ansC);
+
+                    return {
+                        unitId: 9,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '公升',
+                        text: `水壺裡原本有 <strong>${whole} 公升</strong>的水，哥哥喝掉了 <strong>${subStr} 公升</strong>，水壺裡還剩下多少公升的水？`,
+                        correct: ans,
+                        options: buildOptions(ans, [
+                            () => formatDecFromCents(ansC + 100),
+                            () => formatDecFromCents(ansC - 10),
+                            () => formatDecFromCents(whole * 100 + subC),
+                            () => formatDecFromCents(ansC + 10)
+                        ]),
+                        explanation: `整數 ${whole} 可以寫成 ${whole}.00 再對齊小數點相減！${whole}.00 － ${subStr} = ${ans} 公升。`
+                    };
+                } else if (template === 3) {
+                    // 題型 C：二位小數位值與化聚（幾個 0.01）
+                    const hundreds = randInt(1, 5);
+                    const tenths = randInt(0, 9);
+                    const hundredths = randInt(1, 9);
+                    const total001 = hundreds * 100 + tenths * 10 + hundredths;
+                    const decStr = formatDecFromCents(total001);
+
+                    return {
+                        unitId: 9,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '個',
+                        text: `請問 <strong>${decStr}</strong> 是由幾個 <strong>0.01</strong> 合起來的？`,
+                        correct: String(total001),
+                        options: buildOptions(total001, [
+                            () => hundreds * 10 + tenths,
+                            () => total001 * 10,
+                            () => hundreds + tenths + hundredths,
+                            () => total001 - 10
+                        ]),
+                        explanation: `1 是 100 個 0.01，0.1 是 10 個 0.01，所以 ${decStr} 總共是 ${total001} 個 0.01 合起來的。`
+                    };
+                } else {
+                    // 題型 D：二位小數大小比較（破除「位數多就比較大」迷思）
+                    const base = randInt(2, 7);
+                    const d1 = randInt(4, 8);
+                    const nBig = `${base}.${d1}`;
+                    const nSmall1 = `${base}.${d1 - 1}9`;
+                    const nSmall2 = `${base}.0${d1}`;
+                    const nSmall3 = `${base - 1}.99`;
+
+                    return {
+                        unitId: 9,
+                        inputType: 'choice',
+                        text: `下面哪一個小數<strong>最大</strong>？（小心不要被小數位數騙囉！）`,
+                        correct: nBig,
+                        options: shuffle([nBig, nSmall1, nSmall2, nSmall3]),
+                        explanation: `比較小數要從最高位（個位 → 十分位 → 百分位）依序比！${nBig} 的十分位是 ${d1}，比 ${nSmall1} 的十分位 ${d1 - 1} 還要大，所以 ${nBig} 最大！`
+                    };
+                }
+            },
+
+            // 第十單元：統計圖表（報讀長條圖與折線圖、最大值/最小值相差、趨勢判讀）
+            10: () => {
+                const isLineChart = Math.random() < 0.45;
+
+                if (!isLineChart) {
+                    const scenarios = [
+                        { title: '四年甲班最喜歡的水果統計表', unit: '人', labels: ['蘋果', '香蕉', '葡萄', '草莓'] },
+                        { title: '圖書館一週借書數量統計表', unit: '本', labels: ['星期一', '星期二', '星期三', '星期四'] },
+                        { title: '園遊會各攤位賣出飲料杯數', unit: '杯', labels: ['紅茶', '綠茶', '冬瓜茶', '果汁'] }
+                    ];
+                    const sc = pickRandom(scenarios);
+                    const pool = shuffle([12, 16, 20, 24, 28, 32, 36]);
+                    const vals = pool.slice(0, 4);
+                    const maxVal = Math.max(...vals);
+                    const minVal = Math.min(...vals);
+                    const maxIdx = vals.indexOf(maxVal);
+                    const minIdx = vals.indexOf(minVal);
+
+                    const svg = createBarChartSVG(sc.title, sc.unit, sc.labels, vals, 40, 10);
+                    const qSub = randInt(1, 2);
+
+                    if (qSub === 1) {
+                        const diff = maxVal - minVal;
+                        return {
+                            unitId: 10,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: sc.unit,
+                            text: `觀察下面的長條圖，數量<strong>最多</strong>的項目和<strong>最少</strong>的項目，相差多少${sc.unit}？`,
+                            visual: svg,
+                            correct: String(diff),
+                            options: buildOptions(diff, [
+                                () => maxVal + minVal,
+                                () => maxVal,
+                                () => diff + 4,
+                                () => Math.abs(diff - 4)
+                            ]),
+                            explanation: `最多的「${sc.labels[maxIdx]}」是 ${maxVal} ${sc.unit}，最少的「${sc.labels[minIdx]}」是 ${minVal} ${sc.unit}，兩者相差 ${maxVal} － ${minVal} = ${diff} ${sc.unit}。`
+                        };
+                    } else {
+                        const total = vals.reduce((a, b) => a + b, 0);
+                        return {
+                            unitId: 10,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: sc.unit,
+                            text: `根據這張長條圖，這四個項目的數量<strong>總和</strong>是多少${sc.unit}？`,
+                            visual: svg,
+                            correct: String(total),
+                            options: buildOptions(total, [
+                                () => total + 10,
+                                () => total - 8,
+                                () => vals[0] + vals[1] + vals[2],
+                                () => total + 4
+                            ]),
+                            explanation: `把四條長條的數值全部加起來：${vals.join(' + ')} = ${total} ${sc.unit}。`
+                        };
+                    }
+                } else {
+                    const times = ['8時', '10時', '12時', '14時', '16時'];
+                    const baseT = randInt(20, 23);
+                    const vals = [
+                        baseT,
+                        baseT + randInt(2, 3),
+                        baseT + randInt(5, 7),
+                        baseT + randInt(4, 6),
+                        baseT + randInt(1, 2)
+                    ];
+                    const svg = createLineChartSVG('台北市某日白天氣溫變化折線圖', '℃', times, vals, 18, 32, 2);
+
+                    const qSub = randInt(1, 2);
+                    if (qSub === 1) {
+                        const diff1 = vals[1] - vals[0];
+                        const diff2 = vals[2] - vals[1];
+                        const bestInterval = diff2 >= diff1 ? '10時到12時' : '8時到10時';
+                        return {
+                            unitId: 10,
+                            inputType: 'choice',
+                            text: `觀察這張氣溫折線圖，哪一段時間的氣溫<strong>上升最多</strong>（線段最陡）？`,
+                            visual: svg,
+                            correct: bestInterval,
+                            options: shuffle(['8時到10時', '10時到12時', '12時到14時', '14時到16時']),
+                            explanation: `折線圖中，線段往右上傾斜得越陡，代表增加越多！8時到10時上升 ${diff1}℃，10時到12時上升 ${diff2}℃，所以「${bestInterval}」上升最多。`
+                        };
+                    } else {
+                        const maxT = Math.max(...vals);
+                        const minT = Math.min(...vals);
+                        const diff = maxT - minT;
+                        return {
+                            unitId: 10,
+                            inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                            unitSuffix: '℃',
+                            text: `觀察這張氣溫折線圖，這一天當中<strong>最高氣溫</strong>和<strong>最低氣溫</strong>相差多少度（℃）？`,
+                            visual: svg,
+                            correct: String(diff),
+                            options: buildOptions(diff, [
+                                () => maxT,
+                                () => diff + 2,
+                                () => Math.max(1, diff - 2),
+                                () => maxT + minT
+                            ]),
+                            explanation: `折線圖中最高點是 ${maxT}℃，最低點是 ${minT}℃，兩者相差 ${maxT} － ${minT} = ${diff}℃。`
+                        };
+                    }
+                }
+            }
+        };
+
+        // 為指定關卡生成 N 題不重複題目（期末模擬考 99 會平均分配第 6～10 單元）
+        function generateStageQuestions(stageId, count) {
+            const list = [];
+            const usedTexts = new Set();
+            const units = [6, 7, 8, 9, 10];
+            let attempts = 0;
+
+            // 若為期末模擬考，建立輪流平均分配的單元序列並打亂順序
+            let unitSchedule = [];
+            if (stageId === 99) {
+                for (let i = 0; i < count; i++) {
+                    unitSchedule.push(units[i % units.length]);
+                }
+                unitSchedule = shuffle(unitSchedule);
+            }
+
+            while (list.length < count && attempts < count * 35) {
+                attempts++;
+                const targetUnit = stageId === 99
+                    ? unitSchedule[list.length % unitSchedule.length]
+                    : stageId;
+                const q = QuestionGenerators[targetUnit]();
+                if (!usedTexts.has(q.text)) {
+                    usedTexts.add(q.text);
+                    list.push(q);
+                }
+            }
+
+            // 若因題數較多（如 30~50 題）導致部分題型文字重複，補足剩餘題數確保達到指定題數
+            while (list.length < count) {
+                const targetUnit = stageId === 99
+                    ? unitSchedule[list.length % unitSchedule.length]
+                    : stageId;
+                list.push(QuestionGenerators[targetUnit]());
+            }
+
+            return list;
+        }
+
+        /* ==========================================================================
+           6. 畫面切換、作答互動（選擇題 + 虛擬數字鍵盤）與結算
+           ========================================================================== */
+        function showScreen(screenId) {
+            ['lobby-screen', 'quiz-screen', 'result-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function goHome() {
+            SoundEngine.click();
+            renderLobby();
+            showScreen('lobby-screen');
+        }
+
+        function renderLobby() {
+            const grid = document.getElementById('stages-grid');
+            grid.innerHTML = STAGES.map(stage => {
+                const earnedStars = gameState.stars[stage.id] || 0;
+                const starsHtml = [1, 2, 3].map(i =>
+                    `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
+                ).join('');
+                const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
+                const countHint = stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（可自選）` : `每次 ${gameState.questionCountPref} 題`;
+
+                return `
+                    <div onclick="${clickHandler}" 
+                         class="btn-3d cursor-pointer bg-white rounded-3xl p-5 border-4 ${stage.border} hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
+                                    ${stage.icon}
+                                </div>
+                                <div class="flex gap-1 text-lg bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-100">${starsHtml}</div>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800 leading-snug">${stage.title}</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed">${stage.subtitle}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-400">${countHint}</span>
+                            <span class="text-xs sm:text-sm font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                開始刷題 ➔
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openMockExamModal() {
+            SoundEngine.click();
+            const mockInput = document.getElementById('mock-custom-input');
+            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            document.getElementById('mock-exam-modal').classList.remove('hidden');
+        }
+
+        function closeMockExamModal() {
+            SoundEngine.click();
+            document.getElementById('mock-exam-modal').classList.add('hidden');
+        }
+
+        function launchMockExam(rawCount) {
+            const num = parseInt(rawCount, 10);
+            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(50, num));
+            closeMockExamModal();
+            setQuestionCount(validCount, false);
+            startStage(99);
+        }
+
+        function startStage(stageId) {
+            SoundEngine.click();
+            const stageInfo = STAGES.find(s => s.id === stageId);
+            const count = gameState.questionCountPref || 5;
+
+            currentSession = {
+                stageId: stageId,
+                questions: generateStageQuestions(stageId, count),
+                currentIndex: 0,
+                correctCount: 0,
+                sessionScore: 0,
+                combo: 0,
+                maxCombo: 0,
+                answered: false,
+                keypadInput: ''
+            };
+
+            document.getElementById('stage-badge').textContent = stageInfo.title;
+            clearScratchpad();
+            showScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function retryStage() {
+            startStage(currentSession.stageId);
+        }
+
+        function renderQuestion() {
+            const total = currentSession.questions.length;
+            const idx = currentSession.currentIndex;
+            const q = currentSession.questions[idx];
+            currentSession.answered = false;
+            currentSession.keypadInput = '';
+
+            // 更新進度條
+            document.getElementById('progress-text').textContent = `第 ${idx + 1} / ${total} 題`;
+            document.getElementById('progress-bar').style.width = `${((idx + 1) / total) * 100}%`;
+
+            // 更新連擊徽章
+            const comboEl = document.getElementById('combo-badge');
+            if (currentSession.combo >= 2) {
+                comboEl.textContent = `🔥 ${currentSession.combo} 連擊!`;
+                comboEl.classList.remove('hidden');
+            } else {
+                comboEl.classList.add('hidden');
+            }
+
+            // 題型與單元標籤
+            const unitStage = STAGES.find(s => s.id === q.unitId);
+            document.getElementById('q-unit-tag').textContent = unitStage ? unitStage.title : '';
+            const typeTag = document.getElementById('q-type-tag');
+            if (q.inputType === 'keypad') {
+                typeTag.textContent = '🔢 數字鍵盤填充題';
+                typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800';
+            } else {
+                typeTag.textContent = '🎯 四選一觀念題';
+                typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-700';
+            }
+
+            // 填入題目文字與輔助圖形
+            document.getElementById('question-text').innerHTML = q.text;
+
+            const visualEl = document.getElementById('question-visual');
+            if (q.visual) {
+                visualEl.innerHTML = q.visual;
+                visualEl.classList.remove('hidden');
+            } else {
+                visualEl.innerHTML = '';
+                visualEl.classList.add('hidden');
+            }
+
+            // 隱藏回饋區
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            // 切換顯示「選擇題按鈕」或「數字鍵盤」
+            const optionsGrid = document.getElementById('options-grid');
+            const keypadContainer = document.getElementById('keypad-container');
+
+            if (q.inputType === 'keypad') {
+                optionsGrid.classList.add('hidden');
+                keypadContainer.classList.remove('hidden');
+                document.getElementById('keypad-display').textContent = '';
+                document.getElementById('keypad-unit').textContent = q.unitSuffix || '';
+                const submitBtn = document.getElementById('keypad-submit-btn');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50');
+            } else {
+                keypadContainer.classList.add('hidden');
+                optionsGrid.classList.remove('hidden');
+                const labels = ['A', 'B', 'C', 'D'];
+                optionsGrid.innerHTML = q.options.map((opt, i) => `
+                    <button onclick="selectOption(${i})" id="opt-btn-${i}"
+                        class="btn-3d option-btn bg-sky-50 hover:bg-sky-100 border-3 border-sky-200 rounded-2xl p-4 sm:p-5 text-left flex items-center gap-3.5 transition-all">
+                        <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-500 text-white font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+                            ${labels[i]}
+                        </span>
+                        <span class="text-base sm:text-xl font-bold text-slate-800">${opt}</span>
+                    </button>
+                `).join('');
+            }
+        }
+
+        // 虛擬數字鍵盤操作
+        function pressKey(key) {
+            if (currentSession.answered) return;
+            SoundEngine.click();
+
+            if (key === 'BACK') {
+                currentSession.keypadInput = currentSession.keypadInput.slice(0, -1);
+            } else if (key === '.') {
+                if (!currentSession.keypadInput.includes('.') && currentSession.keypadInput.length < 8) {
+                    currentSession.keypadInput = currentSession.keypadInput === '' ? '0.' : currentSession.keypadInput + '.';
+                }
+            } else {
+                if (currentSession.keypadInput.length < 8) {
+                    if (currentSession.keypadInput === '0') {
+                        currentSession.keypadInput = key;
+                    } else {
+                        currentSession.keypadInput += key;
+                    }
+                }
+            }
+            document.getElementById('keypad-display').textContent = currentSession.keypadInput;
+        }
+
+        function submitKeypadAnswer() {
+            if (currentSession.answered) return;
+            const raw = currentSession.keypadInput.trim();
+            if (!raw) {
+                const disp = document.getElementById('keypad-display');
+                disp.classList.add('animate-shake', 'border-rose-400');
+                setTimeout(() => disp.classList.remove('animate-shake', 'border-rose-400'), 450);
+                return;
+            }
+
+            // 正規化數值比較（例如 3.50 與 3.5 視為相等）
+            const q = currentSession.questions[currentSession.currentIndex];
+            const userNum = parseFloat(raw);
+            const correctNum = parseFloat(q.correct);
+            const isCorrect = !isNaN(userNum) && !isNaN(correctNum) && Math.abs(userNum - correctNum) < 0.0001;
+
+            const submitBtn = document.getElementById('keypad-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50');
+
+            handleAnswerResult(isCorrect, `${raw} ${q.unitSuffix || ''}`.trim());
+        }
+
+        // 選擇題作答
+        function selectOption(selectedIndex) {
+            if (currentSession.answered) return;
+            const q = currentSession.questions[currentSession.currentIndex];
+            const chosen = q.options[selectedIndex];
+            const isCorrect = chosen === q.correct;
+
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                const optVal = q.options[idx];
+                if (optVal === q.correct) {
+                    btn.classList.remove('bg-sky-50', 'hover:bg-sky-100', 'border-sky-200');
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'ring-4', 'ring-emerald-200');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('bg-sky-50', 'hover:bg-sky-100', 'border-sky-200');
+                    btn.classList.add('bg-rose-100', 'border-rose-500', 'animate-shake');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            handleAnswerResult(isCorrect, chosen);
+        }
+
+        // 統一處理答對或答錯邏輯
+        function handleAnswerResult(isCorrect, userDisplayAnswer) {
+            currentSession.answered = true;
+            const q = currentSession.questions[currentSession.currentIndex];
+
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+
+            if (isCorrect) {
+                currentSession.correctCount++;
+                currentSession.combo++;
+                if (currentSession.combo > currentSession.maxCombo) {
+                    currentSession.maxCombo = currentSession.combo;
+                }
+                const points = 100 + (currentSession.combo - 1) * 20;
+                currentSession.sessionScore += points;
+                gameState.totalScore += points;
+
+                SoundEngine.correct(currentSession.combo);
+
+                const praises = ['太棒了！完全正確！', '好厲害！期末考一定沒問題！', '答對囉！觀念非常清楚！', '漂亮的一擊！繼續保持！'];
+                feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                feedbackIcon.textContent = currentSession.combo >= 2 ? '🔥' : '🎉';
+                feedbackTitle.textContent = `${pickRandom(praises)} (+${points} 分)`;
+                feedbackExp.innerHTML = `<strong>解題步驟回顧：</strong>${q.explanation}`;
+            } else {
+                currentSession.combo = 0;
+                SoundEngine.wrong();
+
+                const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
+                const correctDisplay = q.inputType === 'keypad' && q.unitSuffix
+                    ? `${q.correct} ${q.unitSuffix}`
+                    : q.correct;
+
+                // 寫入錯題本
+                if (!gameState.mistakes.some(m => m.questionText === q.text)) {
+                    gameState.mistakes.unshift({
+                        unitId: q.unitId,
+                        stageTitle,
+                        questionText: q.text,
+                        wrongAnswer: userDisplayAnswer,
+                        correctAnswer: correctDisplay,
+                        explanation: q.explanation
+                    });
+                }
+
+                feedbackBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+                feedbackIcon.textContent = '💡';
+                feedbackTitle.textContent = '沒關係！一起來看解題秘訣：';
+                feedbackExp.innerHTML = `正確答案是 <strong>${correctDisplay}</strong>。<br>${q.explanation}`;
+            }
+
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSession.currentIndex === currentSession.questions.length - 1) {
+                nextBtn.innerHTML = '<span>查看本輪成績</span><span>🏆</span>';
+            } else {
+                nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
+            }
+
+            saveProgress();
+        }
+
+        function nextQuestion() {
+            SoundEngine.click();
+            if (currentSession.currentIndex < currentSession.questions.length - 1) {
+                currentSession.currentIndex++;
+                renderQuestion();
+            } else {
+                finishStage();
+            }
+        }
+
+        function finishStage() {
+            SoundEngine.victory();
+            const total = currentSession.questions.length;
+            const correct = currentSession.correctCount;
+            const ratio = correct / total;
+
+            let earnedStars = 0;
+            let badgeText = '稱號：努力見習生';
+            let trophy = '🎖️';
+
+            if (ratio === 1) {
+                earnedStars = 3;
+                badgeText = '稱號：期末考滿分大勇者 👑';
+                trophy = '🏆';
+            } else if (ratio >= 0.6) {
+                earnedStars = 2;
+                badgeText = '稱號：優秀數學騎士 ⚔️';
+                trophy = '🥈';
+            } else if (correct >= 1) {
+                earnedStars = 1;
+                badgeText = '稱號：勇敢探索者 🧭';
+                trophy = '🥉';
+            } else {
+                earnedStars = 0;
+                badgeText = '稱號：再接再厲小勇者 💪';
+                trophy = '🌱';
+            }
+
+            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+                gameState.stars[currentSession.stageId] = earnedStars;
+            }
+            saveProgress();
+
+            document.getElementById('result-trophy').textContent = trophy;
+            document.getElementById('result-title').textContent = ratio >= 0.6 ? '特訓成功！表現很棒喔！' : '完成特訓！再多練習幾次會更熟練！';
+            document.getElementById('result-badge-name').textContent = badgeText;
+            document.getElementById('result-correct').textContent = `${correct} / ${total}`;
+            document.getElementById('result-score').textContent = `+${currentSession.sessionScore}`;
+            document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
+
+            document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
+                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+            ).join('');
+
+            showScreen('result-screen');
+        }
+
+        /* ==========================================================================
+           7. 錯題回顧、弱點分析與一鍵重練功能
+           ========================================================================== */
+        let weakestUnitIdCache = null;
+
+        function openMistakeModal() {
+            SoundEngine.click();
+            const listEl = document.getElementById('mistake-list');
+            const summaryEl = document.getElementById('weakness-summary');
+            const weakBtn = document.getElementById('practice-weakest-btn');
+
+            if (gameState.mistakes.length === 0) {
+                summaryEl.classList.add('hidden');
+                weakBtn.classList.add('hidden');
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <div class="text-5xl mb-3">🌟</div>
+                        <p class="font-bold text-lg text-slate-600">目前沒有錯題紀錄喔！</p>
+                        <p class="text-sm mt-1">答錯的題目會自動收錄在這裡，方便家長陪讀與重點複習。</p>
+                    </div>
+                `;
+            } else {
+                // 統計各單元錯題數量
+                const counts = {};
+                gameState.mistakes.forEach(m => {
+                    if (m.unitId) {
+                        counts[m.unitId] = (counts[m.unitId] || 0) + 1;
+                    }
+                });
+
+                let maxUnit = null;
+                let maxCount = 0;
+                const badgesHtml = Object.entries(counts).map(([uid, cnt]) => {
+                    if (cnt > maxCount) {
+                        maxCount = cnt;
+                        maxUnit = Number(uid);
+                    }
+                    const st = STAGES.find(s => s.id === Number(uid));
+                    return `
+                        <button onclick="practiceSpecificUnit(${uid})" class="bg-white hover:bg-amber-50 border border-rose-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition">
+                            <span>${st ? st.title.split('：')[0] : '單元'}</span>
+                            <span class="bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[11px]">${cnt} 題</span>
+                            <span class="text-indigo-600 underline">特訓➔</span>
+                        </button>
+                    `;
+                }).join('');
+
+                weakestUnitIdCache = maxUnit;
+                summaryEl.classList.remove('hidden');
+                summaryEl.innerHTML = `
+                    <div class="text-xs font-black text-rose-800 mb-2">📊 各單元錯題分布（點擊單元可立即產生新題目特訓）：</div>
+                    <div class="flex flex-wrap gap-2 mb-2">${badgesHtml}</div>
+                `;
+
+                if (weakestUnitIdCache) {
+                    weakBtn.classList.remove('hidden');
+                } else {
+                    weakBtn.classList.add('hidden');
+                }
+
+                listEl.innerHTML = gameState.mistakes.map((m, idx) => `
+                    <div class="bg-slate-50 rounded-2xl p-4 border-2 border-slate-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black bg-rose-100 text-rose-700 px-2.5 py-1 rounded-lg">${m.stageTitle}</span>
+                            <span class="text-xs text-slate-400 font-bold">#${idx + 1}</span>
+                        </div>
+                        <div class="font-bold text-slate-800 mb-2 text-sm sm:text-base">${m.questionText}</div>
+                        <div class="flex flex-wrap gap-3 text-xs sm:text-sm mb-2">
+                            <span class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg font-bold">❌ 當時答：${m.wrongAnswer}</span>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold">✅ 正確解：${m.correctAnswer}</span>
+                        </div>
+                        <div class="text-xs sm:text-sm text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100">
+                            💡 <strong>解析：</strong>${m.explanation}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('mistake-modal').classList.remove('hidden');
+        }
+
+        function closeMistakeModal() {
+            SoundEngine.click();
+            document.getElementById('mistake-modal').classList.add('hidden');
+        }
+
+        function practiceSpecificUnit(unitId) {
+            closeMistakeModal();
+            startStage(Number(unitId));
+        }
+
+        function practiceWeakestUnit() {
+            if (weakestUnitIdCache) {
+                closeMistakeModal();
+                startStage(weakestUnitIdCache);
+            }
+        }
+
+        function clearMistakes() {
+            SoundEngine.click();
+            gameState.mistakes = [];
+            saveProgress();
+            openMistakeModal();
+        }
+
+        function resetProgressConfirm() {
+            SoundEngine.click();
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            SoundEngine.click();
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        function executeResetProgress() {
+            SoundEngine.click();
+            gameState = {
+                stars: { 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 99: 0 },
+                totalScore: 0,
+                questionCountPref: gameState.questionCountPref || 5,
+                mistakes: []
+            };
+            saveProgress();
+            renderLobby();
+            closeConfirmModal();
+        }
+
+        // 初始化應用程式
+        window.onload = function () {
+            Scratchpad.init();
+            loadProgress();
+        };
+    </script>
+</body>
+</html>
