@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四上期末考社會探險家｜家鄉文化大挑戰（適用康軒版進度）</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Google Fonts 繁體中文圓體與英數字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 自訂遊戲字體與溫暖人文色調背景 */
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #fef3c7 0%, #ffedd5 45%, #e0e7ff 100%);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.88); opacity: 0; }
+            70% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* 立體遊戲按鈕 */
+        .btn-3d {
+            transition: all 0.12s ease;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 頂部狀態列 -->
+    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-orange-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
+        <!-- 遊戲標題與回首頁 -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-400 to-rose-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
+                🏮
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-2xl font-black text-orange-600 tracking-wide leading-tight">四上期末考社會探險家</h1>
+                <p class="text-xs sm:text-sm text-slate-500 font-bold">適用康軒版四上第三、四單元進度・家鄉文化刷題</p>
+            </div>
+        </div>
+
+        <!-- 積分、星星與功能按鈕 -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- 返回科目總導覽大廳 -->
+            <a href="../index.html" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 px-3 py-1.5 rounded-2xl flex items-center gap-1 font-bold text-xs sm:text-sm" title="返回科目總導覽首頁">
+                <span>🏠</span>
+                <span class="hidden md:inline">科目大廳</span>
+            </a>
+
+            <!-- 總星星數 -->
+            <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-amber-800 text-sm sm:text-base">
+                <span>⭐</span>
+                <span id="total-stars">0</span>
+                <span class="text-xs text-amber-600">/ 18</span>
+            </div>
+
+            <!-- 總積分 -->
+            <div class="bg-orange-100 border-2 border-orange-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-orange-800 text-sm sm:text-base">
+                <span>🏆</span>
+                <span id="total-score">0</span>
+            </div>
+
+            <!-- 錯題本與弱點分析按鈕 -->
+            <button onclick="openMistakeModal()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1 relative" title="家長陪讀：錯題本與弱點分析">
+                <span>📖</span>
+                <span class="hidden sm:inline">錯題本</span>
+                <span id="mistake-badge" class="hidden absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+            </button>
+
+            <!-- 音效開關 -->
+            <button id="sound-toggle" onclick="toggleSound()" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-2 sm:px-3 sm:py-2 rounded-2xl text-sm flex items-center gap-1" title="切換音效">
+                <span id="sound-icon">🔊</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主畫面容器 -->
+    <main class="w-full max-w-5xl flex-1 flex flex-col justify-center my-4">
+        
+        <!-- 1. 關卡選擇大廳 (Lobby Screen) -->
+        <section id="lobby-screen" class="animate-pop">
+            <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 sm:p-7 shadow-xl border-4 border-orange-200">
+                <div class="flex flex-col gap-4 mb-6 border-b-2 border-slate-100 pb-5">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
+                            <span>🧭</span> 選擇期末考特訓單元（適用康軒版四上第三～四單元）
+                        </h2>
+                        <p class="text-sm text-slate-500 font-medium mt-1">涵蓋「家鄉的傳統信仰與老街」及「家鄉的作息、節慶與節日」，每次隨機組合情境題！</p>
+                    </div>
+
+                    <!-- 自訂刷題題數選擇器 -->
+                    <div class="bg-gradient-to-r from-orange-50 via-amber-50 to-indigo-50 p-3.5 sm:p-4 rounded-2xl border-2 border-orange-200 shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                            <span class="text-sm sm:text-base font-black text-orange-900 flex items-center gap-1.5">
+                                <span>🎯</span> 設定每次練習題數：
+                            </span>
+                            <span id="qcount-estimate" class="text-xs sm:text-sm font-black text-amber-800 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full">
+                                目前設定：5 題（快速暖身・約 2 分鐘）
+                            </span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-orange-600 text-white shadow">
+                                5 題 <span class="opacity-85 font-bold">(暖身)</span>
+                            </button>
+                            <button onclick="setQuestionCount(10)" id="qcount-10" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-orange-50">
+                                10 題 <span class="opacity-75">(標準)</span>
+                            </button>
+                            <button onclick="setQuestionCount(15)" id="qcount-15" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-orange-50">
+                                15 題 <span class="opacity-75">(進階)</span>
+                            </button>
+                            <button onclick="setQuestionCount(20)" id="qcount-20" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-orange-50">
+                                20 題 <span class="opacity-75">(特訓)</span>
+                            </button>
+                            <button onclick="setQuestionCount(25)" id="qcount-25" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-orange-50">
+                                25 題 <span class="opacity-75">(模擬考)</span>
+                            </button>
+
+                            <!-- 自訂題數輸入框 (1~50 題) -->
+                            <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border-2 border-orange-200 focus-within:border-orange-500 ml-auto sm:ml-0">
+                                <label for="custom-qcount-input" class="text-xs font-black text-orange-800 whitespace-nowrap">自訂：</label>
+                                <input id="custom-qcount-input" type="number" min="1" max="50" value="5"
+                                    onchange="applyCustomQuestionCount(this.value)"
+                                    onkeydown="if(event.key==='Enter') applyCustomQuestionCount(this.value)"
+                                    class="w-14 text-center text-sm font-black text-orange-900 bg-orange-50/70 rounded-lg py-0.5 focus:outline-none">
+                                <span class="text-xs font-bold text-slate-500">題</span>
+                                <button onclick="applyCustomQuestionCount(document.getElementById('custom-qcount-input').value)"
+                                    class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-black px-2.5 py-1 rounded-lg transition">
+                                    套用
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6 個關卡網格 (第 3-1 課 ～ 第 4-3 課 + 期末模擬考) -->
+                <div id="stages-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- 關卡卡片由 JS 動態生成 -->
+                </div>
+
+                <!-- 錯題消滅專屬入口橫幅 -->
+                <div id="lobby-mistake-banner" class="hidden mt-5 bg-gradient-to-r from-rose-50 via-amber-50 to-rose-50 border-3 border-rose-300 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">⚔️</span>
+                        <div>
+                            <div class="font-black text-rose-800 text-sm sm:text-base">
+                                錯題本裡目前有 <span id="lobby-mistake-count" class="text-lg underline">0</span> 道觀念迷思題！
+                            </div>
+                            <div class="text-xs text-slate-600 font-medium">進入「消滅錯題大作戰」，重新答對就能把它們徹底消滅喔！</div>
+                        </div>
+                    </div>
+                    <button onclick="startMistakeBattle()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shrink-0">
+                        <span>🔥 消滅錯題大作戰</span>
+                    </button>
+                </div>
+
+                <div class="mt-5 flex justify-between items-center text-xs text-slate-400">
+                    <span>💡 小提示：遇到不確定的社會觀念時，可以按右上角「💡 給我一點小提示」找線索！</span>
+                    <button onclick="resetProgressConfirm()" class="hover:text-rose-500 underline font-bold">
+                        重置所有紀錄
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 遊戲答題畫面 (Quiz Screen) -->
+        <section id="quiz-screen" class="hidden animate-pop">
+            <div class="bg-white rounded-3xl p-4 sm:p-7 shadow-2xl border-4 border-orange-200 relative overflow-hidden">
+                
+                <!-- 頂部進度與連擊列 -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5 pb-4 border-b-2 border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <button onclick="goHome()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm transition">
+                            ⬅️ 返回地圖
+                        </button>
+                        <span id="stage-badge" class="bg-orange-100 text-orange-800 font-black px-3 py-1.5 rounded-xl text-xs sm:text-base">
+                            第三單元第 1 課：信仰與生活
+                        </span>
+                    </div>
+
+                    <!-- 題號進度顯示 -->
+                    <div class="flex items-center gap-2">
+                        <span id="progress-text" class="text-xs sm:text-sm font-black text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                            第 1 / 5 題
+                        </span>
+                        <div class="w-20 sm:w-28 h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-orange-500 transition-all duration-300" style="width: 20%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 連擊徽章 -->
+                    <div class="flex items-center gap-2">
+                        <div id="combo-badge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-3 py-1 rounded-full text-xs sm:text-sm shadow animate-bounce">
+                            🔥 2 連擊!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 題目顯示區 -->
+                <div id="question-container" class="mb-6">
+                    <!-- 題型標籤與「一步一步看提示」按鈕 -->
+                    <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-orange-100 text-orange-800">
+                                文化探索題
+                            </span>
+                            <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
+                                第三單元
+                            </span>
+                        </div>
+
+                        <button onclick="toggleHintBox()" id="hint-btn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1 transition shadow-sm">
+                            <span>💡</span>
+                            <span>給我一點小提示</span>
+                        </button>
+                    </div>
+
+                    <!-- 鷹架提示展開卡（不破梗，只給思考線索） -->
+                    <div id="hint-box" class="hidden mb-3 bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-3.5 text-amber-950 text-xs sm:text-sm font-bold flex items-start gap-2.5 animate-pop">
+                        <span class="text-xl shrink-0">🧭</span>
+                        <div>
+                            <div class="font-black text-amber-800 mb-0.5">探險線索（先想一想再選喔）：</div>
+                            <div id="hint-text" class="leading-relaxed"></div>
+                        </div>
+                    </div>
+
+                    <!-- 題目敘述 -->
+                    <div id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed mb-4">
+                        題目載入中...
+                    </div>
+
+                    <!-- 視覺輔助文化圖解區 (純程式繪製 SVG) -->
+                    <div id="question-visual" class="hidden flex justify-center items-center my-4 bg-slate-50/80 rounded-2xl p-3 sm:p-5 border-2 border-dashed border-orange-200 overflow-x-auto">
+                    </div>
+                </div>
+
+                <!-- 作答區：4 個選擇題選項按鈕 -->
+                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                    <!-- 選項由 JS 動態生成 -->
+                </div>
+
+                <!-- 答題回饋與知識詳解區 -->
+                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
+                        <div class="flex-1">
+                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
+                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-orange-600 hover:bg-orange-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                            <span>下一題</span>
+                            <span>➡️</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. 過關結算畫面 (Result Screen) -->
+        <section id="result-screen" class="hidden animate-pop">
+            <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-orange-300 text-center max-w-2xl mx-auto">
+                <div id="result-trophy" class="text-6xl sm:text-7xl mb-3 animate-float">🏆</div>
+                <h2 id="result-title" class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">單元特訓完成！</h2>
+                <p id="result-badge-name" class="inline-block bg-orange-100 text-orange-800 font-black px-4 py-1 rounded-full text-sm sm:text-base mb-4">
+                    稱號：家鄉文化小達人
+                </p>
+
+                <!-- 星星評等展示 -->
+                <div id="result-stars" class="flex justify-center gap-3 text-5xl sm:text-6xl my-3">
+                    <span>⭐</span><span>⭐</span><span>⭐</span>
+                </div>
+
+                <!-- 數據統計卡片 -->
+                <div class="grid grid-cols-3 gap-3 my-6 bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">答對率</div>
+                        <div id="result-correct" class="text-xl sm:text-2xl font-black text-emerald-600">5 / 5</div>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">本輪得分</div>
+                        <div id="result-score" class="text-xl sm:text-2xl font-black text-orange-600">+500</div>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">最高連擊</div>
+                        <div id="result-combo" class="text-xl sm:text-2xl font-black text-rose-500">5 連擊</div>
+                    </div>
+                </div>
+
+                <!-- 結算按鈕區 -->
+                <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
+                    <button onclick="retryStage()" class="btn-3d bg-orange-500 hover:bg-orange-600 text-white font-black px-6 py-3.5 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                        <span>🔄</span>
+                        <span>再刷一輪（新情境題）</span>
+                    </button>
+                    <button onclick="goHome()" class="btn-3d bg-indigo-500 hover:bg-indigo-600 text-white font-black px-6 py-3.5 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                        <span>🗺️</span>
+                        <span>返回探險地圖</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾資訊與非官方免責聲明 -->
+    <footer class="w-full max-w-5xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
+        <div>依據台灣國小四年級上學期社會課程架構（適用康軒版第三、四單元進度）設計｜題目情境與文化圖解皆由程式原創生成 ✨</div>
+        <div class="text-[11px] text-slate-400 leading-relaxed">
+            ※ 免責聲明：本專案為家長自製之免費教育學習工具，僅供居家複習使用，與康軒文教事業股份有限公司無任何官方合作、授權或隸屬關係。
+        </div>
+    </footer>
+
+    <!-- 錯題回顧與弱點分析 Modal -->
+    <div id="mistake-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl border-4 border-rose-300 animate-pop">
+            <div class="p-5 border-b-2 border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📖</span>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-800">社會探險錯題本 & 弱點分析</h3>
+                        <p class="text-xs text-slate-500">自動統計各課錯誤次數，點擊即可重新練習該課觀念！</p>
+                    </div>
+                </div>
+                <button onclick="closeMistakeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 w-9 h-9 rounded-full font-black flex items-center justify-center">✕</button>
+            </div>
+
+            <!-- 弱點單元分析摘要 -->
+            <div id="weakness-summary" class="px-5 pt-4 pb-2 bg-rose-50/70 border-b border-rose-100">
+            </div>
+            
+            <div id="mistake-list" class="p-5 overflow-y-auto flex-1 space-y-4">
+            </div>
+
+            <div class="p-4 border-t-2 border-slate-100 flex flex-wrap justify-between items-center gap-2 bg-slate-50 rounded-b-3xl">
+                <button onclick="clearMistakes()" class="text-xs sm:text-sm text-rose-500 hover:text-rose-700 font-bold px-3 py-1.5">
+                    🗑️ 清空錯題紀錄
+                </button>
+                <div class="flex flex-wrap gap-2">
+                    <button id="battle-mistakes-btn" onclick="startMistakeBattleFromModal()" class="hidden btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-4 py-2 rounded-xl text-xs sm:text-sm">
+                        ⚔️ 消滅全部錯題（答對才移除）
+                    </button>
+                    <button id="practice-weakest-btn" onclick="practiceWeakestUnit()" class="hidden btn-3d bg-orange-500 hover:bg-orange-600 text-white font-black px-4 py-2 rounded-xl text-xs sm:text-sm">
+                        🔥 重練最弱單元新題
+                    </button>
+                    <button onclick="closeMistakeModal()" class="btn-3d bg-slate-800 text-white font-bold px-5 py-2 rounded-xl text-sm">
+                        關閉視窗
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂確認對話框 -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl border-4 border-orange-300 animate-pop">
+            <div class="text-4xl mb-2">⚠️</div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">確定要重置所有紀錄嗎？</h3>
+            <p class="text-sm text-slate-500 mb-5">社會探險家的星星數、積分與錯題紀錄都會歸零喔！</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="closeConfirmModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl">取消</button>
+                <button onclick="executeResetProgress()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl">確定重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 期末綜合模擬考題數選擇 Modal -->
+    <div id="mock-exam-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-orange-400 animate-pop">
+            <div class="text-5xl mb-2 animate-float">👑</div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-1">期末考綜合模擬考</h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mb-4">將從第三、四單元共 5 課平均抽題，請選擇本次模擬考題數：</p>
+
+            <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-sky-700">10 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">每課 2 題</span>
+                </button>
+                <button onclick="launchMockExam(20)" class="btn-3d bg-orange-50 hover:bg-orange-100 border-2 border-orange-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-orange-700">20 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">每課 4 題</span>
+                </button>
+                <button onclick="launchMockExam(25)" class="btn-3d bg-rose-50 hover:bg-rose-100 border-2 border-rose-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-rose-700">25 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">正式份量</span>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 mb-5">
+                <span class="text-xs sm:text-sm font-black text-slate-700">或自訂題數：</span>
+                <input id="mock-custom-input" type="number" min="5" max="50" value="15"
+                    class="w-16 text-center text-base font-black text-orange-700 bg-white border-2 border-orange-200 rounded-xl py-1 focus:outline-none focus:border-orange-500">
+                <span class="text-xs sm:text-sm font-bold text-slate-500">題</span>
+                <button onclick="launchMockExam(document.getElementById('mock-custom-input').value)"
+                    class="btn-3d bg-orange-600 hover:bg-orange-700 text-white font-black px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">
+                    開始模擬考 ➔
+                </button>
+            </div>
+
+            <button onclick="closeMockExamModal()" class="text-xs sm:text-sm text-slate-400 hover:text-slate-600 font-bold">
+                先返回地圖
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. Web Audio API 音效合成引擎
+           ========================================================================== */
+        const SoundEngine = {
+            ctx: null,
+            enabled: true,
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+
+            playTone(freq, type, duration, delay = 0, volume = 0.22) {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(this.ctx.currentTime + delay);
+                osc.stop(this.ctx.currentTime + delay + duration);
+            },
+
+            click() {
+                this.playTone(620, 'sine', 0.07, 0, 0.14);
+            },
+
+            correct(combo = 1) {
+                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
+                this.playTone(base, 'triangle', 0.13, 0, 0.25);
+                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
+                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
+            },
+
+            wrong() {
+                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
+                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
+            },
+
+            victory() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, idx) => {
+                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
+                });
+            }
+        };
+
+        function toggleSound() {
+            SoundEngine.enabled = !SoundEngine.enabled;
+            const icon = document.getElementById('sound-icon');
+            const btn = document.getElementById('sound-toggle');
+            if (SoundEngine.enabled) {
+                icon.textContent = '🔊';
+                btn.classList.replace('bg-slate-400', 'bg-emerald-500');
+                SoundEngine.click();
+            } else {
+                icon.textContent = '🔇';
+                btn.classList.replace('bg-emerald-500', 'bg-slate-400');
+            }
+        }
+
+        /* ==========================================================================
+           2. 康軒版四上期末考關卡定義（第三單元、第四單元共 5 課 + 期末模擬考）
+           ========================================================================== */
+        const STAGES = [
+            { id: 31, title: '第三單元第 1 課：信仰與生活', subtitle: '原住民族祖靈信仰、漢人神明與多元宗教', icon: '⛩️', color: 'from-rose-400 to-red-600', border: 'border-rose-300' },
+            { id: 32, title: '第三單元第 2 課：老街與生活', subtitle: '老街形成與交通、亭仔腳建築與老街再生', icon: '🏘️', color: 'from-amber-400 to-orange-600', border: 'border-amber-300' },
+            { id: 41, title: '第四單元第 1 課：生活的作息', subtitle: '農曆節氣與陰曆、現代國曆陽曆與星期制', icon: '📅', color: 'from-emerald-400 to-teal-600', border: 'border-emerald-300' },
+            { id: 42, title: '第四單元第 2 課：傳統的節慶', subtitle: '漢人四大節慶、原住民族祭儀與新住民節慶', icon: '🐉', color: 'from-sky-400 to-blue-600', border: 'border-sky-300' },
+            { id: 43, title: '第四單元第 3 課：現代的節日', subtitle: '國定紀念日、族群與家庭節日、職業感謝節日', icon: '🎖️', color: 'from-purple-400 to-indigo-600', border: 'border-purple-300' },
+            { id: 99, title: '期末考綜合模擬考', subtitle: '混合第三、四單元全範圍隨機出題', icon: '👑', color: 'from-yellow-400 via-orange-500 to-rose-600', border: 'border-yellow-400' }
+        ];
+
+        // 獨立存檔鍵值（避免覆蓋數學科進度）
+        let gameState = {
+            stars: { 31: 0, 32: 0, 41: 0, 42: 0, 43: 0, 99: 0 },
+            totalScore: 0,
+            questionCountPref: 5,
+            mistakes: []
+        };
+
+        let currentSession = {
+            stageId: 31,
+            isMistakeBattle: false,
+            questions: [],
+            currentIndex: 0,
+            correctCount: 0,
+            sessionScore: 0,
+            combo: 0,
+            maxCombo: 0,
+            answered: false,
+            usedHint: false
+        };
+
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('knsh_society_4a_final_v1');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                }
+            } catch (e) {
+                console.warn('無法讀取存檔', e);
+            }
+            setQuestionCount(gameState.questionCountPref || 5, false);
+            updateHeaderStats();
+            renderLobby();
+        }
+
+        function saveProgress() {
+            try {
+                localStorage.setItem('knsh_society_4a_final_v1', JSON.stringify(gameState));
+            } catch (e) {
+                console.warn('無法儲存進度', e);
+            }
+            updateHeaderStats();
+        }
+
+        function setQuestionCount(count, playSnd = true) {
+            if (playSnd) SoundEngine.click();
+            const validCount = Math.max(1, Math.min(50, parseInt(count, 10) || 5));
+            gameState.questionCountPref = validCount;
+
+            const presets = [5, 10, 15, 20, 25];
+            presets.forEach(c => {
+                const btn = document.getElementById(`qcount-${c}`);
+                if (!btn) return;
+                if (c === validCount) {
+                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-orange-600 text-white shadow transition';
+                } else {
+                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-orange-50 transition';
+                }
+            });
+
+            const customInput = document.getElementById('custom-qcount-input');
+            if (customInput) customInput.value = validCount;
+
+            const estMinutes = Math.max(1, Math.round(validCount * 0.4));
+            const modeLabel = validCount <= 5 ? '快速暖身'
+                : validCount <= 10 ? '標準練習'
+                : validCount <= 15 ? '進階挑戰'
+                : validCount <= 20 ? '考前特訓'
+                : '完整模擬考';
+            const estEl = document.getElementById('qcount-estimate');
+            if (estEl) {
+                estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+            }
+
+            saveProgress();
+            renderLobby();
+        }
+
+        function applyCustomQuestionCount(rawVal) {
+            const num = parseInt(rawVal, 10);
+            const clamped = isNaN(num) ? 5 : Math.max(1, Math.min(50, num));
+            setQuestionCount(clamped, true);
+        }
+
+        function updateHeaderStats() {
+            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            document.getElementById('total-stars').textContent = totalStars;
+            document.getElementById('total-score').textContent = gameState.totalScore;
+
+            const badge = document.getElementById('mistake-badge');
+            const lobbyBanner = document.getElementById('lobby-mistake-banner');
+            const lobbyCount = document.getElementById('lobby-mistake-count');
+
+            if (gameState.mistakes.length > 0) {
+                badge.textContent = gameState.mistakes.length;
+                badge.classList.remove('hidden');
+                if (lobbyBanner && lobbyCount) {
+                    lobbyCount.textContent = gameState.mistakes.length;
+                    lobbyBanner.classList.remove('hidden');
+                }
+            } else {
+                badge.classList.add('hidden');
+                if (lobbyBanner) lobbyBanner.classList.add('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           3. 工具函式與純程式原創 SVG 文化圖解生成器
+           ========================================================================== */
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 原創 SVG 1：傳統街屋「亭仔腳（騎樓）」構造圖解
+        function createShophouseSVG() {
+            return `
+                <svg width="340" height="170" viewBox="0 0 340 170" class="max-w-full bg-amber-50/60 rounded-xl border border-amber-200">
+                    <!-- 屋頂與牌樓立面 -->
+                    <polygon points="45,45 170,15 295,45" fill="#d97706" stroke="#78350f" stroke-width="2.5"/>
+                    <rect x="60" y="45" width="220" height="42" fill="#fef3c7" stroke="#92400e" stroke-width="2"/>
+                    <rect x="125" y="54" width="90" height="24" rx="4" fill="#fffbeb" stroke="#b45309" stroke-width="1.5"/>
+                    <text x="170" y="70" text-anchor="middle" font-size="12" font-weight="900" fill="#78350f">百年老商號</text>
+
+                    <!-- 一樓店面與亭仔腳（騎樓走廊） -->
+                    <rect x="60" y="87" width="220" height="62" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
+                    <!-- 騎樓拱門廊道 -->
+                    <path d="M 85,149 L 85,108 A 25,20 0 0,1 135,108 L 135,149 Z" fill="#ffffff" stroke="#b45309" stroke-width="2"/>
+                    <path d="M 205,149 L 205,108 A 25,20 0 0,1 255,108 L 255,149 Z" fill="#ffffff" stroke="#b45309" stroke-width="2"/>
+                    <!-- 地面 -->
+                    <line x1="25" y1="149" x2="315" y2="149" stroke="#451a03" stroke-width="3"/>
+                    <!-- 標示箭頭 -->
+                    <text x="170" y="128" text-anchor="middle" font-size="13" font-weight="900" fill="#b91c1c">◀ 亭仔腳（騎樓） ▶</text>
+                    <text x="170" y="164" text-anchor="middle" font-size="11" font-weight="bold" fill="#78350f">遮陽避雨、方便行人與顧客逛街的走廊空間</text>
+                </svg>
+            `;
+        }
+
+        // 原創 SVG 2：農曆與二十四節氣時鐘圖解
+        function createLunarSolarSVG() {
+            return `
+                <svg width="340" height="165" viewBox="0 0 340 165" class="max-w-full bg-emerald-50/50 rounded-xl border border-emerald-200">
+                    <!-- 左側：農曆（陰曆）月亮圓缺 -->
+                    <rect x="20" y="18" width="140" height="128" rx="16" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+                    <circle cx="90" cy="64" r="22" fill="#fef08a" stroke="#eab308" stroke-width="2"/>
+                    <text x="90" y="106" text-anchor="middle" font-size="13" font-weight="900" fill="#065f46">農曆（陰曆）</text>
+                    <text x="90" y="124" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">依據月亮圓缺變化</text>
+                    <text x="90" y="139" text-anchor="middle" font-size="10" font-weight="bold" fill="#059669">＋二十四節氣指導農耕</text>
+
+                    <!-- 右側：國曆（陽曆）太陽公轉 -->
+                    <rect x="180" y="18" width="140" height="128" rx="16" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+                    <circle cx="250" cy="64" r="20" fill="#fb923c" stroke="#ea580c" stroke-width="2"/>
+                    <text x="250" y="106" text-anchor="middle" font-size="13" font-weight="900" fill="#1e40af">國曆（陽曆）</text>
+                    <text x="250" y="124" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">依據地球繞太陽公轉</text>
+                    <text x="250" y="139" text-anchor="middle" font-size="10" font-weight="bold" fill="#2563eb">現代學校與上班共同曆法</text>
+                </svg>
+            `;
+        }
+
+        // 原創 SVG 3：老街位置與水陸交通關係圖
+        function createOldStreetMapSVG() {
+            return `
+                <svg width="340" height="165" viewBox="0 0 340 165" class="max-w-full bg-sky-50/60 rounded-xl border border-sky-200">
+                    <!-- 河流 -->
+                    <path d="M 15,135 Q 110,95 200,120 T 325,90" fill="none" stroke="#38bdf8" stroke-width="24" stroke-linecap="round"/>
+                    <text x="265" y="114" text-anchor="middle" font-size="11" font-weight="900" fill="#0369a1">溪流 / 港口</text>
+                    <!-- 碼頭與老街聚落 -->
+                    <rect x="115" y="65" width="90" height="26" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+                    <text x="160" y="82" text-anchor="middle" font-size="12" font-weight="900" fill="#92400e">熱鬧老街商號</text>
+                    <!-- 信仰中心廟宇 -->
+                    <polygon points="135,42 160,22 185,42" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>
+                    <rect x="140" y="42" width="40" height="18" fill="#fee2e2" stroke="#991b1b" stroke-width="1.5"/>
+                    <text x="160" y="55" text-anchor="middle" font-size="10" font-weight="900" fill="#7f1d1d">廟宇</text>
+                    <text x="170" y="156" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">早期老街多興起於「碼頭渡口」或「廟宇前」等交通便利處</text>
+                </svg>
+            `;
+        }
+
+        /* ==========================================================================
+           4. 康軒版四上期末考動態題庫引擎（第 3-1 課 ～ 第 4-3 課）
+           每次抽題會隨機組合不同生活角色情境與干擾選項，並附帶鷹架小提示
+           ========================================================================== */
+        const CHARACTERS = ['小宇', '小美', '阿傑', '品妍', '子軒', '羽彤'];
+
+        const QuestionBank = {
+            // 第三單元第 1 課：信仰與生活
+            31: [
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 31,
+                        hint: '原住民族重視人與大自然的和諧，相信萬物有靈，且特別敬畏照顧族人的祖先靈魂喔！',
+                        text: `${who}在社會課報告介紹「臺灣原住民族的傳統信仰」，請問原住民族傳統信仰的核心精神是什麼？`,
+                        correct: '敬畏祖靈與自然萬物，祈求族人平安與狩獵、農作豐收',
+                        options: shuffle([
+                            '敬畏祖靈與自然萬物，祈求族人平安與狩獵、農作豐收',
+                            '只祭拜掌管海上航行的媽祖與漁業神明',
+                            '一定要蓋大型的現代化教堂並使用國曆計算祭典',
+                            '禁止在部落裡舉辦任何祭典或分享食物'
+                        ]),
+                        explanation: '臺灣原住民族傳統信仰相信萬物有靈，並深信「祖靈」會庇佑族人，因此透過傳統祭儀表達對祖靈與大自然的敬畏與感謝。'
+                    };
+                },
+                () => {
+                    const deityCases = [
+                        { god: '土地公（福德正神）', role: '守護鄉里土地與農作收成、保佑商家平安', wrong1: '專門掌管考試與學業成績', wrong2: '只保護遠洋漁船不被颱風吹翻', wrong3: '負責醫治各種疑難雜症的醫神' },
+                        { god: '媽祖（天上聖母）', role: '早期先民渡海來臺時祈求航海平安的重要守護神', wrong1: '掌管山林狩獵的原住民族祖靈', wrong2: '專門掌管文昌功名與寫作', wrong3: '負責管理地下秩序的城隍爺' },
+                        { god: '三官大帝（天官、地官、水官）', role: '掌管天、地、水三界，祈求風調雨順與消災賜福', wrong1: '只負責保佑建築工人施工安全', wrong2: '專門掌管廚房灶火的神明', wrong3: '西方宗教裡的聖誕老人' }
+                    ];
+                    const item = pickRandom(deityCases);
+                    return {
+                        unitId: 31,
+                        hint: '想想看先民來到臺灣開墾或渡海時，最需要神明保佑哪方面的平安？',
+                        text: `早期漢人先民渡海來臺開墾時，常透過信仰尋求心靈寄託。請問家鄉廟宇常見的「<strong>${item.god}</strong>」，主要寄託了居民什麼樣的祈願？`,
+                        correct: item.role,
+                        options: shuffle([item.role, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `漢人先民依生活需求祭拜不同神明，其中「${item.god}」主要是${item.role}。`
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 31,
+                        hint: '不同文化與宗教各有飲食與禮儀規範（例如伊斯蘭教不吃豬肉），我們應該抱持什麼態度？',
+                        text: `班上新住民同學的家人信奉伊斯蘭教，在準備班級同樂會餐點時，${who}應該注意什麼才是有禮貌的表現？`,
+                        correct: '尊重對方的宗教飲食規範（如避免含有豬肉的食材）',
+                        options: shuffle([
+                            '尊重對方的宗教飲食規範（如避免含有豬肉的食材）',
+                            '強迫同學一定要吃大家準備的傳統豬肉香腸',
+                            '嘲笑對方的信仰習慣跟自己家裡不一樣',
+                            '認為只有自己家的信仰才是唯一正確的'
+                        ]),
+                        explanation: '隨著新住民與多元文化融入家鄉，家鄉出現了教堂、清真寺等不同信仰場所，我們應學習理解並尊重不同宗教的禮儀與飲食禁忌。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 31,
+                        hint: '廟宇不只是拜拜的地方，以前的人也常在廟前廣場聊天、看戲或討論村里大事喔！',
+                        text: `早期家鄉的傳統廟宇除了是居民祭祀神明的場所之外，還經常扮演什麼樣的生活功能？`,
+                        correct: '居民聚會聊天、交換訊息及舉辦廟會活動的社交中心',
+                        options: shuffle([
+                            '居民聚會聊天、交換訊息及舉辦廟會活動的社交中心',
+                            '專門用來停放高鐵與捷運列車的維修廠',
+                            '全村唯一可以辦理護照與出國簽證的機關',
+                            '禁止任何居民靠近與進入的私人住宅'
+                        ]),
+                        explanation: '傳統廟宇往往位於聚落中心，廟埕（廟前廣場）不僅是舉辦慶典的場地，也是居民聯絡感情、討論地方事務與市集交易的重要空間。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 31,
+                        hint: '現在大家越來越重視空氣品質與環境保護，很多廟宇都推出了友善環境的新做法！',
+                        text: `現代社會越來越重視環境保護，許多家鄉廟宇在舉辦祭祀活動時，採取了哪一種兼顧傳統與環保的做法？`,
+                        correct: '減少燃香與金紙數量（一爐一香或以米代金）',
+                        options: shuffle([
+                            '減少燃香與金紙數量（一爐一香或以米代金）',
+                            '在室內密閉空間燃放大量高空煙火',
+                            '把拜拜完的供品全部直接倒進家鄉河流裡',
+                            '24 小時不間斷焚燒塑膠製品以示誠意'
+                        ]),
+                        explanation: '現代信仰文化與時俱進，許多廟宇推動「一爐一香」、「金紙集中燒」或「以米代金、以功代金」，在虔誠敬神的同時也守護空氣與環境品質。'
+                    };
+                }
+            ],
+
+            // 第三單元第 2 課：老街與生活
+            32: [
+                () => {
+                    return {
+                        unitId: 32,
+                        visual: createOldStreetMapSVG(),
+                        hint: '觀察上圖，早期沒有高鐵和高速公路，人們要買賣貨物最方便聚集在哪裡？',
+                        text: `觀察下方的家鄉聚落圖，早期家鄉的「老街」通常最容易在下列哪一種地點形成？`,
+                        correct: '港口渡口附近或香火鼎盛的廟宇前方',
+                        options: shuffle([
+                            '港口渡口附近或香火鼎盛的廟宇前方',
+                            '人煙稀少、沒有道路的高山山頂上',
+                            '完全沒有水源的沙漠無人區',
+                            '現代化高速鐵路地下隧道裡面'
+                        ]),
+                        explanation: '早期交通與商業活動依賴水運或人群聚集處，因此老街多在「河港渡口」或「大廟前方」逐漸發展成熱鬧的商店街。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        visual: createShophouseSVG(),
+                        hint: '看看圖中一樓店面前面延伸出來的遮雨走廊，閩南語稱為什麼呢？',
+                        text: `觀察下方的傳統街屋建築圖，許多老街一樓店面都會設計「<strong>亭仔腳（騎樓）</strong>」，這項建築設計最主要的功能是什麼？`,
+                        correct: '讓行人與顧客在炎熱或下雨天時可以遮陽避雨、方便逛街',
+                        options: shuffle([
+                            '讓行人與顧客在炎熱或下雨天時可以遮陽避雨、方便逛街',
+                            '專門用來停放大型貨櫃車與遊覽車的車庫',
+                            '用來飼養水牛與耕田農具的穀倉',
+                            '為了阻擋陽光照射，讓店面完全保持黑暗'
+                        ]),
+                        explanation: '「亭仔腳」（即現代所稱的騎樓）是臺灣傳統街屋的智慧設計，能為往來行人遮陽避雨，也帶動店面的商業繁榮。'
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 32,
+                        hint: '看看老街屋頂正上方裝飾華麗的牆面，上面常刻著店號或吉祥圖案，叫作什麼？',
+                        text: `${who}假日和家人去逛大溪老街時，發現許多老房子屋頂正上方都有造型華麗的裝飾牆面，上面還刻著商號名稱與花草圖案，這稱為什麼？`,
+                        correct: '牌樓立面',
+                        options: shuffle([
+                            '牌樓立面',
+                            '太陽能光電板',
+                            '防空避難室',
+                            '高速公路隔音牆'
+                        ]),
+                        explanation: '傳統街屋上方的「牌樓立面」常融合中西式建築風格與吉祥雕刻，不僅展現商家的財力與品味，也是老街最吸睛的文化特色。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '想一想，為什麼以前很熱鬧的老街，後來曾經變得冷清？跟「交通改變」和「街道寬度」有關喔！',
+                        text: `許多家鄉老街在發展過程中，曾經一度面臨沒落與冷清，下列哪一個<strong>不是</strong>造成老街沒落的原因？`,
+                        correct: '政府與居民積極推動文化保存與觀光導覽',
+                        options: shuffle([
+                            '政府與居民積極推動文化保存與觀光導覽',
+                            '河運逐漸淤積，改由新開闢的寬闊公路取代交通',
+                            '老街街道較狹窄，不方便現代汽車通行與停車',
+                            '年輕人口外移，傳統手工藝面臨失傳危機'
+                        ]),
+                        explanation: '「推動文化保存與觀光導覽」是讓老街重新繁榮（再生）的方法，而不是造成老街沒落的原因喔！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '老街再生不能只靠拆掉重蓋高樓大廈，而是要保留文化特色並加入新創意！',
+                        text: `為了讓家鄉老街重新展現活力（老街再生），居民與地方政府可以採取下列哪一種做法？`,
+                        correct: '保存古蹟建築風貌，並結合在地特色美食與文創體驗活動',
+                        options: shuffle([
+                            '保存古蹟建築風貌，並結合在地特色美食與文創體驗活動',
+                            '把所有百年老房子全部拆除，改建成一模一樣的鐵皮工廠',
+                            '禁止任何外地遊客進入老街參觀與消費',
+                            '把老街全部圍起來當作大型垃圾掩埋場'
+                        ]),
+                        explanation: '透過社區營造，保留老街歷史建築與「亭仔腳」風貌，並結合文創商店、在地特產與文化導覽，能讓老街既留住記憶又帶動觀光。'
+                    };
+                }
+            ],
+
+            // 第四單元第 1 課：生活的作息
+            41: [
+                () => {
+                    return {
+                        unitId: 41,
+                        visual: createLunarSolarSVG(),
+                        hint: '觀察上圖，早期農業社會需要配合季節播種、收割，是參考哪一種曆法與節氣？',
+                        text: `觀察下方的曆法對照圖，早期家鄉居民從事農耕與漁撈時，主要依據哪一種曆法來安排生活作息？`,
+                        correct: '農曆（陰曆）與二十四節氣',
+                        options: shuffle([
+                            '農曆（陰曆）與二十四節氣',
+                            '完全只看手機行事曆與星期幾',
+                            '依據股票市場開盤的時間表',
+                            '只看世界盃足球賽的轉播日期'
+                        ]),
+                        explanation: '早期農業社會「日出而作、日落而息」，居民觀察月亮圓缺制定「農曆」，並配合太陽運行規律歸納出「二十四節氣」來指導農事與漁撈。'
+                    };
+                },
+                () => {
+                    const terms = [
+                        { term: '清明', desc: '春暖花開、適合掃墓祭祖與春耕的時節', wrong1: '天氣最寒冷、準備過冬至吃湯圓', wrong2: '一年當中白天最短、黑夜最長的一天', wrong3: '準備除夕夜圍爐吃年夜飯' },
+                        { term: '冬至', desc: '一年中黑夜最長的一天，傳統習俗會全家人一起吃湯圓', wrong1: '端午節划龍舟、掛艾草的節氣', wrong2: '中秋節賞月吃月餅的節氣', wrong3: '春天第一聲春雷響起的「驚蟄」' },
+                        { term: '芒種', desc: '夏季穀物成熟、忙碌收割與播種的農忙時節', wrong1: '冬天大雪紛飛、完全停止農作的時節', wrong2: '農曆正月初一拜年的新年第一天', wrong3: '重陽節登高敬老的傳統節日' }
+                    ];
+                    const item = pickRandom(terms);
+                    return {
+                        unitId: 41,
+                        hint: '二十四節氣反映了氣候與農作的變化，想一想「' + item.term + '」是什麼時候會聽到的節氣？',
+                        text: `先民智慧將一年分為「二十四節氣」來配合氣候變化安排生活。請問節氣中的「<strong>${item.term}</strong>」代表什麼意思？`,
+                        correct: item.desc,
+                        options: shuffle([item.desc, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `二十四節氣中的「${item.term}」是指${item.desc}，展現先民順應自然氣候的生活智慧。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        hint: '現在我們上學、上班、放週休二日，大家一起約時間都是看哪一種日曆呢？',
+                        text: `現代社會中，學校上課、銀行營業與公司行號上班，主要是依據哪一種曆法與制度來統一作息？`,
+                        correct: '國曆（陽曆）與星期制',
+                        options: shuffle([
+                            '國曆（陽曆）與星期制',
+                            '每天看潮汐漲退潮的時間決定幾點上學',
+                            '依據村裡廟宇擲筊的結果決定明天要不要上班',
+                            '完全沒有統一曆法，每個人自己隨便算日期'
+                        ]),
+                        explanation: '現代工商業社會為了方便與世界各地接軌，統一採用「國曆（陽曆）」與「星期制」（週休二日）作為共同的生活作息標準。'
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 41,
+                        hint: '星期六、星期日週休二日時，大家不用上學上班，最常做什麼活動來調劑身心？',
+                        text: `現代推行「週休二日」制度後，${who}一家人在週末假期有了更多休閒時間。下列哪一種是健康又有意義的休閒生活安排？`,
+                        correct: '到家鄉步道踏青、參觀博物館或閱讀課外書',
+                        options: shuffle([
+                            '到家鄉步道踏青、參觀博物館或閱讀課外書',
+                            '連續兩天熬夜打電動、完全不睡覺也不運動',
+                            '在社區公園裡大聲喧嘩並亂丟飲料罐',
+                            '把功課全部丟掉，開學再抄同學的作業'
+                        ]),
+                        explanation: '現代人的作息除了工作與學習，也重視「休閒生活」，透過戶外踏青、藝文參觀或運動，能讓身心獲得充分休息與充實。'
+                    };
+                }
+            ],
+
+            // 第四單元第 2 課：傳統的節慶
+            42: [
+                () => {
+                    const festivals = [
+                        { name: '春節（農曆新年）', date: '農曆正月初一', custom: '除夕圍爐、貼春聯、領壓歲錢與走春拜年', wrong1: '划龍舟、吃粽子與掛艾草', wrong2: '賞月、吃月餅與剝柚子', wrong3: '提燈籠、猜燈謎與吃元宵' },
+                        { name: '元宵節', date: '農曆正月十五', custom: '賞花燈、提燈籠、猜燈謎與吃元宵（湯圓）', wrong1: '掃墓祭祖與吃潤餅', wrong2: '喝雄黃酒與立蛋比賽', wrong3: '放天燈祈福與除夕守歲' },
+                        { name: '端午節', date: '農曆五月初五', custom: '賽龍舟、吃粽子、配戴香包與門口掛艾草菖蒲', wrong1: '全家人賞滿月、吃月餅', wrong2: '貼春聯、放鞭炮與領紅包', wrong3: '到祖先墳前除草掃墓' },
+                        { name: '中秋節', date: '農曆八月十五', custom: '全家人團圓賞月、吃月餅與品嘗柚子', wrong1: '划龍舟紀念愛國詩人屈原', wrong2: '提燈籠參加元宵燈會', wrong3: '大掃除與貼門神春聯' }
+                    ];
+                    const f = pickRandom(festivals);
+                    return {
+                        unitId: 42,
+                        hint: `這個節慶在「${f.date}」，想想看這一天家裡會準備什麼應景的食物或活動？`,
+                        text: `漢人傳統節慶多依照農曆日期舉行。請問在「<strong>${f.name}</strong>」（${f.date}）時，家鄉居民最常進行哪一項傳統習俗？`,
+                        correct: f.custom,
+                        options: shuffle([f.custom, f.wrong1, f.wrong2, f.wrong3]),
+                        explanation: `「${f.name}」在${f.date}，主要習俗為${f.custom}，凝聚了家族情感與文化傳承。`
+                    };
+                },
+                () => {
+                    const indigenous = [
+                        { tribe: '阿美族', ritual: '豐年祭（Ilisin）', desc: '感謝神靈與祖靈保佑五穀豐收，族人穿著傳統服飾手牽手歌舞歡慶', wrong1: '划龍舟與吃肉粽', wrong2: '在清真寺舉辦開齋節', wrong3: '舉行聖誕節報佳音活動' },
+                        { tribe: '達悟族（雅美族）', ritual: '飛魚祭', desc: '祈求飛魚季漁獲豐收與海上航行平安，並遵守傳統捕魚與飲食禁忌', wrong1: '在高山上舉辦射耳祭狩獵訓練', wrong2: '全族人一起提燈籠猜燈謎', wrong3: '到老街廟宇搶頭香' },
+                        { tribe: '布農族', ritual: '射耳祭（Malahtangia）', desc: '祈求狩獵豐收與鍛鍊男子射箭技巧，並以八部合音祈禱小米豐收', wrong1: '在蘭嶼海邊划拼板舟捕飛魚', wrong2: '舉辦潑水節互相灑水祝福', wrong3: '除夕夜貼春聯領壓歲錢' }
+                    ];
+                    const item = pickRandom(indigenous);
+                    return {
+                        unitId: 42,
+                        hint: `這是「${item.tribe}」非常重要的歲時祭儀，跟他們的生活環境（農耕、海洋或山林狩獵）息息相關喔！`,
+                        text: `臺灣原住民族各族都有獨特的傳統祭儀。請問「<strong>${item.tribe}</strong>」每年舉辦的「<strong>${item.ritual}</strong>」，主要文化內涵是什麼？`,
+                        correct: item.desc,
+                        options: shuffle([item.desc, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `「${item.tribe}」的「${item.ritual}」展現族群與自然共存的智慧：${item.desc}。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        hint: '參加原住民族祭典時，我們是客人，要尊重族人的神聖空間與規定，不能隨便亂闖喔！',
+                        text: `當我們去參觀原住民族部落的傳統祭典時，下列哪一種行為才是尊重多元文化的正確態度？`,
+                        correct: '事先了解祭典禮儀與禁忌，未經同意不隨意闖入祭場或拍照',
+                        options: shuffle([
+                            '事先了解祭典禮儀與禁忌，未經同意不隨意闖入祭場或拍照',
+                            '為了拍網美照，直接衝進祭司祈福的圓圈中間',
+                            '大聲批評原住民族的傳統服飾與歌謠很奇怪',
+                            '隨意觸摸祭典中神聖的祭品與器具'
+                        ]),
+                        explanation: '原住民族的歲時祭儀具有神聖的宗教與文化意義，參觀時應遵守部落規範、保持安靜與尊重，展現公民素養。'
+                    };
+                },
+                () => {
+                    const newImmigrant = [
+                        { fest: '潑水節（宋干節）', origin: '泰國、緬甸等東南亞國家的新年慶典，藉由互相灑水洗去厄運並獻上祝福', wrong1: '日本在冬天堆雪人的傳統節日', wrong2: '美國在十一月吃火雞的感恩節', wrong3: '漢人農曆七月十五的中元普渡' },
+                        { fest: '開齋節', origin: '信奉伊斯蘭教的新住民（如印尼籍朋友）在齋戒月結束後，盛裝聚會慶祝的重要節日', wrong1: '中秋節全家人一起烤肉賞月', wrong2: '端午節在河邊比賽划龍舟', wrong3: '西洋萬聖節小朋友挨家挨戶要糖果' }
+                    ];
+                    const item = pickRandom(newImmigrant);
+                    return {
+                        unitId: 42,
+                        hint: '這個節慶隨著東南亞新住民來到臺灣，現在在許多縣市也能體驗到這份熱情與祝福喔！',
+                        text: `隨著新住民朋友來到家鄉生活，也帶來了豐富的文化節慶。請問「<strong>${item.fest}</strong>」源自哪裡、有什麼文化意義？`,
+                        correct: item.origin,
+                        options: shuffle([item.origin, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `「${item.fest}」是${item.origin}，讓我們的家鄉文化變得更加多元繽紛！`
+                    };
+                }
+            ],
+
+            // 第四單元第 3 課：現代的節日
+            43: [
+                () => {
+                    const nationalDays = [
+                        { day: '中華民國開國紀念日（元旦）', date: '國曆 1 月 1 日', meaning: '紀念中華民國建立，也是新一年的開始', wrong1: '紀念孔子誕辰與感謝老師辛勞', wrong2: '慶祝農曆春節除夕圍爐', wrong3: '紀念五月一日勞工朋友的貢獻' },
+                        { day: '國慶日（雙十節）', date: '國曆 10 月 10 日', meaning: '慶祝國家生日，全國各地常舉行升旗典禮與慶祝活動', wrong1: '紀念兒童節讓小朋友放假遊玩', wrong2: '紀念父親節感謝爸爸的辛勞', wrong3: '原住民族正名紀念日' },
+                        { day: '和平紀念日', date: '國曆 2 月 28 日', meaning: '紀念二二八事件，提醒人們珍惜和平、彼此包容與尊重人權', wrong1: '慶祝中秋節全家人團圓賞月', wrong2: '紀念軍人節表揚國軍保家衛國', wrong3: '端午節紀念屈原的傳統節慶' }
+                    ];
+                    const d = pickRandom(nationalDays);
+                    return {
+                        unitId: 43,
+                        hint: `這個國定紀念日在「${d.date}」，主要跟國家的歷史與和平紀念有關喔！`,
+                        text: `現代社會依據「國曆」訂定了許多具有歷史與紀念意義的節日。請問「<strong>${d.day}</strong>」（${d.date}）設立的主要意義是什麼？`,
+                        correct: d.meaning,
+                        options: shuffle([d.meaning, d.wrong1, d.wrong2, d.wrong3]),
+                        explanation: `「${d.day}」在${d.date}，主要是為了${d.meaning}。`
+                    };
+                },
+                () => {
+                    const jobDays = [
+                        { day: '教師節', date: '國曆 9 月 28 日', target: '感謝老師平日教導與陪伴學生成長的辛勞', wrong1: '感謝消防員冒險救火的辛勞', wrong2: '紀念端午節划龍舟的傳統習俗', wrong3: '慶祝新年的第一天元旦' },
+                        { day: '勞動節', date: '國曆 5 月 1 日', target: '肯定各行各業勞工朋友對社會經濟與建設的付出', wrong1: '專門給國小學生放假的兒童節', wrong2: '紀念國慶日煙火施放', wrong3: '原住民族舉辦豐年祭的日子' },
+                        { day: '軍人節', date: '國曆 9 月 3 日', target: '感謝國軍官兵日夜保衛國家與救災的貢獻', wrong1: '感謝郵差送信的郵政節', wrong2: '慶祝父親節與母親節', wrong3: '農曆八月十五的中秋節' },
+                        { day: '護理師節（國際護師節）', date: '國曆 5 月 12 日', target: '感謝護理人員細心照護病人與守護大眾健康', wrong1: '感謝警察維護交通治安的警察節', wrong2: '紀念地球環境保護的世界地球日', wrong3: '漢人傳統的清明掃墓節' }
+                    ];
+                    const j = pickRandom(jobDays);
+                    return {
+                        unitId: 43,
+                        hint: `這個節日在「${j.date}」，主要是為了向哪一種職業的辛苦工作者表達感謝？`,
+                        text: `為了感謝各行各業工作者對社會的貢獻，現代社會訂有許多職業節日。請問「<strong>${j.day}</strong>」（${j.date}）主要是為了表達什麼心意？`,
+                        correct: j.target,
+                        options: shuffle([j.target, j.wrong1, j.wrong2, j.wrong3]),
+                        explanation: `「${j.day}」（${j.date}）主要是為了${j.target}，提醒我們對身邊每位付出的人心懷感恩。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 43,
+                        hint: '8 月 1 日是為了紀念原住民族在 1994 年成功爭取將稱呼從「山胞」正名為「原住民」喔！',
+                        text: `每年國曆 <strong>8 月 1 日</strong>是我國的「<strong>原住民族日</strong>」，政府訂定這個節日最主要的目的是什麼？`,
+                        correct: '紀念原住民族正名運動的歷史，喚起國人對原住民族文化與權利的尊重',
+                        options: shuffle([
+                            '紀念原住民族正名運動的歷史，喚起國人對原住民族文化與權利的尊重',
+                            '規定全臺灣民眾這一天都必須吃月餅和柚子',
+                            '紀念高鐵通車與捷運完工的交通紀念日',
+                            '專門用來慶祝商家週年慶大拍賣的購物節'
+                        ]),
+                        explanation: '1994 年 8 月 1 日憲法增修條文正式將「山胞」正名為「原住民」，政府因此將 8 月 1 日訂為「原住民族日」，彰顯多元文化平權的價值。'
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 43,
+                        hint: '家庭節日（母親節、父親節、祖父母節）的重點不在於花大錢買禮物，而是真心表達感謝與陪伴！',
+                        text: `每年五月的第二個星期日是「母親節」，${who}想向媽媽或照顧自己的家人表達感謝，下列哪一種做法最能傳達真摯的心意？`,
+                        correct: '親手寫一張感謝卡片、分擔家事並給家人一個溫暖的擁抱',
+                        options: shuffle([
+                            '親手寫一張感謝卡片、分擔家事並給家人一個溫暖的擁抱',
+                            '跟媽媽要很多零用錢去買昂貴玩具送給自己',
+                            '把房間弄得亂七八糟，全部留給家人收拾',
+                            '整天滑手機不跟家人說話'
+                        ]),
+                        explanation: '母親節、父親節與八月第四個星期日的「祖父母節」，都是提醒我們感念家人辛勞、主動關懷與陪伴的溫馨節日。'
+                    };
+                }
+            ]
+        };
+
+        // 為指定關卡生成 N 題不重複題目
+        function generateStageQuestions(stageId, count) {
+            const list = [];
+            const usedTexts = new Set();
+            const units = [31, 32, 41, 42, 43];
+            let attempts = 0;
+
+            let unitSchedule = [];
+            if (stageId === 99) {
+                for (let i = 0; i < count; i++) {
+                    unitSchedule.push(units[i % units.length]);
+                }
+                unitSchedule = shuffle(unitSchedule);
+            }
+
+            while (list.length < count && attempts < count * 30) {
+                attempts++;
+                const targetUnit = stageId === 99
+                    ? unitSchedule[list.length % unitSchedule.length]
+                    : stageId;
+                const generatorFn = pickRandom(QuestionBank[targetUnit]);
+                const q = generatorFn();
+                if (!usedTexts.has(q.text)) {
+                    usedTexts.add(q.text);
+                    list.push(q);
+                }
+            }
+
+            while (list.length < count) {
+                const targetUnit = stageId === 99
+                    ? unitSchedule[list.length % unitSchedule.length]
+                    : stageId;
+                const generatorFn = pickRandom(QuestionBank[targetUnit]);
+                list.push(generatorFn());
+            }
+
+            return list;
+        }
+
+        /* ==========================================================================
+           5. 畫面切換、作答互動與結算
+           ========================================================================== */
+        function showScreen(screenId) {
+            ['lobby-screen', 'quiz-screen', 'result-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function goHome() {
+            SoundEngine.click();
+            renderLobby();
+            showScreen('lobby-screen');
+        }
+
+        function renderLobby() {
+            const grid = document.getElementById('stages-grid');
+            grid.innerHTML = STAGES.map(stage => {
+                const earnedStars = gameState.stars[stage.id] || 0;
+                const starsHtml = [1, 2, 3].map(i =>
+                    `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
+                ).join('');
+                const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
+                const countHint = stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（可自選）` : `每次 ${gameState.questionCountPref} 題`;
+
+                return `
+                    <div onclick="${clickHandler}" 
+                         class="btn-3d cursor-pointer bg-white rounded-3xl p-5 border-4 ${stage.border} hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
+                                    ${stage.icon}
+                                </div>
+                                <div class="flex gap-1 text-lg bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-100">${starsHtml}</div>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800 leading-snug">${stage.title}</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed">${stage.subtitle}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-400">${countHint}</span>
+                            <span class="text-xs sm:text-sm font-black text-orange-600 bg-orange-50 px-3 py-1 rounded-full group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                開始探險 ➔
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openMockExamModal() {
+            SoundEngine.click();
+            const mockInput = document.getElementById('mock-custom-input');
+            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            document.getElementById('mock-exam-modal').classList.remove('hidden');
+        }
+
+        function closeMockExamModal() {
+            SoundEngine.click();
+            document.getElementById('mock-exam-modal').classList.add('hidden');
+        }
+
+        function launchMockExam(rawCount) {
+            const num = parseInt(rawCount, 10);
+            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(50, num));
+            closeMockExamModal();
+            setQuestionCount(validCount, false);
+            startStage(99);
+        }
+
+        function startStage(stageId) {
+            SoundEngine.click();
+            const stageInfo = STAGES.find(s => s.id === stageId);
+            const count = gameState.questionCountPref || 5;
+
+            currentSession = {
+                stageId: stageId,
+                isMistakeBattle: false,
+                questions: generateStageQuestions(stageId, count),
+                currentIndex: 0,
+                correctCount: 0,
+                sessionScore: 0,
+                combo: 0,
+                maxCombo: 0,
+                answered: false,
+                usedHint: false
+            };
+
+            document.getElementById('stage-badge').textContent = stageInfo.title;
+            showScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function startMistakeBattle() {
+            if (!gameState.mistakes || gameState.mistakes.length === 0) return;
+            SoundEngine.click();
+
+            const battleQuestions = gameState.mistakes.map(m => {
+                if (m.rawQuestion) {
+                    return { ...m.rawQuestion, isMistakeRetry: true };
+                }
+                return {
+                    unitId: m.unitId || 31,
+                    hint: `這題上次誤選了「${m.wrongAnswer}」，再仔細回想課文觀念喔！`,
+                    text: m.questionText,
+                    visual: m.visual || null,
+                    correct: m.correctAnswer,
+                    options: shuffle([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道']),
+                    explanation: m.explanation,
+                    isMistakeRetry: true
+                };
+            });
+
+            currentSession = {
+                stageId: 88,
+                isMistakeBattle: true,
+                questions: battleQuestions,
+                currentIndex: 0,
+                correctCount: 0,
+                sessionScore: 0,
+                combo: 0,
+                maxCombo: 0,
+                answered: false,
+                usedHint: false
+            };
+
+            document.getElementById('stage-badge').textContent = '⚔️ 消滅錯題大作戰';
+            showScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function startMistakeBattleFromModal() {
+            closeMistakeModal();
+            startMistakeBattle();
+        }
+
+        function retryStage() {
+            if (currentSession.isMistakeBattle) {
+                if (gameState.mistakes.length > 0) {
+                    startMistakeBattle();
+                } else {
+                    goHome();
+                }
+            } else {
+                startStage(currentSession.stageId);
+            }
+        }
+
+        function toggleHintBox() {
+            SoundEngine.click();
+            const hintBox = document.getElementById('hint-box');
+            hintBox.classList.toggle('hidden');
+            if (!hintBox.classList.contains('hidden')) {
+                currentSession.usedHint = true;
+            }
+        }
+
+        function renderQuestion() {
+            const total = currentSession.questions.length;
+            const idx = currentSession.currentIndex;
+            const q = currentSession.questions[idx];
+            currentSession.answered = false;
+            currentSession.usedHint = false;
+
+            const hintBox = document.getElementById('hint-box');
+            const hintText = document.getElementById('hint-text');
+            hintBox.classList.add('hidden');
+            hintText.innerHTML = q.hint || '仔細閱讀題目中的關鍵時間、地點或文化特色喔！';
+
+            document.getElementById('progress-text').textContent = `第 ${idx + 1} / ${total} 題`;
+            document.getElementById('progress-bar').style.width = `${((idx + 1) / total) * 100}%`;
+
+            const comboEl = document.getElementById('combo-badge');
+            if (currentSession.combo >= 2) {
+                comboEl.textContent = `🔥 ${currentSession.combo} 連擊!`;
+                comboEl.classList.remove('hidden');
+            } else {
+                comboEl.classList.add('hidden');
+            }
+
+            const unitStage = STAGES.find(s => s.id === q.unitId);
+            document.getElementById('q-unit-tag').textContent = unitStage ? unitStage.title : '';
+            const typeTag = document.getElementById('q-type-tag');
+            if (currentSession.isMistakeBattle) {
+                typeTag.textContent = '⚔️ 錯題復仇戰（答對即消滅）';
+                typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-700';
+            } else {
+                typeTag.textContent = '🏮 社會素養四選一';
+                typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-orange-100 text-orange-800';
+            }
+
+            document.getElementById('question-text').innerHTML = q.text;
+
+            const visualEl = document.getElementById('question-visual');
+            if (q.visual) {
+                visualEl.innerHTML = q.visual;
+                visualEl.classList.remove('hidden');
+            } else {
+                visualEl.innerHTML = '';
+                visualEl.classList.add('hidden');
+            }
+
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            const optionsGrid = document.getElementById('options-grid');
+            const labels = ['A', 'B', 'C', 'D'];
+            optionsGrid.innerHTML = q.options.map((opt, i) => `
+                <button onclick="selectOption(${i})" id="opt-btn-${i}"
+                    class="btn-3d option-btn bg-orange-50/70 hover:bg-orange-100 border-3 border-orange-200 rounded-2xl p-4 sm:p-5 text-left flex items-center gap-3.5 transition-all">
+                    <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-500 text-white font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+                        ${labels[i]}
+                    </span>
+                    <span class="text-sm sm:text-lg font-bold text-slate-800 leading-snug">${opt}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectOption(selectedIndex) {
+            if (currentSession.answered) return;
+            const q = currentSession.questions[currentSession.currentIndex];
+            const chosen = q.options[selectedIndex];
+            const isCorrect = chosen === q.correct;
+
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                const optVal = q.options[idx];
+                if (optVal === q.correct) {
+                    btn.classList.remove('bg-orange-50/70', 'hover:bg-orange-100', 'border-orange-200');
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'ring-4', 'ring-emerald-200');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('bg-orange-50/70', 'hover:bg-orange-100', 'border-orange-200');
+                    btn.classList.add('bg-rose-100', 'border-rose-500', 'animate-shake');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            handleAnswerResult(isCorrect, chosen);
+        }
+
+        function handleAnswerResult(isCorrect, userDisplayAnswer) {
+            currentSession.answered = true;
+            const q = currentSession.questions[currentSession.currentIndex];
+
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+
+            if (isCorrect) {
+                currentSession.correctCount++;
+                if (!currentSession.usedHint) {
+                    currentSession.combo++;
+                }
+                if (currentSession.combo > currentSession.maxCombo) {
+                    currentSession.maxCombo = currentSession.combo;
+                }
+                const points = 100 + Math.max(0, currentSession.combo - 1) * 20;
+                currentSession.sessionScore += points;
+                gameState.totalScore += points;
+
+                SoundEngine.correct(currentSession.combo);
+
+                const prevLen = gameState.mistakes.length;
+                gameState.mistakes = gameState.mistakes.filter(m => m.questionText !== q.text);
+                const eliminated = gameState.mistakes.length < prevLen;
+
+                const praises = ['太棒了！完全正確！', '好厲害！社會觀念很清楚！', '答對囉！家鄉文化小達人！', '漂亮的一擊！繼續保持！'];
+                feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                feedbackIcon.textContent = eliminated ? '💥' : (currentSession.combo >= 2 ? '🔥' : '🎉');
+                feedbackTitle.textContent = eliminated
+                    ? `💥 成功消滅這道錯題！(+${points} 分)`
+                    : `${pickRandom(praises)} (+${points} 分)`;
+                feedbackExp.innerHTML = `<strong>重點知識回顧：</strong>${q.explanation}`;
+            } else {
+                currentSession.combo = 0;
+                SoundEngine.wrong();
+
+                const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
+                if (!gameState.mistakes.some(m => m.questionText === q.text)) {
+                    gameState.mistakes.unshift({
+                        unitId: q.unitId,
+                        stageTitle,
+                        questionText: q.text,
+                        visual: q.visual || null,
+                        wrongAnswer: userDisplayAnswer,
+                        correctAnswer: q.correct,
+                        explanation: q.explanation,
+                        rawQuestion: q
+                    });
+                }
+
+                feedbackBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+                feedbackIcon.textContent = '💡';
+                feedbackTitle.textContent = '沒關係！已收錄進「錯題本」，一起來看重點解析：';
+                feedbackExp.innerHTML = `正確答案是 <strong>${q.correct}</strong>。<br>${q.explanation}`;
+            }
+
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSession.currentIndex === currentSession.questions.length - 1) {
+                nextBtn.innerHTML = '<span>查看本輪成績</span><span>🏆</span>';
+            } else {
+                nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
+            }
+
+            saveProgress();
+        }
+
+        function nextQuestion() {
+            SoundEngine.click();
+            if (currentSession.currentIndex < currentSession.questions.length - 1) {
+                currentSession.currentIndex++;
+                renderQuestion();
+            } else {
+                finishStage();
+            }
+        }
+
+        function finishStage() {
+            SoundEngine.victory();
+            const total = currentSession.questions.length;
+            const correct = currentSession.correctCount;
+            const ratio = correct / total;
+
+            let earnedStars = 0;
+            let badgeText = '稱號：家鄉見習探險員';
+            let trophy = '🎖️';
+
+            if (ratio === 1) {
+                earnedStars = 3;
+                badgeText = '稱號：家鄉文化大博士 👑';
+                trophy = '🏆';
+            } else if (ratio >= 0.6) {
+                earnedStars = 2;
+                badgeText = '稱號：優秀文化小導覽員 🏮';
+                trophy = '🥈';
+            } else if (correct >= 1) {
+                earnedStars = 1;
+                badgeText = '稱號：勇敢歷史探索者 🧭';
+                trophy = '🥉';
+            } else {
+                earnedStars = 0;
+                badgeText = '稱號：再接再厲小探險家 💪';
+                trophy = '🌱';
+            }
+
+            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+                gameState.stars[currentSession.stageId] = earnedStars;
+            }
+            saveProgress();
+
+            if (currentSession.isMistakeBattle) {
+                const remaining = gameState.mistakes.length;
+                document.getElementById('result-trophy').textContent = remaining === 0 ? '🏆' : '⚔️';
+                document.getElementById('result-title').textContent = remaining === 0
+                    ? '太神啦！所有錯題全部消滅完畢！'
+                    : `錯題大作戰完成！還剩下 ${remaining} 題待消滅`;
+                document.getElementById('result-badge-name').textContent = remaining === 0
+                    ? '稱號：觀念滿分終結者 👑'
+                    : '稱號：勇猛錯題獵人 🗡️';
+            } else {
+                document.getElementById('result-trophy').textContent = trophy;
+                document.getElementById('result-title').textContent = ratio >= 0.6 ? '探險成功！表現非常棒！' : '完成特訓！多讀幾次解析會更熟練喔！';
+                document.getElementById('result-badge-name').textContent = badgeText;
+            }
+
+            document.getElementById('result-correct').textContent = `${correct} / ${total}`;
+            document.getElementById('result-score').textContent = `+${currentSession.sessionScore}`;
+            document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
+
+            document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
+                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+            ).join('');
+
+            showScreen('result-screen');
+        }
+
+        /* ==========================================================================
+           6. 錯題回顧、弱點分析與一鍵重練功能
+           ========================================================================== */
+        let weakestUnitIdCache = null;
+
+        function openMistakeModal() {
+            SoundEngine.click();
+            const listEl = document.getElementById('mistake-list');
+            const summaryEl = document.getElementById('weakness-summary');
+            const weakBtn = document.getElementById('practice-weakest-btn');
+            const battleBtn = document.getElementById('battle-mistakes-btn');
+
+            if (gameState.mistakes.length === 0) {
+                summaryEl.classList.add('hidden');
+                weakBtn.classList.add('hidden');
+                if (battleBtn) battleBtn.classList.add('hidden');
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <div class="text-5xl mb-3">🌟</div>
+                        <p class="font-bold text-lg text-slate-600">目前沒有錯題紀錄喔！</p>
+                        <p class="text-sm mt-1">答錯的題目會自動收錄在這裡，方便家長陪讀與重點複習。</p>
+                    </div>
+                `;
+            } else {
+                if (battleBtn) battleBtn.classList.remove('hidden');
+                const counts = {};
+                gameState.mistakes.forEach(m => {
+                    if (m.unitId) {
+                        counts[m.unitId] = (counts[m.unitId] || 0) + 1;
+                    }
+                });
+
+                let maxUnit = null;
+                let maxCount = 0;
+                const badgesHtml = Object.entries(counts).map(([uid, cnt]) => {
+                    if (cnt > maxCount) {
+                        maxCount = cnt;
+                        maxUnit = Number(uid);
+                    }
+                    const st = STAGES.find(s => s.id === Number(uid));
+                    return `
+                        <button onclick="practiceSpecificUnit(${uid})" class="bg-white hover:bg-orange-50 border border-rose-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition">
+                            <span>${st ? st.title.split('：')[1] : '課程'}</span>
+                            <span class="bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[11px]">${cnt} 題</span>
+                            <span class="text-orange-600 underline">特訓➔</span>
+                        </button>
+                    `;
+                }).join('');
+
+                weakestUnitIdCache = maxUnit;
+                summaryEl.classList.remove('hidden');
+                summaryEl.innerHTML = `
+                    <div class="text-xs font-black text-rose-800 mb-2">📊 各課錯題分布（點擊可立即產生新題目特訓）：</div>
+                    <div class="flex flex-wrap gap-2 mb-2">${badgesHtml}</div>
+                `;
+
+                if (weakestUnitIdCache) {
+                    weakBtn.classList.remove('hidden');
+                } else {
+                    weakBtn.classList.add('hidden');
+                }
+
+                listEl.innerHTML = gameState.mistakes.map((m, idx) => `
+                    <div class="bg-slate-50 rounded-2xl p-4 border-2 border-slate-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black bg-rose-100 text-rose-700 px-2.5 py-1 rounded-lg">${m.stageTitle}</span>
+                            <span class="text-xs text-slate-400 font-bold">#${idx + 1}</span>
+                        </div>
+                        <div class="font-bold text-slate-800 mb-2 text-sm sm:text-base">${m.questionText}</div>
+                        <div class="flex flex-wrap gap-3 text-xs sm:text-sm mb-2">
+                            <span class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg font-bold">❌ 當時答：${m.wrongAnswer}</span>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold">✅ 正確解：${m.correctAnswer}</span>
+                        </div>
+                        <div class="text-xs sm:text-sm text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100">
+                            💡 <strong>重點解析：</strong>${m.explanation}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('mistake-modal').classList.remove('hidden');
+        }
+
+        function closeMistakeModal() {
+            SoundEngine.click();
+            document.getElementById('mistake-modal').classList.add('hidden');
+        }
+
+        function practiceSpecificUnit(unitId) {
+            closeMistakeModal();
+            startStage(Number(unitId));
+        }
+
+        function practiceWeakestUnit() {
+            if (weakestUnitIdCache) {
+                closeMistakeModal();
+                startStage(weakestUnitIdCache);
+            }
+        }
+
+        function clearMistakes() {
+            SoundEngine.click();
+            gameState.mistakes = [];
+            saveProgress();
+            openMistakeModal();
+        }
+
+        function resetProgressConfirm() {
+            SoundEngine.click();
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            SoundEngine.click();
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        function executeResetProgress() {
+            SoundEngine.click();
+            gameState = {
+                stars: { 31: 0, 32: 0, 41: 0, 42: 0, 43: 0, 99: 0 },
+                totalScore: 0,
+                questionCountPref: gameState.questionCountPref || 5,
+                mistakes: []
+            };
+            saveProgress();
+            renderLobby();
+            closeConfirmModal();
+        }
+
+        window.onload = function () {
+            loadProgress();
+        };
+    </script>
+</body>
+</html>
