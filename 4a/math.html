@@ -547,7 +547,7 @@
 
     <script>
         /* ==========================================================================
-           1. Web Audio API 音效合成引擎 (無外部音檔依賴)
+           1. Web Audio API 音效合成引擎
            ========================================================================== */
         const SoundEngine = {
             ctx: null,
@@ -620,7 +620,7 @@
         }
 
         /* ==========================================================================
-           2. 手寫計算草稿板 (Canvas 支援觸控與滑鼠)
+           2. 手寫計算草稿板 (改用 Pointer Events 支援 iPad / Apple Pencil 與 Retina 精準對位)
            ========================================================================== */
         const Scratchpad = {
             canvas: null,
@@ -637,26 +637,39 @@
 
                 const getPos = (e) => {
                     const rect = this.canvas.getBoundingClientRect();
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                     return {
-                        x: clientX - rect.left,
-                        y: clientY - rect.top
+                        x: e.clientX - rect.left,
+                        y: e.clientY - rect.top
                     };
                 };
 
                 const startDraw = (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    if (Math.abs(this.canvas.width - Math.round(rect.width * dpr)) > 2) {
+                        this.resize(true);
+                    }
+
                     this.drawing = true;
+                    if (this.canvas.setPointerCapture && e.pointerId !== undefined) {
+                        try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
+                    }
                     const pos = getPos(e);
                     this.ctx.beginPath();
                     this.ctx.moveTo(pos.x, pos.y);
+                    this.ctx.lineWidth = e.pointerType === 'pen' ? 2.6 : 3.2;
+                    this.ctx.lineCap = 'round';
+                    this.ctx.lineJoin = 'round';
+                    this.ctx.strokeStyle = this.color;
+                    this.ctx.lineTo(pos.x + 0.1, pos.y + 0.1);
+                    this.ctx.stroke();
                 };
 
                 const moveDraw = (e) => {
                     if (!this.drawing) return;
                     if (e.cancelable) e.preventDefault();
                     const pos = getPos(e);
-                    this.ctx.lineWidth = 3;
+                    this.ctx.lineWidth = e.pointerType === 'pen' ? 2.6 : 3.2;
                     this.ctx.lineCap = 'round';
                     this.ctx.lineJoin = 'round';
                     this.ctx.strokeStyle = this.color;
@@ -664,26 +677,48 @@
                     this.ctx.stroke();
                 };
 
-                const endDraw = () => {
+                const endDraw = (e) => {
+                    if (!this.drawing) return;
                     this.drawing = false;
+                    if (this.canvas.releasePointerCapture && e.pointerId !== undefined) {
+                        try { this.canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+                    }
                 };
 
-                this.canvas.addEventListener('mousedown', startDraw);
-                this.canvas.addEventListener('mousemove', moveDraw);
-                window.addEventListener('mouseup', endDraw);
-
-                this.canvas.addEventListener('touchstart', startDraw, { passive: false });
-                this.canvas.addEventListener('touchmove', moveDraw, { passive: false });
-                this.canvas.addEventListener('touchend', endDraw);
-                window.addEventListener('resize', () => this.resize());
+                this.canvas.addEventListener('pointerdown', startDraw);
+                this.canvas.addEventListener('pointermove', moveDraw);
+                this.canvas.addEventListener('pointerup', endDraw);
+                this.canvas.addEventListener('pointercancel', endDraw);
+                window.addEventListener('resize', () => this.resize(true));
             },
 
-            resize() {
+            resize(preserveDrawing = false) {
                 if (!this.canvas) return;
-                const rect = this.canvas.parentElement.getBoundingClientRect();
-                if (rect.width > 0 && rect.height > 0) {
-                    this.canvas.width = rect.width;
-                    this.canvas.height = rect.height;
+                const parent = this.canvas.parentElement;
+                if (!parent) return;
+                const rect = parent.getBoundingClientRect();
+                if (rect.width <= 0 || rect.height <= 0) return;
+
+                const dpr = window.devicePixelRatio || 1;
+                const targetW = Math.round(rect.width * dpr);
+                const targetH = Math.round(rect.height * dpr);
+
+                if (this.canvas.width === targetW && this.canvas.height === targetH) return;
+
+                let tempCanvas = null;
+                if (preserveDrawing && this.canvas.width > 0 && this.canvas.height > 0) {
+                    tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = this.canvas.width;
+                    tempCanvas.height = this.canvas.height;
+                    tempCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
+                }
+
+                this.canvas.width = targetW;
+                this.canvas.height = targetH;
+                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                if (tempCanvas) {
+                    this.ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
                 }
             }
         };
@@ -699,7 +734,8 @@
                 panel.classList.toggle('hidden');
             }
             if (!panel.classList.contains('hidden')) {
-                Scratchpad.resize();
+                Scratchpad.resize(true);
+                requestAnimationFrame(() => Scratchpad.resize(true));
             }
         }
 
@@ -729,7 +765,8 @@
         function clearScratchpad() {
             SoundEngine.click();
             if (Scratchpad.ctx && Scratchpad.canvas) {
-                Scratchpad.ctx.clearRect(0, 0, Scratchpad.canvas.width, Scratchpad.canvas.height);
+                const dpr = window.devicePixelRatio || 1;
+                Scratchpad.ctx.clearRect(0, 0, Scratchpad.canvas.width / dpr, Scratchpad.canvas.height / dpr);
             }
         }
 
