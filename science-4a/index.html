@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四上期末考自然科學探險營｜聲光現象・電路實驗大挑戰（適用康軒版進度）</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Google Fonts 繁體中文圓體與英數字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #fef9c3 100%);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.88); opacity: 0; }
+            70% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .btn-3d {
+            transition: all 0.12s ease;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 頂部狀態列 -->
+    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-emerald-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
+                🔬
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-2xl font-black text-emerald-700 tracking-wide leading-tight">四上期末考自然科學探險營</h1>
+                <p class="text-xs sm:text-sm text-slate-500 font-bold">適用康軒版四上第三、四單元進度・聲光與電路特訓</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- 返回科目總導覽大廳 -->
+            <a href="../index.html" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 px-3 py-1.5 rounded-2xl flex items-center gap-1 font-bold text-xs sm:text-sm" title="返回科目總導覽首頁">
+                <span>🏠</span>
+                <span class="hidden md:inline">科目大廳</span>
+            </a>
+
+            <!-- 總星星數 -->
+            <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-amber-800 text-sm sm:text-base">
+                <span>⭐</span>
+                <span id="total-stars">0</span>
+                <span class="text-xs text-amber-600">/ 18</span>
+            </div>
+
+            <!-- 總積分 -->
+            <div class="bg-emerald-100 border-2 border-emerald-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-emerald-800 text-sm sm:text-base">
+                <span>🏆</span>
+                <span id="total-score">0</span>
+            </div>
+
+            <!-- 錯題本按鈕 -->
+            <button onclick="openMistakeModal()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1 relative" title="家長陪讀：自然錯題本">
+                <span>🧪</span>
+                <span class="hidden sm:inline">錯題本</span>
+                <span id="mistake-badge" class="hidden absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+            </button>
+
+            <!-- 音效開關 -->
+            <button id="sound-toggle" onclick="toggleSound()" class="btn-3d bg-teal-500 hover:bg-teal-600 text-white font-bold p-2 sm:px-3 sm:py-2 rounded-2xl text-sm flex items-center gap-1" title="切換音效">
+                <span id="sound-icon">🔊</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主畫面容器 -->
+    <main class="w-full max-w-5xl flex-1 flex flex-col justify-center my-4">
+        
+        <!-- 1. 關卡選擇大廳 -->
+        <section id="lobby-screen" class="animate-pop">
+            <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-5 sm:p-7 shadow-xl border-4 border-emerald-200">
+                <div class="flex flex-col gap-4 mb-6 border-b-2 border-slate-100 pb-5">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
+                            <span>🔭</span> 選擇期末考科學實驗關卡（適用康軒版四上第三～四單元）
+                        </h2>
+                        <p class="text-sm text-slate-500 font-medium mt-1">涵蓋「有趣的聲光現象」與「好玩的電路」，內建電路接法與光線實驗 SVG 圖解！</p>
+                    </div>
+
+                    <!-- 自訂刷題題數選擇器 -->
+                    <div class="bg-gradient-to-r from-emerald-50 via-sky-50 to-amber-50 p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-200 shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                            <span class="text-sm sm:text-base font-black text-emerald-900 flex items-center gap-1.5">
+                                <span>🎯</span> 設定每次練習題數：
+                            </span>
+                            <span id="qcount-estimate" class="text-xs sm:text-sm font-black text-amber-800 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full">
+                                目前設定：5 題（快速暖身・約 2 分鐘）
+                            </span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-emerald-600 text-white shadow">
+                                5 題 <span class="opacity-85 font-bold">(暖身)</span>
+                            </button>
+                            <button onclick="setQuestionCount(10)" id="qcount-10" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50">
+                                10 題 <span class="opacity-75">(標準)</span>
+                            </button>
+                            <button onclick="setQuestionCount(15)" id="qcount-15" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50">
+                                15 題 <span class="opacity-75">(進階)</span>
+                            </button>
+                            <button onclick="setQuestionCount(20)" id="qcount-20" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50">
+                                20 題 <span class="opacity-75">(特訓)</span>
+                            </button>
+                            <button onclick="setQuestionCount(25)" id="qcount-25" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50">
+                                25 題 <span class="opacity-75">(模擬考)</span>
+                            </button>
+
+                            <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border-2 border-emerald-200 focus-within:border-emerald-500 ml-auto sm:ml-0">
+                                <label for="custom-qcount-input" class="text-xs font-black text-emerald-800 whitespace-nowrap">自訂：</label>
+                                <input id="custom-qcount-input" type="number" min="1" max="50" value="5"
+                                    onchange="applyCustomQuestionCount(this.value)"
+                                    onkeydown="if(event.key==='Enter') applyCustomQuestionCount(this.value)"
+                                    class="w-14 text-center text-sm font-black text-emerald-900 bg-emerald-50/70 rounded-lg py-0.5 focus:outline-none">
+                                <span class="text-xs font-bold text-slate-500">題</span>
+                                <button onclick="applyCustomQuestionCount(document.getElementById('custom-qcount-input').value)"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-2.5 py-1 rounded-lg transition">
+                                    套用
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6 個關卡網格 -->
+                <div id="stages-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+
+                <!-- 錯題消滅專屬入口橫幅 -->
+                <div id="lobby-mistake-banner" class="hidden mt-5 bg-gradient-to-r from-rose-50 via-amber-50 to-emerald-50 border-3 border-rose-300 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">⚔️</span>
+                        <div>
+                            <div class="font-black text-rose-800 text-sm sm:text-base">
+                                實驗錯題本裡目前有 <span id="lobby-mistake-count" class="text-lg underline">0</span> 道易錯科學題！
+                            </div>
+                            <div class="text-xs text-slate-600 font-medium">進入「消滅錯題大作戰」，重新答對就能把它們徹底消滅喔！</div>
+                        </div>
+                    </div>
+                    <button onclick="startMistakeBattle()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shrink-0">
+                        <span>🔥 消滅錯題大作戰</span>
+                    </button>
+                </div>
+
+                <div class="mt-5 flex justify-between items-center text-xs text-slate-400">
+                    <span>💡 小提示：觀察電路圖時，記得用手指沿著電線從電池「正極（＋）」畫到「負極（－）」檢查看看有沒有形成通路喔！</span>
+                    <button onclick="resetProgressConfirm()" class="hover:text-rose-500 underline font-bold">
+                        重置所有紀錄
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 遊戲答題畫面 -->
+        <section id="quiz-screen" class="hidden animate-pop">
+            <div class="bg-white rounded-3xl p-4 sm:p-7 shadow-2xl border-4 border-emerald-200 relative overflow-hidden">
+                
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5 pb-4 border-b-2 border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <button onclick="goHome()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm transition">
+                            ⬅️ 返回地圖
+                        </button>
+                        <span id="stage-badge" class="bg-emerald-100 text-emerald-800 font-black px-3 py-1.5 rounded-xl text-xs sm:text-base">
+                            第三單元 3-1：聲音的產生與傳播
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span id="progress-text" class="text-xs sm:text-sm font-black text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                            第 1 / 5 題
+                        </span>
+                        <div class="w-20 sm:w-28 h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 20%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div id="combo-badge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-3 py-1 rounded-full text-xs sm:text-sm shadow animate-bounce">
+                            🔥 2 連擊!
+                        </div>
+                    </div>
+                </div>
+
+                <div id="question-container" class="mb-6">
+                    <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
+                                科學探究題
+                            </span>
+                            <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
+                                第三單元
+                            </span>
+                        </div>
+
+                        <button onclick="toggleHintBox()" id="hint-btn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1 transition shadow-sm">
+                            <span>💡</span>
+                            <span>給我一點小提示</span>
+                        </button>
+                    </div>
+
+                    <div id="hint-box" class="hidden mb-3 bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-3.5 text-amber-950 text-xs sm:text-sm font-bold flex items-start gap-2.5 animate-pop">
+                        <span class="text-xl shrink-0">🧭</span>
+                        <div>
+                            <div class="font-black text-amber-800 mb-0.5">實驗室小線索（先想一想再選喔）：</div>
+                            <div id="hint-text" class="leading-relaxed"></div>
+                        </div>
+                    </div>
+
+                    <div id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed mb-4">
+                        題目載入中...
+                    </div>
+
+                    <!-- 視覺輔助科學實驗圖解區 (純程式繪製 SVG) -->
+                    <div id="question-visual" class="hidden flex justify-center items-center my-4 bg-slate-50/80 rounded-2xl p-3 sm:p-5 border-2 border-dashed border-emerald-200 overflow-x-auto">
+                    </div>
+                </div>
+
+                <!-- 4 個選擇題選項按鈕 -->
+                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                </div>
+
+                <!-- 答題回饋與科學解析區 -->
+                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
+                        <div class="flex-1">
+                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
+                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                            <span>下一題</span>
+                            <span>➡️</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. 過關結算畫面 -->
+        <section id="result-screen" class="hidden animate-pop">
+            <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-emerald-300 text-center max-w-2xl mx-auto">
+                <div id="result-trophy" class="text-6xl sm:text-7xl mb-3 animate-float">🏆</div>
+                <h2 id="result-title" class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">實驗關卡完成！</h2>
+                <p id="result-badge-name" class="inline-block bg-emerald-100 text-emerald-800 font-black px-4 py-1 rounded-full text-sm sm:text-base mb-4">
+                    稱號：小小科學家
+                </p>
+
+                <div id="result-stars" class="flex justify-center gap-3 text-5xl sm:text-6xl my-3">
+                    <span>⭐</span><span>⭐</span><span>⭐</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 my-6 bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">答對率</div>
+                        <div id="result-correct" class="text-xl sm:text-2xl font-black text-emerald-600">5 / 5</div>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">本輪得分</div>
+                        <div id="result-score" class="text-xl sm:text-2xl font-black text-teal-600">+500</div>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm text-slate-500 font-bold">最高連擊</div>
+                        <div id="result-combo" class="text-xl sm:text-2xl font-black text-amber-500">5 連擊</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
+                    <button onclick="retryStage()" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3.5 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                        <span>🔄</span>
+                        <span>再刷一輪（全新實驗題）</span>
+                    </button>
+                    <button onclick="goHome()" class="btn-3d bg-sky-500 hover:bg-sky-600 text-white font-black px-6 py-3.5 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                        <span>🗺️</span>
+                        <span>返回實驗地圖</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾資訊與非官方免責聲明 -->
+    <footer class="w-full max-w-5xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
+        <div>依據台灣國小四年級上學期自然科學課程架構（適用康軒版第三、四單元進度）設計｜題目與實驗圖解皆由程式原創生成 ✨</div>
+        <div class="text-[11px] text-slate-400 leading-relaxed">
+            ※ 免責聲明：本專案為家長自製之免費教育學習工具，僅供居家複習使用，與康軒文教事業股份有限公司無任何官方合作、授權或隸屬關係。
+        </div>
+    </footer>
+
+    <!-- 錯題回顧與弱點分析 Modal -->
+    <div id="mistake-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl border-4 border-rose-300 animate-pop">
+            <div class="p-5 border-b-2 border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🧪</span>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-800">自然實驗錯題本 & 弱點分析</h3>
+                        <p class="text-xs text-slate-500">自動統計各單元錯誤次數，點擊即可重新練習該單元實驗觀念！</p>
+                    </div>
+                </div>
+                <button onclick="closeMistakeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 w-9 h-9 rounded-full font-black flex items-center justify-center">✕</button>
+            </div>
+
+            <div id="weakness-summary" class="px-5 pt-4 pb-2 bg-rose-50/70 border-b border-rose-100">
+            </div>
+            
+            <div id="mistake-list" class="p-5 overflow-y-auto flex-1 space-y-4">
+            </div>
+
+            <div class="p-4 border-t-2 border-slate-100 flex flex-wrap justify-between items-center gap-2 bg-slate-50 rounded-b-3xl">
+                <button onclick="clearMistakes()" class="text-xs sm:text-sm text-rose-500 hover:text-rose-700 font-bold px-3 py-1.5">
+                    🗑️ 清空錯題紀錄
+                </button>
+                <div class="flex flex-wrap gap-2">
+                    <button id="battle-mistakes-btn" onclick="startMistakeBattleFromModal()" class="hidden btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-4 py-2 rounded-xl text-xs sm:text-sm">
+                        ⚔️ 消滅全部錯題（答對才移除）
+                    </button>
+                    <button id="practice-weakest-btn" onclick="practiceWeakestUnit()" class="hidden btn-3d bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs sm:text-sm">
+                        🔥 重練最弱單元新題
+                    </button>
+                    <button onclick="closeMistakeModal()" class="btn-3d bg-slate-800 text-white font-bold px-5 py-2 rounded-xl text-sm">
+                        關閉視窗
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂確認對話框 -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl border-4 border-emerald-300 animate-pop">
+            <div class="text-4xl mb-2">⚠️</div>
+            <h3 class="text-xl font-black text-slate-800 mb-2">確定要重置所有紀錄嗎？</h3>
+            <p class="text-sm text-slate-500 mb-5">自然科學探險營的星星數、積分與錯題紀錄都會歸零喔！</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="closeConfirmModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-2.5 rounded-xl">取消</button>
+                <button onclick="executeResetProgress()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-5 py-2.5 rounded-xl">確定重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 期末綜合模擬考題數選擇 Modal -->
+    <div id="mock-exam-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-emerald-400 animate-pop">
+            <div class="text-5xl mb-2 animate-float">👑</div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-1">期末考自然科學綜合模擬考</h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mb-4">將從第三、四單元共 5 大實驗主題平均抽題，請選擇本次模擬考題數：</p>
+
+            <div class="grid grid-cols-3 gap-2.5 mb-4">
+                <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-sky-700">10 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">每主題 2 題</span>
+                </button>
+                <button onclick="launchMockExam(20)" class="btn-3d bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-emerald-700">20 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">每主題 4 題</span>
+                </button>
+                <button onclick="launchMockExam(25)" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
+                    <span class="text-lg font-black text-amber-700">25 題</span>
+                    <span class="text-[11px] font-bold text-slate-500">正式份量</span>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 mb-5">
+                <span class="text-xs sm:text-sm font-black text-slate-700">或自訂題數：</span>
+                <input id="mock-custom-input" type="number" min="5" max="50" value="15"
+                    class="w-16 text-center text-base font-black text-emerald-700 bg-white border-2 border-emerald-200 rounded-xl py-1 focus:outline-none focus:border-emerald-500">
+                <span class="text-xs sm:text-sm font-bold text-slate-500">題</span>
+                <button onclick="launchMockExam(document.getElementById('mock-custom-input').value)"
+                    class="btn-3d bg-emerald-600 hover:bg-emerald-700 text-white font-black px-3.5 py-1.5 rounded-xl text-xs sm:text-sm">
+                    開始模擬考 ➔
+                </button>
+            </div>
+
+            <button onclick="closeMockExamModal()" class="text-xs sm:text-sm text-slate-400 hover:text-slate-600 font-bold">
+                先返回地圖
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. Web Audio API 音效合成引擎
+           ========================================================================== */
+        const SoundEngine = {
+            ctx: null,
+            enabled: true,
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+
+            playTone(freq, type, duration, delay = 0, volume = 0.22) {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(this.ctx.currentTime + delay);
+                osc.stop(this.ctx.currentTime + delay + duration);
+            },
+
+            click() {
+                this.playTone(620, 'sine', 0.07, 0, 0.14);
+            },
+
+            correct(combo = 1) {
+                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
+                this.playTone(base, 'triangle', 0.13, 0, 0.25);
+                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
+                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
+            },
+
+            wrong() {
+                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
+                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
+            },
+
+            victory() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, idx) => {
+                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
+                });
+            }
+        };
+
+        function toggleSound() {
+            SoundEngine.enabled = !SoundEngine.enabled;
+            const icon = document.getElementById('sound-icon');
+            const btn = document.getElementById('sound-toggle');
+            if (SoundEngine.enabled) {
+                icon.textContent = '🔊';
+                btn.classList.replace('bg-slate-400', 'bg-teal-500');
+                SoundEngine.click();
+            } else {
+                icon.textContent = '🔇';
+                btn.classList.replace('bg-teal-500', 'bg-slate-400');
+            }
+        }
+
+        /* ==========================================================================
+           2. 康軒版四上期末考關卡定義（第三單元：有趣的聲光現象、第四單元：好玩的電路）
+           ========================================================================== */
+        const STAGES = [
+            { id: 31, title: '第三單元 3-1：聲音的產生與傳播', subtitle: '物體振動發聲、傳聲介質與聲音三要素', icon: '🔊', color: 'from-sky-400 to-blue-600', border: 'border-sky-300' },
+            { id: 32, title: '第三單元 3-2 & 3-3：光的特性與應用', subtitle: '光線直線前進、鏡面反射、水中折射與彩虹色散', icon: '🌈', color: 'from-amber-400 to-orange-600', border: 'border-amber-300' },
+            { id: 41, title: '第四單元 4-1：如何讓燈泡發亮', subtitle: '電池正負極、燈泡構造、通路、斷路與短路', icon: '💡', color: 'from-emerald-400 to-teal-600', border: 'border-emerald-300' },
+            { id: 42, title: '第四單元 4-2：電路的連接方式', subtitle: '電池串聯與並聯、燈泡串聯與並聯亮度比較', icon: '🔋', color: 'from-purple-400 to-indigo-600', border: 'border-purple-300' },
+            { id: 43, title: '第四單元 4-3：導體與安全用電', subtitle: '導電物品測試、電力來源與居家用電安全', icon: '⚡', color: 'from-rose-400 to-pink-600', border: 'border-rose-300' },
+            { id: 99, title: '期末考自然科學綜合模擬考', subtitle: '混合第三、四單元五大實驗主題隨機出題', icon: '👑', color: 'from-yellow-400 via-emerald-500 to-teal-600', border: 'border-yellow-400' }
+        ];
+
+        let gameState = {
+            stars: { 31: 0, 32: 0, 41: 0, 42: 0, 43: 0, 99: 0 },
+            totalScore: 0,
+            questionCountPref: 5,
+            mistakes: []
+        };
+
+        let currentSession = {
+            stageId: 31,
+            isMistakeBattle: false,
+            questions: [],
+            currentIndex: 0,
+            correctCount: 0,
+            sessionScore: 0,
+            combo: 0,
+            maxCombo: 0,
+            answered: false,
+            usedHint: false
+        };
+
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('knsh_science_4a_final_v1');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                }
+            } catch (e) {
+                console.warn('無法讀取存檔', e);
+            }
+            setQuestionCount(gameState.questionCountPref || 5, false);
+            updateHeaderStats();
+            renderLobby();
+        }
+
+        function saveProgress() {
+            try {
+                localStorage.setItem('knsh_science_4a_final_v1', JSON.stringify(gameState));
+            } catch (e) {
+                console.warn('無法儲存進度', e);
+            }
+            updateHeaderStats();
+        }
+
+        function setQuestionCount(count, playSnd = true) {
+            if (playSnd) SoundEngine.click();
+            const validCount = Math.max(1, Math.min(50, parseInt(count, 10) || 5));
+            gameState.questionCountPref = validCount;
+
+            const presets = [5, 10, 15, 20, 25];
+            presets.forEach(c => {
+                const btn = document.getElementById(`qcount-${c}`);
+                if (!btn) return;
+                if (c === validCount) {
+                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-emerald-600 text-white shadow transition';
+                } else {
+                    btn.className = 'qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50 transition';
+                }
+            });
+
+            const customInput = document.getElementById('custom-qcount-input');
+            if (customInput) customInput.value = validCount;
+
+            const estMinutes = Math.max(1, Math.round(validCount * 0.4));
+            const modeLabel = validCount <= 5 ? '快速暖身'
+                : validCount <= 10 ? '標準練習'
+                : validCount <= 15 ? '進階挑戰'
+                : validCount <= 20 ? '考前特訓'
+                : '完整模擬考';
+            const estEl = document.getElementById('qcount-estimate');
+            if (estEl) {
+                estEl.textContent = `目前設定：${validCount} 題（${modeLabel}・約 ${estMinutes} 分鐘）`;
+            }
+
+            saveProgress();
+            renderLobby();
+        }
+
+        function applyCustomQuestionCount(rawVal) {
+            const num = parseInt(rawVal, 10);
+            const clamped = isNaN(num) ? 5 : Math.max(1, Math.min(50, num));
+            setQuestionCount(clamped, true);
+        }
+
+        function updateHeaderStats() {
+            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            document.getElementById('total-stars').textContent = totalStars;
+            document.getElementById('total-score').textContent = gameState.totalScore;
+
+            const badge = document.getElementById('mistake-badge');
+            const lobbyBanner = document.getElementById('lobby-mistake-banner');
+            const lobbyCount = document.getElementById('lobby-mistake-count');
+
+            if (gameState.mistakes.length > 0) {
+                badge.textContent = gameState.mistakes.length;
+                badge.classList.remove('hidden');
+                if (lobbyBanner && lobbyCount) {
+                    lobbyCount.textContent = gameState.mistakes.length;
+                    lobbyBanner.classList.remove('hidden');
+                }
+            } else {
+                badge.classList.add('hidden');
+                if (lobbyBanner) lobbyBanner.classList.add('hidden');
+            }
+        }
+
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        /* ==========================================================================
+           3. 純程式原創 SVG 科學實驗圖解生成器（電路接法、串並聯、光的反射與折射）
+           ========================================================================== */
+        // SVG 1：燈泡通路、斷路、短路接法實驗圖
+        function createBulbCircuitSVG(mode) {
+            // mode: 'closed' (通路), 'open' (斷路-沒接金屬螺紋), 'short' (短路-電線直接連正負極)
+            let wireTop = '';
+            let wireBottom = '';
+            let label = '';
+
+            if (mode === 'closed') {
+                // 正極 → 燈泡金屬螺紋；負極 → 燈泡底部接點
+                wireTop = `<path d="M 105,65 L 185,65 L 222,78" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>`;
+                wireBottom = `<path d="M 105,120 L 235,120 L 235,98" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>`;
+                label = '接法 A：電線分別連接燈泡「金屬螺紋」與「底部接點」';
+            } else if (mode === 'open') {
+                // 兩條電線都接在玻璃罩或同一處（斷路）
+                wireTop = `<path d="M 105,65 L 185,65 L 222,78" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>`;
+                wireBottom = `<path d="M 105,120 L 185,120 L 222,85" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>`;
+                label = '接法 B：兩條電線都接在燈泡側邊「金屬螺紋」上';
+            } else {
+                // 短路：電線直接把電池正極和負極接在一起
+                wireTop = `<path d="M 105,65 L 145,65 L 145,120 L 105,120" fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>`;
+                wireBottom = `<text x="235" y="128" text-anchor="middle" font-size="11" font-weight="bold" fill="#94a3b8">（燈泡未形成完整迴路）</text>`;
+                label = '接法 C：電線沒有經過燈泡，直接把電池正、負極連起來';
+            }
+
+            return `
+                <svg width="350" height="165" viewBox="0 0 350 165" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <!-- 電池 -->
+                    <rect x="75" y="55" width="30" height="75" rx="4" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+                    <rect x="84" y="47" width="12" height="8" fill="#ca8a04"/>
+                    <text x="90" y="75" text-anchor="middle" font-size="14" font-weight="900" fill="#dc2626">＋</text>
+                    <text x="90" y="118" text-anchor="middle" font-size="14" font-weight="900" fill="#2563eb">－</text>
+
+                    <!-- 燈泡 -->
+                    <circle cx="235" cy="52" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
+                    <rect x="223" y="71" width="24" height="18" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+                    <circle cx="235" cy="93" r="5" fill="#475569"/>
+                    <text x="272" y="83" font-size="10" font-weight="bold" fill="#475569">金屬螺紋</text>
+                    <text x="272" y="98" font-size="10" font-weight="bold" fill="#475569">底部接點</text>
+
+                    ${wireTop}
+                    ${wireBottom}
+                    <text x="175" y="153" text-anchor="middle" font-size="11" font-weight="900" fill="#1e293b">${label}</text>
+                </svg>
+            `;
+        }
+
+        // SVG 2：光的折射（水杯吸管看起來折斷）圖解
+        function createLightRefractionSVG() {
+            return `
+                <svg width="320" height="165" viewBox="0 0 320 165" class="max-w-full bg-sky-50/50 rounded-xl border border-sky-200">
+                    <!-- 透明水杯與水面 -->
+                    <rect x="95" y="30" width="130" height="110" rx="6" fill="#ffffff" stroke="#64748b" stroke-width="2.5"/>
+                    <rect x="97" y="80" width="126" height="58" rx="4" fill="#bae6fd" opacity="0.75"/>
+                    <line x1="97" y1="80" x2="223" y2="80" stroke="#0284c7" stroke-width="2" stroke-dasharray="4,3"/>
+                    <text x="242" y="65" font-size="11" font-weight="bold" fill="#475569">空氣</text>
+                    <text x="242" y="110" font-size="11" font-weight="bold" fill="#0369a1">水裡</text>
+
+                    <!-- 吸管（水面上與水面下看起來錯開折斷） -->
+                    <line x1="185" y1="20" x2="155" y2="80" stroke="#f43f5e" stroke-width="7" stroke-linecap="round"/>
+                    <line x1="143" y1="80" x2="122" y2="132" stroke="#f43f5e" stroke-width="7" stroke-linecap="round"/>
+                    <text x="160" y="156" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a">光從水進入空氣時行進方向發生偏折</text>
+                </svg>
+            `;
+        }
+
+        /* ==========================================================================
+           4. 康軒版四上期末考動態題庫（第三單元：聲光現象、第四單元：好玩的電路）
+           ========================================================================== */
+        const CHARACTERS = ['小宇', '小美', '阿傑', '品妍', '子軒', '羽彤'];
+
+        const QuestionBank = {
+            // 3-1：聲音的產生與傳播
+            31: [
+                () => {
+                    const instruments = [
+                        { item: '敲擊音叉並放進水裡', phenomenon: '水面濺起水花，摸音叉會感覺麻麻的', concept: '聲音是由物體「振動」產生的' },
+                        { item: '撥動吉他的弦', phenomenon: '琴弦快速左右晃動並發出樂音', concept: '聲音是由物體「振動」產生的' },
+                        { item: '敲打大鼓並在鼓面上放幾顆綠豆', phenomenon: '綠豆在鼓面上跳動起來', concept: '聲音是由物體「振動」產生的' }
+                    ];
+                    const exp = pickRandom(instruments);
+                    return {
+                        unitId: 31,
+                        hint: '當物體發出聲音時，摸一摸會感覺麻麻的；一旦用手按住停止晃動，聲音就會立刻停止喔！',
+                        text: `自然課做實驗時，${exp.item}，會觀察到「${exp.phenomenon}」。這個現象主要證明了什麼科學原理？`,
+                        correct: exp.concept,
+                        options: shuffle([
+                            exp.concept,
+                            '聲音一定要通電才會產生',
+                            '只有金屬製成的物品才能發出聲音',
+                            '聲音只能在黑暗的環境中傳播'
+                        ]),
+                        explanation: `所有發聲的物體都在「振動」，一旦物體停止振動（例如用手按住發聲中的音叉），聲音就會立刻消失。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 31,
+                        hint: '聲音需要靠「介質（固體、液體或氣體）」才能傳播；外太空沒有空氣（真空狀態），聲音傳得出去嗎？',
+                        text: `兩位太空人在沒有空氣的月球表面進行任務時，即使面對面大聲喊叫，彼此也聽不到對方的聲音，最主要的原因是什麼？`,
+                        correct: '聲音需要靠空氣等物質才能傳播，無法在真空中傳播',
+                        options: shuffle([
+                            '聲音需要靠空氣等物質才能傳播，無法在真空中傳播',
+                            '月球上的重力太強，把聲音全部吸進地底下',
+                            '太空衣的玻璃面罩會把所有光線反射掉',
+                            '因為月球上沒有水，所以聲音無法產生'
+                        ]),
+                        explanation: '聲音必須透過空氣、水或固體等「介質」才能傳播出去；月球表面沒有空氣（屬於真空），所以聲音無法傳播。'
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 31,
+                        hint: '使勁用力敲鼓，鼓面振動的幅度變大，聲音就會變得更「大聲（響度變大）」喔！',
+                        text: `${who}用鼓棒敲擊大鼓時，原本輕輕敲，後來改用「更大的力氣」敲擊同一個位置，聲音會發生什麼變化？`,
+                        correct: '鼓面振動幅度變大，聲音變得更「大聲（響度變大）」',
+                        options: shuffle([
+                            '鼓面振動幅度變大，聲音變得更「大聲（響度變大）」',
+                            '聲音會從低音變成非常尖銳的高音',
+                            '鼓面完全不會振動，聲音立刻消失',
+                            '聲音的傳播速度會變成光速一樣快'
+                        ]),
+                        explanation: '敲擊力道越大，物體振動的「幅度」就越大，發出的聲音就越「大聲（音量／響度越大）」。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 31,
+                        hint: '製造噪音會干擾別人休息與學習，我們在生活中有哪些降低噪音的好方法？',
+                        text: `為了減少噪音對生活與聽力的危害，下列哪一種做法是<strong>正確</strong>的防治噪音方式？`,
+                        correct: '在圖書館輕聲細語、為桌椅腳裝上軟墊並種植行道樹隔音',
+                        options: shuffle([
+                            '在圖書館輕聲細語、為桌椅腳裝上軟墊並種植行道樹隔音',
+                            '把耳機音量開到最大聲來蓋過外面的施工聲',
+                            '在走廊上大聲奔跑尖叫並用力甩門',
+                            '深夜時在住宅區施放高分貝煙火'
+                        ]),
+                        explanation: '音量過大或不悅耳的聲音就是「噪音」，透過輕聲交談、加裝隔音牆／軟墊與種樹，都能有效降低噪音干擾。'
+                    };
+                }
+            ],
+
+            // 3-2 & 3-3：光的特性與應用
+            32: [
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '太陽光照在樹幹上，樹幹後面會出現影子，因為光沒辦法轉彎繞過去！',
+                        text: `晴天時，操場上的籃球架和樹木會在地面上形成清晰的影子，這項現象證明了光具有什麼特性？`,
+                        correct: '光在空氣中是沿著「直線」前進的',
+                        options: shuffle([
+                            '光在空氣中是沿著「直線」前進的',
+                            '光遇到不透明物體時會自動轉彎繞過去',
+                            '光只能在晚上沒有太陽的時候才能前進',
+                            '影子是因為地面吸了太多水分而變黑'
+                        ]),
+                        explanation: '因為光沿著「直線」前進，遇到不透明的物體（如樹木、身體）時會被阻擋，在物體後方形成光線照不到的區域，就是「影子」。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        visual: createLightRefractionSVG(),
+                        hint: '觀察上圖，吸管並沒有真的折斷，而是光線從「水」進入「空氣」時行進方向發生偏折了！',
+                        text: `把一根直吸管斜放進裝水的透明玻璃杯裡，從側面看吸管好像在水面處「折斷」了，這是因為光的哪一種現象？`,
+                        correct: '光的折射現象（光從水進入空氣時行進方向偏折）',
+                        options: shuffle([
+                            '光的折射現象（光從水進入空氣時行進方向偏折）',
+                            '水的浮力太大，把塑膠吸管直接折斷了',
+                            '光的色散現象，讓吸管變成七種顏色',
+                            '這是因為玻璃杯裡發生了電路短路'
+                        ]),
+                        explanation: '光從水中斜射進入空氣時，行進方向會發生偏折，這種現象稱為「光的折射」，會讓水裡的物體看起來位置變淺或吸管像折斷一樣。'
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 32,
+                        hint: '平靜的水面、光滑的鏡子和不鏽鋼湯匙都能照出人影，因為光線照到光滑表面會彈回來！',
+                        text: `${who}站在平靜無波的池塘邊，看到水面上清楚倒映出岸邊柳樹與藍天的倒影，這是利用了光的哪一種特性？`,
+                        correct: '光的反射現象',
+                        options: shuffle([
+                            '光的反射現象',
+                            '光的折射現象',
+                            '聲音的振動現象',
+                            '電磁鐵的磁力現象'
+                        ]),
+                        explanation: '光線照射到平靜的水面或鏡子等光滑表面時，會改變方向反彈回來，這就是「光的反射」，讓我們能看見倒影或鏡中的自己。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '雨過天晴時，空氣中懸浮著許多小水滴，陽光穿過小水滴會分散出紅、橙、黃、綠、藍、靛、紫七種色光！',
+                        text: `午後雷陣雨剛停、太陽出來時，背對太陽往天空看常會看到美麗的彩虹。請問彩虹的形成主要結合了光的哪些現象？`,
+                        correct: '陽光穿過空氣中的小水滴，經過折射與反射後分散出七種色光',
+                        options: shuffle([
+                            '陽光穿過空氣中的小水滴，經過折射與反射後分散出七種色光',
+                            '天上的雲朵被彩色油漆染成七種顏色',
+                            '地面上的積水蒸發後變成彩色的煙霧',
+                            '月球反射出來的冷光照射在空氣中'
+                        ]),
+                        explanation: '太陽光其實是由多種色光混合而成的！當陽光穿過小水滴時，會發生折射與反射並分散出紅、橙、黃、綠、藍、靛、紫等色光，形成彩虹。'
+                    };
+                }
+            ],
+
+            // 4-1：如何讓燈泡發亮（通路、斷路、短路）
+            41: [
+                () => {
+                    return {
+                        unitId: 41,
+                        visual: createBulbCircuitSVG('closed'),
+                        hint: '觀察上圖，一條電線接在燈泡側邊「金屬螺紋」，另一條接在「底部接點」，並分別連到電池正極與負極，電流能順暢繞一圈嗎？',
+                        text: `觀察下方的電路實驗圖（接法 A），兩條電線分別連接電池正、負極與燈泡的「金屬螺紋」和「底部接點」，請問燈泡會發亮嗎？`,
+                        correct: '會發亮，因為形成了完整的「通路」',
+                        options: shuffle([
+                            '會發亮，因為形成了完整的「通路」',
+                            '不會發亮，因為這是「斷路」',
+                            '不會發亮，因為發生了「短路」',
+                            '不會發亮，因為電池沒有裝進手電筒殼裡'
+                        ]),
+                        explanation: '要讓小燈泡發亮，兩條電線必須分別連接燈泡的「金屬螺紋」與「底部接點」，並接上電池的「正極」與「負極」，形成封閉的「通路」！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        visual: createBulbCircuitSVG('open'),
+                        hint: '看看上圖，兩條電線全都擠在側邊「金屬螺紋」上，沒有接到最底下的「底部接點」，電流沒有經過燈絲喔！',
+                        text: `觀察下方的電路實驗圖（接法 B），兩條電線都接在燈泡側邊的「金屬螺紋」上，請問燈泡會發亮嗎？`,
+                        correct: '不會發亮，因為沒有連接底部接點，無法形成通路（屬於斷路）',
+                        options: shuffle([
+                            '不會發亮，因為沒有連接底部接點，無法形成通路（屬於斷路）',
+                            '會發亮，而且比平常亮兩倍',
+                            '會發亮，但是只會發出藍色的光',
+                            '會讓電池立刻爆炸'
+                        ]),
+                        explanation: '燈泡內部燈絲的兩端分別連著「金屬螺紋」和「底部接點」，兩條電線都接在螺紋上時，電流不會通過燈絲，無法形成通路。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        visual: createBulbCircuitSVG('short'),
+                        hint: '危險接法！電線沒有經過燈泡，直接把電池正極和負極連在一起，電線和電池會瞬間發燙喔！',
+                        text: `做電路實驗時，如果像下圖（接法 C）一樣，沒有經過燈泡就直接用電線把電池的正極和負極連在一起，會發生什麼現象？`,
+                        correct: '發生「短路」，燈泡不會亮，而且電線和電池會很快發燙、耗盡電力',
+                        options: shuffle([
+                            '發生「短路」，燈泡不會亮，而且電線和電池會很快發燙、耗盡電力',
+                            '燈泡會變得超級亮，而且電池永遠不會沒電',
+                            '這是最省電的標準接法，應該多多模仿',
+                            '電線會結冰變冷'
+                        ]),
+                        explanation: '電線不經過燈泡直接連接電池正、負極，稱為「短路」，會使電流過大導致電池與電線迅速發燙甚至損壞，做實驗時要立刻斷開！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        hint: '手電筒的開關就是用來控制「通路」和「斷路」的機關喔！',
+                        text: `當我們把家裡或手電筒的開關「打開（ON）」讓燈泡亮起來時，此時電路處於哪一種狀態？`,
+                        correct: '通路（電流順暢通過形成封閉迴路）',
+                        options: shuffle([
+                            '通路（電流順暢通過形成封閉迴路）',
+                            '斷路（電路中間斷開不導電）',
+                            '短路（電池正負極直接相連）',
+                            '停電狀態'
+                        ]),
+                        explanation: '開關接通時，電路形成完整的封閉迴路，電流可以順暢流通使燈泡發亮，這就叫做「通路」；切斷開關時則成為「斷路」。'
+                    };
+                }
+            ],
+
+            // 4-2：電路的連接方式（電池串聯/並聯、燈泡串聯/並聯）
+            42: [
+                () => {
+                    return {
+                        unitId: 42,
+                        hint: '把兩顆電池頭尾相接（正極接負極）排成一排，電力會疊加起來，燈泡會變得很亮喔！',
+                        text: `將兩顆電池「正極接負極」排成一列連接一個小燈泡（電池串聯），和只用一顆電池相比，燈泡的亮度會有什麼變化？`,
+                        correct: '燈泡變得更亮（電力增強）',
+                        options: shuffle([
+                            '燈泡變得更亮（電力增強）',
+                            '燈泡完全不會亮',
+                            '燈泡變得比一顆電池時更暗',
+                            '燈泡會變成彩色閃爍燈'
+                        ]),
+                        explanation: '「電池串聯」（正極接負極）能把兩顆電池的電力串接增強，所以燈泡會比只接一顆電池時更亮！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        hint: '兩顆電池「正極接正極、負極接負極」並排在一起（電池並聯），亮度跟一顆電池差不多，但可以撐更久喔！',
+                        text: `將兩顆電池「正極接正極、負極接負極」並排連接（電池並聯），和只用一顆電池相比，燈泡的亮度與使用時間有什麼特點？`,
+                        correct: '亮度與接一顆電池差不多，但電池可以使用得更久',
+                        options: shuffle([
+                            '亮度與接一顆電池差不多，但電池可以使用得更久',
+                            '亮度會變成兩倍亮，但 10 秒鐘就會沒電',
+                            '因為正極接正極，所以燈泡完全不會亮',
+                            '燈泡會立刻燒壞'
+                        ]),
+                        explanation: '「電池並聯」時，燈泡的亮度與接一顆電池相同，但電力由兩顆電池共同分擔，因此可以讓燈泡持續發亮更久！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        hint: '兩顆燈泡串成同一條路（燈泡串聯），只要拔掉其中一顆燈泡，整條路就斷掉了喔！',
+                        text: `將兩個小燈泡串接在同一個迴路上（燈泡串聯），如果把其中一顆燈泡轉鬆拔下來，另一顆燈泡會怎麼樣？`,
+                        correct: '另一顆燈泡也會立刻熄滅（因為整條電路變成斷路）',
+                        options: shuffle([
+                            '另一顆燈泡也會立刻熄滅（因為整條電路變成斷路）',
+                            '另一顆燈泡會變得更亮',
+                            '另一顆燈泡完全不受影響，繼續發亮',
+                            '另一顆燈泡會開始發出蜂鳴聲'
+                        ]),
+                        explanation: '「燈泡串聯」只有一條電流路徑，只要其中一顆燈泡壞掉或拔除，整條迴路就會變成「斷路」，另一顆燈泡也會跟著熄滅。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        hint: '家裡的電燈和教室的日光燈，關掉一盞燈時其他燈還是亮著，因為它們是「並聯」各自有獨立的通路！',
+                        text: `教室裡有好幾盞電燈，當老師關掉講台上的電燈時，同學座位上方的電燈依然亮著。請問教室裡的電燈是採用哪一種連接方式？`,
+                        correct: '燈泡並聯（各自形成獨立迴路，互不影響）',
+                        options: shuffle([
+                            '燈泡並聯（各自形成獨立迴路，互不影響）',
+                            '燈泡串聯（全部共用同一條電線路徑）',
+                            '電池短路',
+                            '完全沒有接電線，靠太陽能發光'
+                        ]),
+                        explanation: '「燈泡並聯」讓每顆燈泡各自與電源形成獨立迴路，因此其中一顆熄滅或損壞時，其他燈泡依然能正常發亮，居家與教室照明都採用並聯！'
+                    };
+                }
+            ],
+
+            // 4-3：導體與安全用電
+            43: [
+                () => {
+                    const conductors = ['鐵製迴紋針', '銅製硬幣', '鋁箔紙', '不鏽鋼湯匙'];
+                    const insulators = ['塑膠尺', '橡皮擦', '木頭竹筷', '乾布條', '玻璃彈珠'];
+                    const good = pickRandom(conductors);
+                    const bads = shuffle(insulators).slice(0, 3);
+
+                    return {
+                        unitId: 43,
+                        hint: '大部分的「金屬」製品（如銅、鐵、鋁）都容易讓電流通過，稱為「導體」喔！',
+                        text: `把下列哪一種物品連接進通路檢測器的兩個夾子之間，可以讓小燈泡發亮（屬於「導體」）？`,
+                        correct: good,
+                        options: shuffle([good, ...bads]),
+                        explanation: `「${good}」是金屬製品，容易讓電流通過，稱為「導體」；而塑膠、橡膠、乾木頭與玻璃則是不易導電的「不良導體（絕緣體）」。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 43,
+                        hint: '電線外面包著一層塑膠皮，一方面防止觸電，另一方面避免兩條金屬銅線碰在一起發生短路！',
+                        text: `觀察我們平常使用的電線，裡面是銅線、外面卻包著一層塑膠皮，請問外層包覆塑膠皮的主要目的是什麼？`,
+                        correct: '塑膠是不良導體，可以防止人們觸電並避免電線相碰短路',
+                        options: shuffle([
+                            '塑膠是不良導體，可以防止人們觸電並避免電線相碰短路',
+                            '為了讓電線看起來比較重、不容易被風吹走',
+                            '因為塑膠比銅線更容易導電',
+                            '為了讓電線在晚上會自己發光'
+                        ]),
+                        explanation: '內部「銅線」是優良導體負責輸送電流；外層「塑膠皮」是不良導體，能隔絕電流保護使用者安全、防止觸電。'
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 43,
+                        hint: '自來水含有雜質是可以導電的！手濕濕的時候絕對不能去碰插頭或電器開關喔！',
+                        text: `關於居家安全用電的習慣，下列哪一位小朋友的做法最<strong>正確</strong>？`,
+                        correct: `${who}洗完手後，先把雙手完全擦乾再去拔電風扇的插頭`,
+                        options: shuffle([
+                            `${who}洗完手後，先把雙手完全擦乾再去拔電風扇的插頭`,
+                            '為了省時間，直接用力拉扯電風扇的電線把插頭扯下來',
+                            '把十幾個高耗電電器全部插在同一個延長線插座上',
+                            '好奇拿金屬螺絲起子伸進牆壁的電源插座孔裡'
+                        ]),
+                        explanation: '安全用電守則：手濕不碰電器、拔插頭要握住插頭本體（不拉扯電線）、不將金屬物品插入插座、延長線不超過負載。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 43,
+                        hint: '用完的廢乾電池含有重金屬與化學物質，隨便丟進一般垃圾會污染土壤和地下水喔！',
+                        text: `玩具車裡的乾電池沒電了，換下來的廢乾電池應該如何處理才符合環保與安全原則？`,
+                        correct: '交給超商、學校或資源回收車的「廢電池回收筒」回收',
+                        options: shuffle([
+                            '交給超商、學校或資源回收車的「廢電池回收筒」回收',
+                            '直接丟進廚房的一般垃圾桶或馬桶裡沖走',
+                            '用鐵鎚敲破外殼看看裡面有什麼東西',
+                            '放進微波爐裡加熱充電繼續使用'
+                        ]),
+                        explanation: '廢乾電池含有重金屬與化學物質，不可隨意丟棄或拆解、加熱，應妥善分類並投入超商或學校的廢電池回收筒。'
+                    };
+                }
+            ]
+        };
+
+        function generateStageQuestions(stageId, count) {
+            const list = [];
+            const usedTexts = new Set();
+            const units = [31, 32, 41, 42, 43];
+            let attempts = 0;
+
+            let unitSchedule = [];
+            if (stageId === 99) {
+                for (let i = 0; i < count; i++) {
+                    unitSchedule.push(units[i % units.length]);
+                }
+                unitSchedule = shuffle(unitSchedule);
+            }
+
+            while (list.length < count && attempts < count * 30) {
+                attempts++;
+                const targetUnit = stageId === 99
+                    ? unitSchedule[list.length % unitSchedule.length]
+                    : stageId;
+                const generatorFn = pickRandom(QuestionBank[targetUnit]);
+                const q = generatorFn();
+                if (!usedTexts.has(q.text)) {
+                    usedTexts.add(q.text);
+                    list.push(q);
+                }
+            }
+
+            while (list.length < count) {
+                const targetUnit = stageId === 99
+                    ? unitSchedule[list.length % unitSchedule.length]
+                    : stageId;
+                const generatorFn = pickRandom(QuestionBank[targetUnit]);
+                list.push(generatorFn());
+            }
+
+            return list;
+        }
+
+        /* ==========================================================================
+           5. 畫面切換、作答互動與結算
+           ========================================================================== */
+        function showScreen(screenId) {
+            ['lobby-screen', 'quiz-screen', 'result-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function goHome() {
+            SoundEngine.click();
+            renderLobby();
+            showScreen('lobby-screen');
+        }
+
+        function renderLobby() {
+            const grid = document.getElementById('stages-grid');
+            grid.innerHTML = STAGES.map(stage => {
+                const earnedStars = gameState.stars[stage.id] || 0;
+                const starsHtml = [1, 2, 3].map(i =>
+                    `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
+                ).join('');
+                const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
+                const countHint = stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（可自選）` : `每次 ${gameState.questionCountPref} 題`;
+
+                return `
+                    <div onclick="${clickHandler}" 
+                         class="btn-3d cursor-pointer bg-white rounded-3xl p-5 border-4 ${stage.border} hover:-translate-y-1 transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
+                                    ${stage.icon}
+                                </div>
+                                <div class="flex gap-1 text-lg bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-100">${starsHtml}</div>
+                            </div>
+                            <h3 class="text-lg font-black text-slate-800 leading-snug">${stage.title}</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed">${stage.subtitle}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-400">${countHint}</span>
+                            <span class="text-xs sm:text-sm font-black text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                開始實驗 ➔
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openMockExamModal() {
+            SoundEngine.click();
+            const mockInput = document.getElementById('mock-custom-input');
+            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            document.getElementById('mock-exam-modal').classList.remove('hidden');
+        }
+
+        function closeMockExamModal() {
+            SoundEngine.click();
+            document.getElementById('mock-exam-modal').classList.add('hidden');
+        }
+
+        function launchMockExam(rawCount) {
+            const num = parseInt(rawCount, 10);
+            const validCount = isNaN(num) ? 20 : Math.max(5, Math.min(50, num));
+            closeMockExamModal();
+            setQuestionCount(validCount, false);
+            startStage(99);
+        }
+
+        function startStage(stageId) {
+            SoundEngine.click();
+            const stageInfo = STAGES.find(s => s.id === stageId);
+            const count = gameState.questionCountPref || 5;
+
+            currentSession = {
+                stageId: stageId,
+                isMistakeBattle: false,
+                questions: generateStageQuestions(stageId, count),
+                currentIndex: 0,
+                correctCount: 0,
+                sessionScore: 0,
+                combo: 0,
+                maxCombo: 0,
+                answered: false,
+                usedHint: false
+            };
+
+            document.getElementById('stage-badge').textContent = stageInfo.title;
+            showScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function startMistakeBattle() {
+            if (!gameState.mistakes || gameState.mistakes.length === 0) return;
+            SoundEngine.click();
+
+            const battleQuestions = gameState.mistakes.map(m => {
+                if (m.rawQuestion) {
+                    return { ...m.rawQuestion, isMistakeRetry: true };
+                }
+                return {
+                    unitId: m.unitId || 31,
+                    hint: `這題上次誤選了「${m.wrongAnswer}」，再仔細回想科學實驗原理喔！`,
+                    text: m.questionText,
+                    visual: m.visual || null,
+                    correct: m.correctAnswer,
+                    options: shuffle([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道']),
+                    explanation: m.explanation,
+                    isMistakeRetry: true
+                };
+            });
+
+            currentSession = {
+                stageId: 88,
+                isMistakeBattle: true,
+                questions: battleQuestions,
+                currentIndex: 0,
+                correctCount: 0,
+                sessionScore: 0,
+                combo: 0,
+                maxCombo: 0,
+                answered: false,
+                usedHint: false
+            };
+
+            document.getElementById('stage-badge').textContent = '⚔️ 消滅錯題大作戰';
+            showScreen('quiz-screen');
+            renderQuestion();
+        }
+
+        function startMistakeBattleFromModal() {
+            closeMistakeModal();
+            startMistakeBattle();
+        }
+
+        function retryStage() {
+            if (currentSession.isMistakeBattle) {
+                if (gameState.mistakes.length > 0) {
+                    startMistakeBattle();
+                } else {
+                    goHome();
+                }
+            } else {
+                startStage(currentSession.stageId);
+            }
+        }
+
+        function toggleHintBox() {
+            SoundEngine.click();
+            const hintBox = document.getElementById('hint-box');
+            hintBox.classList.toggle('hidden');
+            if (!hintBox.classList.contains('hidden')) {
+                currentSession.usedHint = true;
+            }
+        }
+
+        function renderQuestion() {
+            const total = currentSession.questions.length;
+            const idx = currentSession.currentIndex;
+            const q = currentSession.questions[idx];
+            currentSession.answered = false;
+            currentSession.usedHint = false;
+
+            const hintBox = document.getElementById('hint-box');
+            const hintText = document.getElementById('hint-text');
+            hintBox.classList.add('hidden');
+            hintText.innerHTML = q.hint || '觀察實驗變因與現象之間的因果關係喔！';
+
+            document.getElementById('progress-text').textContent = `第 ${idx + 1} / ${total} 題`;
+            document.getElementById('progress-bar').style.width = `${((idx + 1) / total) * 100}%`;
+
+            const comboEl = document.getElementById('combo-badge');
+            if (currentSession.combo >= 2) {
+                comboEl.textContent = `🔥 ${currentSession.combo} 連擊!`;
+                comboEl.classList.remove('hidden');
+            } else {
+                comboEl.classList.add('hidden');
+            }
+
+            const unitStage = STAGES.find(s => s.id === q.unitId);
+            document.getElementById('q-unit-tag').textContent = unitStage ? unitStage.title : '';
+            const typeTag = document.getElementById('q-type-tag');
+            if (currentSession.isMistakeBattle) {
+                typeTag.textContent = '⚔️ 錯題復仇戰（答對即消滅）';
+                typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-700';
+            } else {
+                typeTag.textContent = '🔬 自然科學四選一';
+                typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800';
+            }
+
+            document.getElementById('question-text').innerHTML = q.text;
+
+            const visualEl = document.getElementById('question-visual');
+            if (q.visual) {
+                visualEl.innerHTML = q.visual;
+                visualEl.classList.remove('hidden');
+            } else {
+                visualEl.innerHTML = '';
+                visualEl.classList.add('hidden');
+            }
+
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            const optionsGrid = document.getElementById('options-grid');
+            const labels = ['A', 'B', 'C', 'D'];
+            optionsGrid.innerHTML = q.options.map((opt, i) => `
+                <button onclick="selectOption(${i})" id="opt-btn-${i}"
+                    class="btn-3d option-btn bg-emerald-50/70 hover:bg-emerald-100 border-3 border-emerald-200 rounded-2xl p-4 sm:p-5 text-left flex items-center gap-3.5 transition-all">
+                    <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center shrink-0 text-base sm:text-lg">
+                        ${labels[i]}
+                    </span>
+                    <span class="text-sm sm:text-lg font-bold text-slate-800 leading-snug">${opt}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectOption(selectedIndex) {
+            if (currentSession.answered) return;
+            const q = currentSession.questions[currentSession.currentIndex];
+            const chosen = q.options[selectedIndex];
+            const isCorrect = chosen === q.correct;
+
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                const optVal = q.options[idx];
+                if (optVal === q.correct) {
+                    btn.classList.remove('bg-emerald-50/70', 'hover:bg-emerald-100', 'border-emerald-200');
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'ring-4', 'ring-emerald-200');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('bg-emerald-50/70', 'hover:bg-emerald-100', 'border-emerald-200');
+                    btn.classList.add('bg-rose-100', 'border-rose-500', 'animate-shake');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            handleAnswerResult(isCorrect, chosen);
+        }
+
+        function handleAnswerResult(isCorrect, userDisplayAnswer) {
+            currentSession.answered = true;
+            const q = currentSession.questions[currentSession.currentIndex];
+
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+
+            if (isCorrect) {
+                currentSession.correctCount++;
+                if (!currentSession.usedHint) {
+                    currentSession.combo++;
+                }
+                if (currentSession.combo > currentSession.maxCombo) {
+                    currentSession.maxCombo = currentSession.combo;
+                }
+                const points = 100 + Math.max(0, currentSession.combo - 1) * 20;
+                currentSession.sessionScore += points;
+                gameState.totalScore += points;
+
+                SoundEngine.correct(currentSession.combo);
+
+                const prevLen = gameState.mistakes.length;
+                gameState.mistakes = gameState.mistakes.filter(m => m.questionText !== q.text);
+                const eliminated = gameState.mistakes.length < prevLen;
+
+                const praises = ['太棒了！實驗推理完全正確！', '好厲害！小小科學家！', '答對囉！自然原理很清楚！', '漂亮的一擊！繼續保持！'];
+                feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                feedbackIcon.textContent = eliminated ? '💥' : (currentSession.combo >= 2 ? '🔥' : '🎉');
+                feedbackTitle.textContent = eliminated
+                    ? `💥 成功消滅這道錯題！(+${points} 分)`
+                    : `${pickRandom(praises)} (+${points} 分)`;
+                feedbackExp.innerHTML = `<strong>科學原理回顧：</strong>${q.explanation}`;
+            } else {
+                currentSession.combo = 0;
+                SoundEngine.wrong();
+
+                const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
+                if (!gameState.mistakes.some(m => m.questionText === q.text)) {
+                    gameState.mistakes.unshift({
+                        unitId: q.unitId,
+                        stageTitle,
+                        questionText: q.text,
+                        visual: q.visual || null,
+                        wrongAnswer: userDisplayAnswer,
+                        correctAnswer: q.correct,
+                        explanation: q.explanation,
+                        rawQuestion: q
+                    });
+                }
+
+                feedbackBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+                feedbackIcon.textContent = '💡';
+                feedbackTitle.textContent = '沒關係！已收錄進「錯題本」，一起來看科學解析：';
+                feedbackExp.innerHTML = `正確答案是 <strong>${q.correct}</strong>。<br>${q.explanation}`;
+            }
+
+            const nextBtn = document.getElementById('next-btn');
+            if (currentSession.currentIndex === currentSession.questions.length - 1) {
+                nextBtn.innerHTML = '<span>查看本輪成績</span><span>🏆</span>';
+            } else {
+                nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
+            }
+
+            saveProgress();
+        }
+
+        function nextQuestion() {
+            SoundEngine.click();
+            if (currentSession.currentIndex < currentSession.questions.length - 1) {
+                currentSession.currentIndex++;
+                renderQuestion();
+            } else {
+                finishStage();
+            }
+        }
+
+        function finishStage() {
+            SoundEngine.victory();
+            const total = currentSession.questions.length;
+            const correct = currentSession.correctCount;
+            const ratio = correct / total;
+
+            let earnedStars = 0;
+            let badgeText = '稱號：見習實驗小助手';
+            let trophy = '🎖️';
+
+            if (ratio === 1) {
+                earnedStars = 3;
+                badgeText = '稱號：諾貝爾小小科學家 👑';
+                trophy = '🏆';
+            } else if (ratio >= 0.6) {
+                earnedStars = 2;
+                badgeText = '稱號：優秀實驗研究員 🔬';
+                trophy = '🥈';
+            } else if (correct >= 1) {
+                earnedStars = 1;
+                badgeText = '稱號：勇敢科學探索者 🔭';
+                trophy = '🥉';
+            } else {
+                earnedStars = 0;
+                badgeText = '稱號：再接再厲小觀察員 💪';
+                trophy = '🌱';
+            }
+
+            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+                gameState.stars[currentSession.stageId] = earnedStars;
+            }
+            saveProgress();
+
+            if (currentSession.isMistakeBattle) {
+                const remaining = gameState.mistakes.length;
+                document.getElementById('result-trophy').textContent = remaining === 0 ? '🏆' : '⚔️';
+                document.getElementById('result-title').textContent = remaining === 0
+                    ? '太神啦！所有錯題全部消滅完畢！'
+                    : `錯題大作戰完成！還剩下 ${remaining} 題待消滅`;
+                document.getElementById('result-badge-name').textContent = remaining === 0
+                    ? '稱號：科學滿分終結者 👑'
+                    : '稱號：勇猛錯題獵人 🗡️';
+            } else {
+                document.getElementById('result-trophy').textContent = trophy;
+                document.getElementById('result-title').textContent = ratio >= 0.6 ? '實驗成功！表現非常棒！' : '完成特訓！多讀幾次實驗解析會更熟練喔！';
+                document.getElementById('result-badge-name').textContent = badgeText;
+            }
+
+            document.getElementById('result-correct').textContent = `${correct} / ${total}`;
+            document.getElementById('result-score').textContent = `+${currentSession.sessionScore}`;
+            document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
+
+            document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
+                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+            ).join('');
+
+            showScreen('result-screen');
+        }
+
+        /* ==========================================================================
+           6. 錯題回顧與弱點分析
+           ========================================================================== */
+        let weakestUnitIdCache = null;
+
+        function openMistakeModal() {
+            SoundEngine.click();
+            const listEl = document.getElementById('mistake-list');
+            const summaryEl = document.getElementById('weakness-summary');
+            const weakBtn = document.getElementById('practice-weakest-btn');
+            const battleBtn = document.getElementById('battle-mistakes-btn');
+
+            if (gameState.mistakes.length === 0) {
+                summaryEl.classList.add('hidden');
+                weakBtn.classList.add('hidden');
+                if (battleBtn) battleBtn.classList.add('hidden');
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <div class="text-5xl mb-3">🌟</div>
+                        <p class="font-bold text-lg text-slate-600">目前沒有錯題紀錄喔！</p>
+                        <p class="text-sm mt-1">答錯的實驗題會自動收錄在這裡，方便家長陪讀與重點複習。</p>
+                    </div>
+                `;
+            } else {
+                if (battleBtn) battleBtn.classList.remove('hidden');
+                const counts = {};
+                gameState.mistakes.forEach(m => {
+                    if (m.unitId) {
+                        counts[m.unitId] = (counts[m.unitId] || 0) + 1;
+                    }
+                });
+
+                let maxUnit = null;
+                let maxCount = 0;
+                const badgesHtml = Object.entries(counts).map(([uid, cnt]) => {
+                    if (cnt > maxCount) {
+                        maxCount = cnt;
+                        maxUnit = Number(uid);
+                    }
+                    const st = STAGES.find(s => s.id === Number(uid));
+                    return `
+                        <button onclick="practiceSpecificUnit(${uid})" class="bg-white hover:bg-emerald-50 border border-rose-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition">
+                            <span>${st ? st.title.split('：')[1] : '單元'}</span>
+                            <span class="bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[11px]">${cnt} 題</span>
+                            <span class="text-emerald-700 underline">特訓➔</span>
+                        </button>
+                    `;
+                }).join('');
+
+                weakestUnitIdCache = maxUnit;
+                summaryEl.classList.remove('hidden');
+                summaryEl.innerHTML = `
+                    <div class="text-xs font-black text-rose-800 mb-2">📊 各單元錯題分布（點擊可立即產生新題目特訓）：</div>
+                    <div class="flex flex-wrap gap-2 mb-2">${badgesHtml}</div>
+                `;
+
+                if (weakestUnitIdCache) {
+                    weakBtn.classList.remove('hidden');
+                } else {
+                    weakBtn.classList.add('hidden');
+                }
+
+                listEl.innerHTML = gameState.mistakes.map((m, idx) => `
+                    <div class="bg-slate-50 rounded-2xl p-4 border-2 border-slate-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-black bg-rose-100 text-rose-700 px-2.5 py-1 rounded-lg">${m.stageTitle}</span>
+                            <span class="text-xs text-slate-400 font-bold">#${idx + 1}</span>
+                        </div>
+                        <div class="font-bold text-slate-800 mb-2 text-sm sm:text-base">${m.questionText}</div>
+                        <div class="flex flex-wrap gap-3 text-xs sm:text-sm mb-2">
+                            <span class="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg font-bold">❌ 當時答：${m.wrongAnswer}</span>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg font-bold">✅ 正確解：${m.correctAnswer}</span>
+                        </div>
+                        <div class="text-xs sm:text-sm text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100">
+                            💡 <strong>解析：</strong>${m.explanation}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('mistake-modal').classList.remove('hidden');
+        }
+
+        function closeMistakeModal() {
+            SoundEngine.click();
+            document.getElementById('mistake-modal').classList.add('hidden');
+        }
+
+        function practiceSpecificUnit(unitId) {
+            closeMistakeModal();
+            startStage(Number(unitId));
+        }
+
+        function practiceWeakestUnit() {
+            if (weakestUnitIdCache) {
+                closeMistakeModal();
+                startStage(weakestUnitIdCache);
+            }
+        }
+
+        function clearMistakes() {
+            SoundEngine.click();
+            gameState.mistakes = [];
+            saveProgress();
+            openMistakeModal();
+        }
+
+        function resetProgressConfirm() {
+            SoundEngine.click();
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            SoundEngine.click();
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        function executeResetProgress() {
+            SoundEngine.click();
+            gameState = {
+                stars: { 31: 0, 32: 0, 41: 0, 42: 0, 43: 0, 99: 0 },
+                totalScore: 0,
+                questionCountPref: gameState.questionCountPref || 5,
+                mistakes: []
+            };
+            saveProgress();
+            renderLobby();
+            closeConfirmModal();
+        }
+
+        window.onload = function () {
+            loadProgress();
+        };
+    </script>
+</body>
+</html>
