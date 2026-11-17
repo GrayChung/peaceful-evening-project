@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>翰林四上期末考數學冒險島｜勇者刷題大挑戰</title>
+    <title>四上期末考數學冒險島｜勇者刷題大挑戰（適用翰林版進度）</title>
     <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 載入 Google Fonts 繁體中文圓體與英數字體 -->
@@ -106,13 +106,19 @@
                 🏰
             </div>
             <div>
-                <h1 class="text-lg sm:text-2xl font-black text-amber-600 tracking-wide leading-tight">翰林四上期末考冒險島</h1>
-                <p class="text-xs sm:text-sm text-slate-500 font-bold">第 6～10 單元無限刷題特訓</p>
+                <h1 class="text-lg sm:text-2xl font-black text-amber-600 tracking-wide leading-tight">四上期末考數學冒險島</h1>
+                <p class="text-xs sm:text-sm text-slate-500 font-bold">適用翰林版四上第 6～10 單元進度・無限刷題特訓</p>
             </div>
         </div>
 
         <!-- 積分、星星與功能按鈕 -->
         <div class="flex items-center gap-2 sm:gap-3">
+            <!-- 返回科目總導覽大廳 -->
+            <a href="../index.html" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 px-3 py-1.5 rounded-2xl flex items-center gap-1 font-bold text-xs sm:text-sm" title="返回科目總導覽首頁">
+                <span>🏠</span>
+                <span class="hidden md:inline">科目大廳</span>
+            </a>
+
             <!-- 總星星數 -->
             <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-amber-800 text-sm sm:text-base">
                 <span>⭐</span>
@@ -149,9 +155,9 @@
                 <div class="flex flex-col gap-4 mb-6 border-b-2 border-slate-100 pb-5">
                     <div>
                         <h2 class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
-                            <span>🗺️</span> 選擇期末考特訓單元（翰林版四上）
+                            <span>🗺️</span> 選擇期末考特訓單元（適用翰林版四上範圍）
                         </h2>
-                        <p class="text-sm text-slate-500 font-medium mt-1">每次點選都會自動生成全新數字、圖表與生活情境題！</p>
+                        <p class="text-sm text-slate-500 font-medium mt-1">每次點選都會自動生成全新數字、幾何圖形與生活情境題！</p>
                     </div>
 
                     <!-- 醒目版：自訂刷題題數選擇器（含預設檔位與 1~50 自訂輸入） -->
@@ -434,9 +440,12 @@
 
     </main>
 
-    <!-- 頁尾資訊 -->
-    <footer class="text-center text-xs sm:text-sm text-slate-500 font-medium py-2">
-        依據台灣國小四年級上學期「翰林版數學期末考範圍（第 6～10 單元）」設計｜每次題目動態生成 ✨
+    <!-- 頁尾資訊與非官方免責聲明 -->
+    <footer class="w-full max-w-5xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
+        <div>依據台灣國小四年級上學期數學課程架構（適用翰林版第 6～10 單元進度）設計｜題目與圖表皆由程式動態隨機生成 ✨</div>
+        <div class="text-[11px] text-slate-400 leading-relaxed">
+            ※ 免責聲明：本專案為家長自製之免費教育學習工具，僅供居家複習使用，與翰林出版事業股份有限公司無任何官方合作、授權或隸屬關係。
+        </div>
     </footer>
 
     <!-- 錯題回顧與弱點分析 Modal -->

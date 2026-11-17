@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小親子互動複習遊樂場｜多科目學習大廳</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Google Fonts 繁體中文圓體與英數字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #dcfce7 100%);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.14);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-between p-4 sm:p-6">
+
+    <!-- 頂部大廳招牌 -->
+    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-4 border-amber-300 px-5 py-4 sm:px-8 sm:py-5 flex flex-wrap items-center justify-between gap-4 animate-pop">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-md border-2 border-white">
+                🎒
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-3xl font-black text-slate-800 tracking-wide">
+                    國小親子互動複習遊樂場
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 font-bold mt-0.5">
+                    跨年級、多科目動態出題練習平台・支援 iPad 觸控手寫草稿
+                </p>
+            </div>
+        </div>
+
+        <!-- 年級篩選標籤 -->
+        <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <button onclick="filterGrade('all')" id="tab-all" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition">
+                全部科目
+            </button>
+            <button onclick="filterGrade('4')" id="tab-4" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
+                四年級專區
+            </button>
+            <button onclick="filterGrade('coming')" id="tab-coming" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
+                即將推出
+            </button>
+        </div>
+    </header>
+
+    <!-- 主內容區：科目卡片導覽 -->
+    <main class="w-full max-w-5xl flex-1 my-6">
+        
+        <!-- iPad 加入主畫面小提醒橫幅 -->
+        <div class="bg-sky-50/95 border-2 border-sky-200 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-sky-900 shadow-sm">
+            <div class="flex items-center gap-2 font-bold">
+                <span class="text-lg">📱</span>
+                <span>iPad 使用小技巧：在 Safari 點擊右上角「分享 ⬆」➔「加入主畫面」，就能像 App 一樣一鍵開啟所有科目！</span>
+            </div>
+            <span class="text-[11px] font-black bg-sky-200/70 text-sky-800 px-2.5 py-0.5 rounded-full">本機自動存檔</span>
+        </div>
+
+        <!-- 科目卡片網格 -->
+        <div id="portal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            <!-- 卡片 1：四年級上學期數學（已上線：./math-4a/index.html） -->
+            <a href="./math-4a/index.html" data-grade="4" data-status="live"
+               class="portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-amber-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
+                    ● 已開放遊玩
+                </div>
+                <div>
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
+                        🏰
+                    </div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-black bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-lg">四年級上學期</span>
+                        <span class="text-xs font-bold text-slate-400">數學科</span>
+                    </div>
+                    <h2 class="text-xl font-black text-slate-800 mt-1">
+                        四上期末考數學冒險島
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                        適用翰林版第 6～10 單元進度（除法、三角形與全等、兩步驟併式、二位小數、統計圖表）。內建直式方格草稿板與錯題大作戰！
+                    </p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-mono text-slate-400">/math-4a/</span>
+                    <span class="text-sm font-black text-amber-600 bg-amber-50 group-hover:bg-amber-500 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
+                        進入挑戰 ➔
+                    </span>
+                </div>
+            </a>
+
+            <!-- 卡片 2：四年級下學期數學（預留擴充：./math-4b/index.html） -->
+            <div data-grade="4" data-status="coming" onclick="showComingSoon('四年級下學期｜數學冒險島', 'math-4b')"
+                 class="portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-sky-200 flex flex-col justify-between relative transition">
+                <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
+                    🛠️ 籌備建置中
+                </div>
+                <div>
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-300 to-blue-400 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
+                        🏝️
+                    </div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-black bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-lg">四年級下學期</span>
+                        <span class="text-xs font-bold text-slate-400">數學科</span>
+                    </div>
+                    <h2 class="text-xl font-black text-slate-700 mt-1">
+                        四下數學冒險島
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                        預計涵蓋概數、四則運算、四邊形王國、分數魔法、周長與面積、小數乘整數與立體積木。
+                    </p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-mono text-slate-400">/math-4b/</span>
+                    <span class="text-xs font-black text-sky-600 bg-sky-50 px-3 py-1.5 rounded-xl">
+                        查看規劃說明
+                    </span>
+                </div>
+            </div>
+
+            <!-- 卡片 3：四年級上學期國語（預留擴充：./chinese-4a/index.html） -->
+            <div data-grade="4" data-status="coming" onclick="showComingSoon('四年級上學期｜國語文大挑戰', 'chinese-4a')"
+                 class="portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-rose-200 flex flex-col justify-between relative transition">
+                <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
+                    🛠️ 籌備建置中
+                </div>
+                <div>
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-300 to-pink-400 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
+                        📖
+                    </div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-black bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-lg">四年級上學期</span>
+                        <span class="text-xs font-bold text-slate-400">國語科</span>
+                    </div>
+                    <h2 class="text-xl font-black text-slate-700 mt-1">
+                        四上國語文勇者試煉
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                        預計收錄形近字辨析、多音字測驗、成語填空與修辭判斷快問快答。
+                    </p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-mono text-slate-400">/chinese-4a/</span>
+                    <span class="text-xs font-black text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl">
+                        查看規劃說明
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 頁尾免責聲明與授權 -->
+    <footer class="w-full max-w-5xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
+        <div>國小親子互動複習遊樂場｜採模組化架構設計，所有題目與圖表皆由程式動態隨機生成 ✨</div>
+        <div class="text-[11px] text-slate-400 leading-relaxed">
+            ※ 免責聲明：本專案為家長自製之免費教育學習工具，採 CC BY-NC 4.0 非商業授權。頁面提及之出版社名稱僅作課程進度對照之指示性說明，與各教科書出版社無任何官方合作或隸屬關係。
+        </div>
+    </footer>
+
+    <!-- 建置中提示小視窗 -->
+    <div id="info-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-sky-300 animate-pop">
+            <div class="text-5xl mb-3">🚧</div>
+            <h3 id="modal-title" class="text-xl font-black text-slate-800 mb-2">模組規劃中</h3>
+            <p id="modal-desc" class="text-sm text-slate-600 leading-relaxed mb-5"></p>
+            <button onclick="closeInfoModal()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl text-sm">
+                我知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function filterGrade(filter) {
+            // 更新頁籤樣式
+            document.querySelectorAll('.grade-tab').forEach(btn => {
+                btn.className = 'grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition';
+            });
+            const activeBtn = document.getElementById(`tab-${filter}`);
+            if (activeBtn) {
+                activeBtn.className = 'grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition';
+            }
+
+            // 篩選卡片
+            document.querySelectorAll('.portal-card').forEach(card => {
+                const grade = card.getAttribute('data-grade');
+                const status = card.getAttribute('data-status');
+                if (filter === 'all') {
+                    card.classList.remove('hidden');
+                } else if (filter === '4') {
+                    card.classList.toggle('hidden', grade !== '4');
+                } else if (filter === 'coming') {
+                    card.classList.toggle('hidden', status !== 'coming');
+                }
+            });
+        }
+
+        function showComingSoon(title, folderName) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-desc').innerHTML = `此科目模組尚未上線！<br>未來建置完成後，只要在 GitHub 儲存庫建立 <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-700">${folderName}/index.html</code> 即可直接啟用。`;
+            document.getElementById('info-modal').classList.remove('hidden');
+        }
+
+        function closeInfoModal() {
+            document.getElementById('info-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
