@@ -533,7 +533,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 30 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 37 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -1013,7 +1013,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單單元 5～8 題／總模擬 30 題型全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單單元 6～8 題／總模擬 37 題型全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.6));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -1376,6 +1376,110 @@
             `;
         }
 
+        // 動態繪製對摺剪紙三角形 SVG (第七單元考古題：對摺剪下判斷展開後的三角形)
+        function createFoldedPaperTriangleSVG(halfTopAngle) {
+            return `
+                <svg width="310" height="165" viewBox="0 0 310 165" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <text x="155" y="20" text-anchor="middle" font-size="12" font-weight="900" fill="#334155">將色紙沿虛線對摺後剪下，展開是什麼三角形？</text>
+                    <!-- 對摺紙張示意（左側為對摺後的兩層紙） -->
+                    <rect x="65" y="38" width="68" height="104" fill="#fef3c7" stroke="#d97706" stroke-width="2" rx="3"/>
+                    <!-- 摺線（中軸線） -->
+                    <line x1="133" y1="30" x2="133" y2="150" stroke="#e11d48" stroke-width="2.5" stroke-dasharray="5,4"/>
+                    <text x="133" y="160" text-anchor="middle" font-size="10" font-weight="900" fill="#e11d48">對摺線（對稱軸）</text>
+                    <!-- 剪裁三角形填色與虛線剪裁邊 -->
+                    <polygon points="133,44 76,126 133,126" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2.5" stroke-dasharray="4,3"/>
+                    <text x="122" y="79" text-anchor="end" font-size="12" font-weight="900" fill="#e11d48">${halfTopAngle}°</text>
+                    <text x="93" y="90" text-anchor="end" font-size="10" font-weight="bold" fill="#4f46e5">✂️ 沿此線剪下</text>
+                    <!-- 展開圖示意輪廓（虛線） -->
+                    <line x1="168" y1="90" x2="206" y2="90" stroke="#64748b" stroke-width="2" stroke-dasharray="3,2"/>
+                    <polygon points="206,85 216,90 206,95" fill="#64748b"/>
+                    <text x="190" y="80" text-anchor="middle" font-size="10" font-bold" fill="#64748b">展開</text>
+                    <polygon points="262,46 226,126 298,126" fill="#f1f5f9" stroke="#64748b" stroke-width="2" stroke-dasharray="4,3"/>
+                    <text x="262" y="102" text-anchor="middle" font-size="14" font-weight="900" fill="#4f46e5">？</text>
+                </svg>
+            `;
+        }
+
+        // 動態繪製雙折線圖 SVG (第十單元考古題：兩地數據比較)
+        function createDualLineChartSVG(title, yUnit, labels, seriesAName, valsA, seriesBName, valsB, minAxis, maxAxis, step) {
+            const w = 380;
+            const h = 238;
+            const padL = 48;
+            const padR = 25;
+            const padT = 42;
+            const padB = 38;
+            const plotW = w - padL - padR;
+            const plotH = h - padT - padB;
+            const hasBreak = minAxis > 0;
+            const breakGap = hasBreak ? 22 : 0;
+            const usableH = plotH - breakGap;
+            const baseY = padT + plotH;
+            const plotBottom = baseY - breakGap;
+            const range = maxAxis - minAxis;
+
+            let gridLines = '';
+            for (let v = minAxis; v <= maxAxis; v += step) {
+                const y = plotBottom - ((v - minAxis) / range) * usableH;
+                gridLines += `
+                    <line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
+                    <text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#475569">${v}</text>
+                `;
+            }
+
+            const breakSvg = hasBreak ? `
+                <text x="${padL - 8}" y="${baseY + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#475569">0</text>
+                <rect x="${padL - 5}" y="${baseY - 16}" width="10" height="10" fill="#ffffff"/>
+                <path d="M ${padL - 6},${baseY - 14} Q ${padL - 2},${baseY - 18} ${padL},${baseY - 14} T ${padL + 6},${baseY - 14}" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/>
+                <path d="M ${padL - 6},${baseY - 8} Q ${padL - 2},${baseY - 12} ${padL},${baseY - 8} T ${padL + 6},${baseY - 8}" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/>
+            ` : '';
+
+            const slot = plotW / (labels.length - 1 || 1);
+            const mapCoords = (vals) => vals.map((val, idx) => ({
+                x: padL + idx * slot,
+                y: plotBottom - ((val - minAxis) / range) * usableH,
+                val
+            }));
+            const coordsA = mapCoords(valsA);
+            const coordsB = mapCoords(valsB);
+
+            const polyA = coordsA.map(c => `${c.x},${c.y}`).join(' ');
+            const polyB = coordsB.map(c => `${c.x},${c.y}`).join(' ');
+
+            const dotsA = coordsA.map(c => `
+                <circle cx="${c.x}" cy="${c.y}" r="4.5" fill="#ea580c" stroke="#ffffff" stroke-width="1.8"/>
+                <text x="${c.x}" y="${c.y - 8}" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#c2410c">${c.val}</text>
+            `).join('');
+            const dotsB = coordsB.map(c => `
+                <rect x="${c.x - 4}" y="${c.y - 4}" width="8" height="8" rx="1.5" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="${c.x}" y="${c.y + 15}" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0369a1">${c.val}</text>
+            `).join('');
+            const xLabels = labels.map((lbl, idx) =>
+                `<text x="${padL + idx * slot}" y="${h - 12}" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">${lbl}</text>`
+            ).join('');
+
+            return `
+                <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <text x="${w / 2}" y="18" text-anchor="middle" font-size="12.5" font-weight="900" fill="#0f172a">${title}（${yUnit}）</text>
+                    <!-- 圖例 -->
+                    <line x1="${w - 135}" y1="30" x2="${w - 117}" y2="30" stroke="#ea580c" stroke-width="2.5"/>
+                    <circle cx="${w - 126}" cy="30" r="3" fill="#ea580c"/>
+                    <text x="${w - 113}" y="33" font-size="10.5" font-weight="bold" fill="#c2410c">${seriesAName}</text>
+                    <line x1="${w - 72}" y1="30" x2="${w - 54}" y2="30" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5,3"/>
+                    <rect x="${w - 66}" y="27" width="6" height="6" fill="#0284c7"/>
+                    <text x="${w - 50}" y="33" font-size="10.5" font-weight="bold" fill="#0369a1">${seriesBName}</text>
+                    ${gridLines}
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${baseY}" stroke="#334155" stroke-width="2"/>
+                    <line x1="${padL}" y1="${baseY}" x2="${w - padR}" y2="${baseY}" stroke="#334155" stroke-width="2"/>
+                    ${breakSvg}
+                    <polyline points="${polyA}" fill="none" stroke="#ea580c" stroke-width="2.8" stroke-linejoin="round"/>
+                    <polyline points="${polyB}" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6,3" stroke-linejoin="round"/>
+                    ${dotsA}
+                    ${dotsB}
+                    ${xLabels}
+                </svg>
+            `;
+        }
+
         /* ==========================================================================
            5. 翰林版四上第 6～10 單元高度動態題庫引擎（含期末必考易錯陷阱題與逐步提示）
            六、除法 | 七、三角形與全等 | 八、兩步驟問題與併式 | 九、二位小數 | 十、統計圖表
@@ -1612,9 +1716,9 @@
                 }
             },
 
-            // 第七單元：三角形與全等（新增三邊長關係、全等對應邊角、等腰內角、周長與平角複合題）
+            // 第七單元：三角形與全等（新增三邊長關係、全等對應邊角、等腰內角、周長、平角與考古題對摺剪紙／全等兩步驟）
             7: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 6);
+                const template = forcedTemplate || randInt(1, 8);
 
                 if (template === 1) {
                     // 題型 A：全等三角形對應邊與對應角（確保三邊符合兩邊和大於第三邊且數值皆不重複）
@@ -1826,7 +1930,7 @@
                         ]),
                         explanation: `等腰三角形有兩條一樣長的腰！先從周長減掉底邊：${perim} － ${base} = ${perim - base} 公分，再平分成 2 條腰：${perim - base} ÷ 2 = ${leg} 公分。`
                     };
-                } else {
+                } else if (template === 6) {
                     // 題型 F：平角（180°）與三角形內角複合角度題
                     const topA = randInt(42, 72);
                     const leftA = randInt(45, 75);
@@ -1849,12 +1953,59 @@
                         ]),
                         explanation: `三角形內角和是 180°，先算出右下角內角 = 180 － ${topA} － ${leftA} = ${innerRight}°；因為底邊延伸為平角（180°），所以外角 ★ = 180 － ${innerRight} = ${extAngle}°（正好等於 ${topA} + ${leftA}）！`
                     };
+                } else if (template === 7) {
+                    // 題型 G：【考古題】對摺剪紙展開判斷三角形類型
+                    const foldCases = [
+                        { half: 30, ans: '正三角形', exp: '展開後兩側對稱邊一樣長（等腰），且頂角變成 30° × 2 = 60°，因此兩個底角也各是 (180 － 60) ÷ 2 = 60°，三個角都是 60°，正是「正三角形」！' },
+                        { half: 45, ans: '等腰直角三角形', exp: '展開後左右兩側剪邊一樣長（等腰），且頂角變成 45° × 2 = 90°（直角），因此是「等腰直角三角形」！' },
+                        { half: 25, ans: '等腰銳角三角形', exp: '展開後兩腰等長，頂角為 25° × 2 = 50°，兩底角各為 (180 － 50) ÷ 2 = 65°，三個角都小於 90°，是「等腰銳角三角形」！' },
+                        { half: 55, ans: '等腰鈍角三角形', exp: '展開後兩腰等長，頂角為 55° × 2 = 110°（大於 90° 為鈍角），因此是「等腰鈍角三角形」！' }
+                    ];
+                    const item = pickRandom(foldCases);
+                    const fullTop = item.half * 2;
+                    return {
+                        unitId: 7,
+                        autoScratchpad: false,
+                        inputType: 'choice',
+                        hint: `對摺剪下來的三角形左右完全對稱，展開後兩條斜邊一定一樣長，而且對摺線處原本的 ${item.half}° 會「打開變成兩倍（${fullTop}°）」喔！`,
+                        text: `如圖，把長方形色紙對摺後，沿著虛線剪下一個夾角為 <strong>${item.half}°</strong> 的三角形，請問把剪下來的三角形完全展開後是什麼三角形？`,
+                        visual: createFoldedPaperTriangleSVG(item.half),
+                        correct: item.ans,
+                        options: shuffle(['正三角形', '等腰直角三角形', '等腰銳角三角形', '等腰鈍角三角形']),
+                        explanation: item.exp
+                    };
+                } else {
+                    // 題型 H：【考古題】全等三角形對應角結合內角和 180° 兩步驟推理
+                    const angleTriples = [
+                        [40, 65, 75],
+                        [50, 60, 70],
+                        [35, 55, 90],
+                        [45, 55, 80],
+                        [30, 65, 85]
+                    ];
+                    const [aA, aB, aC] = shuffle(pickRandom(angleTriples));
+                    return {
+                        unitId: 7,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '度',
+                        hint: `頂點 B 對應 E，所以 ∠B = ∠E = ${aB}°；再用三角形內角和 180° 減掉 ∠A 與 ∠B，求出對應角 ∠C（就是 ∠F）！`,
+                        text: `已知 <strong>△ABC 和 △DEF 是全等三角形</strong>（對應頂點 A↔D、B↔E、C↔F），若 <strong>∠A = ${aA}°</strong>、<strong>∠E = ${aB}°</strong>，請問 <strong>∠C（或 ∠F）</strong>是多少度？`,
+                        correct: String(aC),
+                        options: buildOptions(aC, [
+                            () => aA,
+                            () => aB,
+                            () => 180 - aA,
+                            () => 180 - aB
+                        ]),
+                        explanation: `因為 B 對應 E，所以 ∠B = ∠E = ${aB}°；三角形內角和是 180°，因此 ∠C = 180 － ${aA} － ${aB} = ${aC}°（且對應角 ∠F = ∠C = ${aC}°）。`
+                    };
                 }
             },
 
             // 第八單元：兩步驟問題與併式
             8: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 5);
+                const template = forcedTemplate || randInt(1, 7);
 
                 if (template === 1) {
                     const money = pickRandom([500, 1000]);
@@ -1950,7 +2101,7 @@
                         ]),
                         explanation: `一組套餐是「${p1} + ${p2}」元，買了 ${n} 組要先算一組多少錢再乘以 ${n}，所以要用括號寫成 (${p1} + ${p2}) × ${n}。`
                     };
-                } else {
+                } else if (template === 5) {
                     // 題型 E：【期末必考】連減與括號等價算式辨析
                     const money = pickRandom([500, 800, 1000]);
                     const p1 = randInt(115, 195);
@@ -1971,12 +2122,57 @@
                         ]),
                         explanation: `連減兩個數等於減掉這兩個數的和！先把花的錢合起來 (${p1} + ${p2})，再用 ${money} 元去減，所以 ${money} － ${p1} － ${p2} = ${money} － (${p1} + ${p2})。`
                     };
+                } else if (template === 6) {
+                    // 題型 F：【考古題】連除性質等價算式辨析
+                    const a = pickRandom([5, 6, 8, 12]);
+                    const b = pickRandom([3, 4, 5]);
+                    const qBox = randInt(4, 9);
+                    const total = a * b * qBox;
+                    const correctExpr = `${total} ÷ (${a} × ${b})`;
+                    return {
+                        unitId: 8,
+                        autoScratchpad: false,
+                        inputType: 'choice',
+                        hint: `連除以兩個數（先除以 ${a}、再除以 ${b}），等於先算出「1 箱總共有 ${a} × ${b} 個」，再一次除掉喔！`,
+                        text: `麵包師傅烤了 ${total} 個小牛角，每 ${a} 個裝一袋、每 ${b} 袋裝一箱。計算共可裝幾箱時，哪一個算式和「<strong>${total} ÷ ${a} ÷ ${b}</strong>」結果相同？`,
+                        correct: correctExpr,
+                        options: shuffle([
+                            correctExpr,
+                            `${total} ÷ (${a} ÷ ${b})`,
+                            `(${total} ÷ ${a}) × ${b}`,
+                            `${total} × (${a} × ${b})`
+                        ]),
+                        explanation: `連除性質：一個數連續除以兩個數，等於除以這兩個數的「積」！所以 ${total} ÷ ${a} ÷ ${b} = ${total} ÷ (${a} × ${b}) = ${qBox} 箱。`
+                    };
+                } else {
+                    // 題型 G：【考古題】先平分再相加併式應用題
+                    const students = randInt(24, 34);
+                    const per = randInt(4, 7);
+                    const totalPen = students * per;
+                    const extra = randInt(2, 5);
+                    const ans = per + extra;
+                    return {
+                        unitId: 8,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '枝',
+                        hint: `先用 (${totalPen} ÷ ${students}) 算出每個人分到幾枝原子筆，再加上另外發的 ${extra} 枝鉛筆！`,
+                        text: `老師將 <strong>${totalPen} 枝</strong>原子筆平分給全班 <strong>${students} 位</strong>學生，每人又另外發給 <strong>${extra} 枝</strong>鉛筆，合併寫成「(${totalPen} ÷ ${students}) + ${extra}」，算算看每位學生共拿到幾枝筆？`,
+                        correct: String(ans),
+                        options: buildOptions(ans, [
+                            () => per,
+                            () => Math.floor(totalPen / (students + extra)),
+                            () => ans + 2,
+                            () => Math.max(2, ans - 1)
+                        ]),
+                        explanation: `併式算式為 (${totalPen} ÷ ${students}) + ${extra}。先算平分到的原子筆：${totalPen} ÷ ${students} = ${per} 枝，再加上 ${extra} 枝鉛筆，每人共拿到 ${ans} 枝！`
+                    };
                 }
             },
 
-            // 第九單元：二位小數（新增數線定位判讀、單位換算、整數減二位小數、化聚比較與小數點對齊）
+            // 第九單元：二位小數（新增數線定位、單位換算、整數減二位小數、化聚比較、對齊迷思與考古題看錯加減／範圍極值）
             9: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 6);
+                const template = forcedTemplate || randInt(1, 8);
 
                 if (template === 1) {
                     // 題型 A：二位小數加法生活應用（含單位換算如 1 公尺 8 公分 = 1.08 公尺）
@@ -2098,7 +2294,7 @@
                         options: shuffle([nBig, nSmall1, nSmall2, nSmall3]),
                         explanation: `比較小數要從最高位（個位 → 十分位 → 百分位）依序比！${nBig} 的十分位是 ${d1}，比 ${nSmall1} 的十分位 ${d1 - 1} 還要大，所以 ${nBig} 最大！`
                     };
-                } else {
+                } else if (template === 6) {
                     // 題型 F：【期末必考】小數點對齊迷思改錯（一位小數 + 二位小數）
                     const aWhole = randInt(2, 6);
                     const aTenth = randInt(2, 8);
@@ -2128,14 +2324,73 @@
                         ]),
                         explanation: `小數加法要對齊「小數點」（不是對齊最右邊的數字）！把 ${s1} 看成 ${s1}0，再加上 ${s2}，答案是 ${ans}。`
                     };
+                } else if (template === 7) {
+                    // 題型 G：【考古題】將錯就錯：看錯加/減號逆推正確答案
+                    let dCents = randInt(114, 386);
+                    if (dCents % 10 === 0) dCents += 3;
+                    const wrongSum = randInt(18, 35);
+                    const dStr = formatDecFromCents(dCents);
+                    const origCents = wrongSum * 100 - dCents;
+                    const ansCents = origCents - dCents;
+                    const origStr = formatDecFromCents(origCents);
+                    const ans = formatDecFromCents(ansCents);
+
+                    return {
+                        unitId: 9,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        hint: `先「將錯就錯」倒推原來的被減數（${wrongSum} － ${dStr} = ${origStr}），再算出原本題目要的「${origStr} － ${dStr}」（等於要減兩次 ${dStr} 喔）！`,
+                        text: `小桃做小數減法「<strong>□ － ${dStr}</strong>」時，不小心把減號看成「加 ${dStr}」，算出的結果是 <strong>${wrongSum}</strong>，請問原本這題正確的答案應該是多少？`,
+                        correct: ans,
+                        options: buildOptions(ans, [
+                            () => origStr,
+                            () => formatDecFromCents(wrongSum * 100 + dCents),
+                            () => formatDecFromCents(ansCents + 100),
+                            () => formatDecFromCents(ansCents + 10)
+                        ]),
+                        explanation: `① 先從錯誤算式「□ + ${dStr} = ${wrongSum}」反推原數：${wrongSum}.00 － ${dStr} = ${origStr}。② 再代入正確算式：${origStr} － ${dStr} = ${ans}！`
+                    };
+                } else {
+                    // 題型 H：【考古題】區間範圍內最大／最小二位小數
+                    const lowWhole = randInt(3, 6);
+                    const lowTenth = randInt(2, 7);
+                    const highWhole = lowWhole + randInt(1, 2);
+                    const highTenth = randInt(4, 8);
+                    const lowC = lowWhole * 100 + lowTenth * 10;
+                    const highC = highWhole * 100 + highTenth * 10;
+                    const lowStr = `${lowWhole}.${lowTenth}`;
+                    const highStr = `${highWhole}.${highTenth}`;
+                    const askMax = Math.random() < 0.5;
+                    const ansC = askMax ? highC - 1 : lowC + 1;
+                    const ans = formatDecFromCents(ansC);
+
+                    return {
+                        unitId: 9,
+                        autoScratchpad: false,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        hint: askMax
+                            ? `要找比「${highStr}（等於 ${highStr}0）」小且最接近的二位小數，只要往回退 1 個 0.01 就好囉！`
+                            : `要找比「${lowStr}（等於 ${lowStr}0）」大且最接近的二位小數，只要往上加 1 個 0.01 就好囉！`,
+                        text: `比 <strong>${lowStr}</strong> 大，而且比 <strong>${highStr}</strong> 小的所有「<strong>二位小數</strong>」中，<strong>${askMax ? '最大' : '最小'}</strong>的二位小數是多少？`,
+                        correct: ans,
+                        options: buildOptions(ans, [
+                            () => formatDecFromCents(askMax ? highC - 10 : lowC + 10),
+                            () => `${askMax ? highWhole : lowWhole}.${askMax ? highTenth : lowTenth}9`,
+                            () => formatDecFromCents(askMax ? highC - 2 : lowC + 2),
+                            () => formatDecFromCents(askMax ? lowC + 1 : highC - 1)
+                        ]),
+                        explanation: `${lowStr} = ${lowStr}0，${highStr} = ${highStr}0。在兩數之間（不含端點）的二位小數從 ${formatDecFromCents(lowC + 1)} 到 ${formatDecFromCents(highC - 1)}，因此${askMax ? '最大' : '最小'}的是 ${ans}！`
+                    };
                 }
             },
 
             // 第十單元：統計圖表
             10: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 5);
+                const template = forcedTemplate || randInt(1, 6);
                 const isLineChart = template >= 3;
-                const qSub = template === 5 ? 3 : ((template === 1 || template === 3) ? 1 : 2);
+                const qSub = template === 6 ? 4 : (template === 5 ? 3 : ((template === 1 || template === 3) ? 1 : 2));
 
                 if (!isLineChart) {
                     const scenarios = [
@@ -2192,6 +2447,29 @@
                             explanation: `把四條長條的數值全部加起來：${vals.join(' + ')} = ${total} ${sc.unit}。`
                         };
                     }
+                } else if (qSub === 4) {
+                    // 題型 F：【考古題】雙折線圖比較（兩地氣溫差異最大月份判讀）
+                    const months = ['1月', '2月', '3月', '4月', '5月'];
+                    const diffs = shuffle([2, 3, 5, 6, 8]);
+                    const valsKaohsiung = [20, 22, 24, 27, 29];
+                    const valsTaipei = valsKaohsiung.map((v, i) => v - diffs[i]);
+                    const maxDiff = Math.max(...diffs);
+                    const bestIdx = diffs.indexOf(maxDiff);
+                    const bestMonth = months[bestIdx];
+                    const others = shuffle(months.filter(m => m !== bestMonth)).slice(0, 3);
+                    const svg = createDualLineChartSVG('1～5月高雄與臺北平均氣溫比較圖', '℃', months, '高雄', valsKaohsiung, '臺北', valsTaipei, 10, 32, 4);
+
+                    return {
+                        unitId: 10,
+                        autoScratchpad: false,
+                        inputType: 'choice',
+                        hint: `從圖上找出橘色線（高雄）與藍色線（臺北）在同一個月份裡「上下距離拉得最開」的地方，並算算兩數相差幾度！`,
+                        text: `觀察下方的雙折線圖，請問在哪一個月份中，高雄和臺北的平均氣溫<strong>相差最多</strong>？`,
+                        visual: svg,
+                        correct: bestMonth,
+                        options: shuffle([bestMonth, ...others]),
+                        explanation: `比較各月份兩地溫差，${months.map((m, i) => `${m}差 ${diffs[i]}℃`).join('、')}，其中「${bestMonth}」相差 ${maxDiff}℃ 最多！`
+                    };
                 } else {
                     const times = ['8時', '10時', '12時', '14時', '16時'];
                     const baseT = randInt(20, 22);
@@ -2267,7 +2545,7 @@
         // 為指定關卡生成 N 題不重複題目（支援 'ALL' 全題型制霸，確保每種題型模板各練習 1 題）
         function generateStageQuestions(stageId, count) {
             const units = [6, 7, 8, 9, 10];
-            const templateCounts = { 6: 8, 7: 6, 8: 5, 9: 6, 10: 5 }; // 合計 30 種核心題型
+            const templateCounts = { 6: 8, 7: 8, 8: 7, 9: 8, 10: 6 }; // 合計 37 種核心題型
 
             if (count === 'ALL') {
                 const targetUnits = stageId === 99 ? units : [stageId];
@@ -2341,7 +2619,7 @@
                     `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
                 ).join('');
                 const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
-                const unitTemplateMap = { 6: 8, 7: 6, 8: 5, 9: 6, 10: 5, 99: 30 };
+                const unitTemplateMap = { 6: 8, 7: 8, 8: 7, 9: 8, 10: 6, 99: 37 };
                 const unitTotal = unitTemplateMap[stage.id] || 5;
                 const countHint = gameState.questionCountPref === 'ALL'
                     ? `🌟 全部 ${unitTotal} 種題型`
