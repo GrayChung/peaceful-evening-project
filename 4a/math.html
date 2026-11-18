@@ -75,7 +75,7 @@
     <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
 
     <!-- 頂部狀態列 -->
-    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-amber-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
+    <header class="w-full max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-amber-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
         <!-- 遊戲標題與回首頁 -->
         <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
             <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
@@ -123,7 +123,7 @@
     </header>
 
     <!-- 主畫面容器 -->
-    <main class="w-full max-w-5xl flex-1 flex flex-col justify-center my-4">
+    <main class="w-full max-w-6xl xl:max-w-7xl flex-1 flex flex-col justify-center my-4">
         
         <!-- 1. 關卡選擇大廳 (Lobby Screen) -->
         <section id="lobby-screen" class="animate-pop">
@@ -251,24 +251,24 @@
                     </div>
                 </div>
 
-                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區 -->
-                <div id="mistake-boss-panel" class="hidden mb-5 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3.5 sm:p-4 border-2 border-rose-300 shadow-sm">
-                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
-                        <div id="monster-stage" class="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center">
-                            <div id="monster-svg-wrap" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center"></div>
+                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區（橫式緊湊版） -->
+                <div id="mistake-boss-panel" class="hidden mb-4 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-2.5 sm:px-4 sm:py-2.5 border-2 border-rose-300 shadow-sm">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        <div id="monster-stage" class="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+                            <div id="monster-svg-wrap" class="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center"></div>
                             <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
                                 <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
                                 <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
                             </svg>
                         </div>
-                        <div class="flex-1 w-full">
-                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
-                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1">
+                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full truncate">
                                     😈 錯題魔王登場！答對題目就能削減它的生命值！
                                 </span>
-                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600">HP 5 / 5</span>
+                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600 shrink-0">HP 5 / 5</span>
                             </div>
-                            <div class="relative w-full h-5 sm:h-6 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                            <div class="relative w-full h-4 sm:h-5 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
                                 <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
                                 <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
                                 <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
@@ -277,134 +277,141 @@
                     </div>
                 </div>
 
-                <!-- 題目顯示區 -->
-                <div id="question-container" class="mb-6">
-                    <!-- 題型標籤與「一步一步看提示」按鈕 -->
-                    <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-700">
-                                四選一挑戰
+                <!-- 雙欄響應式工作台（電腦橫式：左欄題目作答詳解／右欄計算草稿紙；手機直式：上下堆疊） -->
+                <div id="quiz-workbench" class="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-6">
+                    <div id="quiz-main-col" class="flex-1 min-w-0 w-full">
+                        <!-- 題目顯示區 -->
+                        <div id="question-container" class="mb-6">
+                            <!-- 題型標籤與「一步一步看提示」按鈕 -->
+                            <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-700">
+                                        四選一挑戰
+                                    </span>
+                                    <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
+                                        第六單元
+                                    </span>
+                                </div>
+
+                                <button onclick="toggleHintBox()" id="hint-btn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1 transition shadow-sm">
+                                    <span>💡</span>
+                                    <span>給我一點小提示</span>
+                                </button>
+                            </div>
+
+                            <!-- 鷹架提示展開卡（不破梗，只給第一步思考方向） -->
+                            <div id="hint-box" class="hidden mb-3 bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-3.5 text-amber-950 text-xs sm:text-sm font-bold flex items-start gap-2.5 animate-pop">
+                                <span class="text-xl shrink-0">🧭</span>
+                                <div>
+                                    <div class="font-black text-amber-800 mb-0.5">解題小線索（先想一想再算喔）：</div>
+                                    <div id="hint-text" class="leading-relaxed"></div>
+                                </div>
+                            </div>
+
+                            <div id="question-body-layout" class="flex flex-col md:flex-row md:items-center gap-4">
+                                <!-- 題目敘述 -->
+                                <div id="question-text" class="flex-1 min-w-0 text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed">
+                                    題目載入中...
+                                </div>
+
+                                <!-- 視覺輔助圖形區 (SVG 三角形幾何、數線、長條圖、折線圖；寬螢幕下與題目左右並排) -->
+                                <div id="question-visual" class="hidden flex justify-center items-center bg-slate-50/80 rounded-2xl p-3 sm:p-4 border-2 border-dashed border-slate-200 overflow-x-auto md:max-w-[52%] shrink-0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 作答區 A：4 個選擇題選項按鈕 -->
+                        <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                            <!-- 選項由 JS 動態生成 -->
+                        </div>
+
+                        <!-- 作答區 B：虛擬數字鍵盤填充題 -->
+                        <div id="keypad-container" class="hidden max-w-md mx-auto bg-slate-50 p-4 sm:p-5 rounded-3xl border-2 border-indigo-200">
+                            <div class="text-xs font-bold text-slate-500 mb-1.5 text-center">請點擊下方數字鍵輸入答案：</div>
+                            <div class="flex items-center justify-center gap-2 mb-4">
+                                <div id="keypad-display" class="flex-1 bg-white border-3 border-indigo-300 rounded-2xl px-4 py-3 text-right text-2xl sm:text-3xl font-black text-indigo-700 min-h-[56px] tracking-wider shadow-inner">
+                                    
+                                </div>
+                                <span id="keypad-unit" class="text-base sm:text-lg font-black text-slate-600 shrink-0"></span>
+                            </div>
+
+                            <!-- 數字鍵盤網格 -->
+                            <div class="grid grid-cols-3 gap-2.5">
+                                <button onclick="pressKey('7')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">7</button>
+                                <button onclick="pressKey('8')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">8</button>
+                                <button onclick="pressKey('9')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">9</button>
+                                <button onclick="pressKey('4')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">4</button>
+                                <button onclick="pressKey('5')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">5</button>
+                                <button onclick="pressKey('6')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">6</button>
+                                <button onclick="pressKey('1')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">1</button>
+                                <button onclick="pressKey('2')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">2</button>
+                                <button onclick="pressKey('3')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">3</button>
+                                <button onclick="pressKey('.')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-2xl py-3 text-xl font-black text-amber-800">.</button>
+                                <button onclick="pressKey('0')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">0</button>
+                                <button onclick="pressKey('BACK')" class="btn-3d bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 rounded-2xl py-3 text-lg font-black text-rose-700">⌫ 退格</button>
+                            </div>
+
+                            <button id="keypad-submit-btn" onclick="submitKeypadAnswer()" class="mt-4 w-full btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3.5 rounded-2xl text-lg flex items-center justify-center gap-2">
+                                <span>送出答案</span>
+                                <span>✅</span>
+                            </button>
+                        </div>
+
+                        <!-- 答題回饋與詳解區（置於草稿紙上方，作答後免滑動即可看結果與按下一題） -->
+                        <div id="feedback-box" class="hidden mt-5 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
+                            <div class="flex items-start gap-3">
+                                <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
+                                <div class="flex-1">
+                                    <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
+                                    <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                                    <span>下一題</span>
+                                    <span>➡️</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 手寫計算草稿板區 (橫式螢幕置於右側工作欄，直式螢幕置於解答區下方；支援點點紙與直式方格紙切換) -->
+                    <div id="scratchpad-panel" class="hidden w-full lg:w-[420px] xl:w-[460px] shrink-0 bg-slate-50 rounded-2xl border-2 border-amber-300 p-3 animate-pop shadow-sm lg:sticky lg:top-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <span class="text-xs sm:text-sm font-black text-amber-800 flex items-center gap-1">
+                                <span>📝</span> 勇者計算草稿紙
                             </span>
-                            <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
-                                第六單元
-                            </span>
+                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <!-- 切換紙張底紋：點點紙 / 直式方格紙 -->
+                                <button onclick="togglePaperStyle()" id="paper-style-btn" class="bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 text-xs font-black px-2.5 py-1 rounded-lg transition">
+                                    ⊞ 切換直式方格紙
+                                </button>
+                                <!-- 切換畫布高度 -->
+                                <button onclick="toggleScratchpadHeight()" id="canvas-size-btn" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-black px-2.5 py-1 rounded-lg transition">
+                                    ↕ 加高畫布
+                                </button>
+                                <!-- 畫筆顏色選擇 -->
+                                <button id="pen-btn-1e293b" onclick="setPenColor('#1e293b')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-white shadow ring-2 ring-offset-1 ring-amber-500 scale-110 transition-transform" title="黑筆"></button>
+                                <button id="pen-btn-e11d48" onclick="setPenColor('#e11d48')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-600 border-2 border-white shadow transition-transform" title="紅筆"></button>
+                                <button id="pen-btn-0284c7" onclick="setPenColor('#0284c7')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-600 border-2 border-white shadow transition-transform" title="藍筆"></button>
+                                <!-- 橡皮擦與復原 -->
+                                <button onclick="toggleEraser()" id="eraser-btn" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition">
+                                    🧽 橡皮擦
+                                </button>
+                                <button onclick="undoScratchpad()" id="undo-btn" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition disabled:opacity-40" disabled>
+                                    ↩ 復原
+                                </button>
+                                <button onclick="clearScratchpad(true)" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition">
+                                    🧹 擦乾淨
+                                </button>
+                                <button onclick="toggleScratchpad()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg transition">
+                                    收起 ▴
+                                </button>
+                            </div>
                         </div>
-
-                        <button onclick="toggleHintBox()" id="hint-btn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1 transition shadow-sm">
-                            <span>💡</span>
-                            <span>給我一點小提示</span>
-                        </button>
-                    </div>
-
-                    <!-- 鷹架提示展開卡（不破梗，只給第一步思考方向） -->
-                    <div id="hint-box" class="hidden mb-3 bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-3.5 text-amber-950 text-xs sm:text-sm font-bold flex items-start gap-2.5 animate-pop">
-                        <span class="text-xl shrink-0">🧭</span>
-                        <div>
-                            <div class="font-black text-amber-800 mb-0.5">解題小線索（先想一想再算喔）：</div>
-                            <div id="hint-text" class="leading-relaxed"></div>
+                        <div id="scratch-canvas-wrap" class="w-full h-56 sm:h-64 lg:h-[360px] bg-white rounded-xl border border-slate-200 overflow-hidden relative transition-all">
+                            <canvas id="scratch-canvas" class="w-full h-full cursor-crosshair paper-dots"></canvas>
                         </div>
-                    </div>
-
-                    <!-- 題目敘述 -->
-                    <div id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed mb-4">
-                        題目載入中...
-                    </div>
-
-                    <!-- 視覺輔助圖形區 (SVG 三角形幾何、數線、長條圖、折線圖) -->
-                    <div id="question-visual" class="hidden flex justify-center items-center my-4 bg-slate-50/80 rounded-2xl p-3 sm:p-5 border-2 border-dashed border-slate-200 overflow-x-auto">
-                    </div>
-                </div>
-
-                <!-- 作答區 A：4 個選擇題選項按鈕 -->
-                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                    <!-- 選項由 JS 動態生成 -->
-                </div>
-
-                <!-- 作答區 B：虛擬數字鍵盤填充題 -->
-                <div id="keypad-container" class="hidden max-w-md mx-auto bg-slate-50 p-4 sm:p-5 rounded-3xl border-2 border-indigo-200">
-                    <div class="text-xs font-bold text-slate-500 mb-1.5 text-center">請點擊下方數字鍵輸入答案：</div>
-                    <div class="flex items-center justify-center gap-2 mb-4">
-                        <div id="keypad-display" class="flex-1 bg-white border-3 border-indigo-300 rounded-2xl px-4 py-3 text-right text-2xl sm:text-3xl font-black text-indigo-700 min-h-[56px] tracking-wider shadow-inner">
-                            
-                        </div>
-                        <span id="keypad-unit" class="text-base sm:text-lg font-black text-slate-600 shrink-0"></span>
-                    </div>
-
-                    <!-- 數字鍵盤網格 -->
-                    <div class="grid grid-cols-3 gap-2.5">
-                        <button onclick="pressKey('7')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">7</button>
-                        <button onclick="pressKey('8')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">8</button>
-                        <button onclick="pressKey('9')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">9</button>
-                        <button onclick="pressKey('4')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">4</button>
-                        <button onclick="pressKey('5')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">5</button>
-                        <button onclick="pressKey('6')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">6</button>
-                        <button onclick="pressKey('1')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">1</button>
-                        <button onclick="pressKey('2')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">2</button>
-                        <button onclick="pressKey('3')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">3</button>
-                        <button onclick="pressKey('.')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-2xl py-3 text-xl font-black text-amber-800">.</button>
-                        <button onclick="pressKey('0')" class="btn-3d bg-white hover:bg-indigo-50 border-2 border-slate-200 rounded-2xl py-3 text-xl font-black text-slate-800">0</button>
-                        <button onclick="pressKey('BACK')" class="btn-3d bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 rounded-2xl py-3 text-lg font-black text-rose-700">⌫ 退格</button>
-                    </div>
-
-                    <button id="keypad-submit-btn" onclick="submitKeypadAnswer()" class="mt-4 w-full btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3.5 rounded-2xl text-lg flex items-center justify-center gap-2">
-                        <span>送出答案</span>
-                        <span>✅</span>
-                    </button>
-                </div>
-
-                <!-- 答題回饋與詳解區（置於草稿紙上方，作答後免滑動即可看結果與按下一題） -->
-                <div id="feedback-box" class="hidden mt-5 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
-                    <div class="flex items-start gap-3">
-                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
-                        <div class="flex-1">
-                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
-                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
-                        </div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
-                            <span>下一題</span>
-                            <span>➡️</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 手寫計算草稿板區 (置於解答區下方，支援點點紙與直式方格紙切換) -->
-                <div id="scratchpad-panel" class="hidden mt-6 bg-slate-50 rounded-2xl border-2 border-amber-300 p-3 animate-pop shadow-sm">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                        <span class="text-xs sm:text-sm font-black text-amber-800 flex items-center gap-1">
-                            <span>📝</span> 勇者計算草稿紙
-                        </span>
-                        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                            <!-- 切換紙張底紋：點點紙 / 直式方格紙 -->
-                            <button onclick="togglePaperStyle()" id="paper-style-btn" class="bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 text-xs font-black px-2.5 py-1 rounded-lg transition">
-                                ⊞ 切換直式方格紙
-                            </button>
-                            <!-- 切換畫布高度 -->
-                            <button onclick="toggleScratchpadHeight()" id="canvas-size-btn" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-black px-2.5 py-1 rounded-lg transition">
-                                ↕ 加高畫布
-                            </button>
-                            <!-- 畫筆顏色選擇 -->
-                            <button id="pen-btn-1e293b" onclick="setPenColor('#1e293b')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-white shadow ring-2 ring-offset-1 ring-amber-500 scale-110 transition-transform" title="黑筆"></button>
-                            <button id="pen-btn-e11d48" onclick="setPenColor('#e11d48')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-600 border-2 border-white shadow transition-transform" title="紅筆"></button>
-                            <button id="pen-btn-0284c7" onclick="setPenColor('#0284c7')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-600 border-2 border-white shadow transition-transform" title="藍筆"></button>
-                            <!-- 橡皮擦與復原 -->
-                            <button onclick="toggleEraser()" id="eraser-btn" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition">
-                                🧽 橡皮擦
-                            </button>
-                            <button onclick="undoScratchpad()" id="undo-btn" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition disabled:opacity-40" disabled>
-                                ↩ 復原
-                            </button>
-                            <button onclick="clearScratchpad(true)" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition">
-                                🧹 擦乾淨
-                            </button>
-                            <button onclick="toggleScratchpad()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg transition">
-                                收起 ▴
-                            </button>
-                        </div>
-                    </div>
-                    <div id="scratch-canvas-wrap" class="w-full h-56 sm:h-64 bg-white rounded-xl border border-slate-200 overflow-hidden relative transition-all">
-                        <canvas id="scratch-canvas" class="w-full h-full cursor-crosshair paper-dots"></canvas>
                     </div>
                 </div>
 
@@ -458,7 +465,7 @@
     </main>
 
     <!-- 頁尾資訊與非官方免責聲明 -->
-    <footer class="w-full max-w-5xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
+    <footer class="w-full max-w-6xl xl:max-w-7xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
         <div>依據台灣國小四年級上學期數學課程架構（適用翰林版第 6～10 單元進度）設計｜題目與圖表皆由程式動態隨機生成 ✨</div>
         <div class="text-[11px] text-slate-400 leading-relaxed">
             ※ 免責聲明：本專案為家長自製之免費教育學習工具，僅供居家複習使用，與翰林出版事業股份有限公司無任何官方合作、授權或隸屬關係。
@@ -866,12 +873,12 @@
             if (!wrap || !btn) return;
             Scratchpad.isTall = !Scratchpad.isTall;
             if (Scratchpad.isTall) {
-                wrap.classList.remove('h-56', 'sm:h-64');
-                wrap.classList.add('h-80', 'sm:h-96');
+                wrap.classList.remove('h-56', 'sm:h-64', 'lg:h-[360px]');
+                wrap.classList.add('h-80', 'sm:h-96', 'lg:h-[500px]');
                 btn.textContent = '↕ 收合高度';
             } else {
-                wrap.classList.remove('h-80', 'sm:h-96');
-                wrap.classList.add('h-56', 'sm:h-64');
+                wrap.classList.remove('h-80', 'sm:h-96', 'lg:h-[500px]');
+                wrap.classList.add('h-56', 'sm:h-64', 'lg:h-[360px]');
                 btn.textContent = '↕ 加高畫布';
             }
             Scratchpad.resize(true);

@@ -53,7 +53,7 @@
     <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
 
     <!-- 頂部狀態列 -->
-    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-rose-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
+    <header class="w-full max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-rose-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
         <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
             <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-rose-400 to-pink-600 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
                 📖
@@ -99,7 +99,7 @@
     </header>
 
     <!-- 主畫面容器 -->
-    <main class="w-full max-w-5xl flex-1 flex flex-col justify-center my-4">
+    <main class="w-full max-w-6xl xl:max-w-7xl flex-1 flex flex-col justify-center my-4">
         
         <!-- 1. 關卡選擇大廳 -->
         <section id="lobby-screen" class="animate-pop">
@@ -218,24 +218,24 @@
                     </div>
                 </div>
 
-                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區 -->
-                <div id="mistake-boss-panel" class="hidden mb-5 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3.5 sm:p-4 border-2 border-rose-300 shadow-sm">
-                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
-                        <div id="monster-stage" class="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center">
-                            <div id="monster-svg-wrap" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center"></div>
+                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區（橫式緊湊版） -->
+                <div id="mistake-boss-panel" class="hidden mb-4 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-2.5 sm:px-4 sm:py-2.5 border-2 border-rose-300 shadow-sm">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        <div id="monster-stage" class="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+                            <div id="monster-svg-wrap" class="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center"></div>
                             <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
                                 <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
                                 <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
                             </svg>
                         </div>
-                        <div class="flex-1 w-full">
-                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
-                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1">
+                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full truncate">
                                     😈 錯題魔王登場！答對題目就能削減它的生命值！
                                 </span>
-                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600">HP 5 / 5</span>
+                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600 shrink-0">HP 5 / 5</span>
                             </div>
-                            <div class="relative w-full h-5 sm:h-6 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                            <div class="relative w-full h-4 sm:h-5 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
                                 <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
                                 <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
                                 <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
@@ -244,120 +244,125 @@
                     </div>
                 </div>
 
-                <div id="question-container" class="mb-6">
-                    <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-800">
-                                語文試煉
-                            </span>
-                            <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
-                                第 7～12 課
-                            </span>
-                        </div>
+                <!-- 雙欄響應式工作台（電腦橫式於手寫生字題顯示左題目與詳解／右田字格手寫板；選擇題自動滿版） -->
+                <div id="quiz-workbench" class="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-6">
+                    <div id="quiz-main-col" class="flex-1 min-w-0 w-full">
+                        <div id="question-container" class="mb-6">
+                            <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span id="q-type-tag" class="text-xs font-black px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-800">
+                                        語文試煉
+                                    </span>
+                                    <span id="q-unit-tag" class="text-xs font-bold text-slate-400">
+                                        第 7～12 課
+                                    </span>
+                                </div>
 
-                        <button onclick="toggleHintBox()" id="hint-btn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1 transition shadow-sm">
-                            <span>💡</span>
-                            <span>給我一點小提示</span>
-                        </button>
-                    </div>
-
-                    <div id="hint-box" class="hidden mb-3 bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-3.5 text-amber-950 text-xs sm:text-sm font-bold flex items-start gap-2.5 animate-pop">
-                        <span class="text-xl shrink-0">🧭</span>
-                        <div>
-                            <div class="font-black text-amber-800 mb-0.5">語文線索（先想一想再選喔）：</div>
-                            <div id="hint-text" class="leading-relaxed"></div>
-                        </div>
-                    </div>
-
-                    <div id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed mb-4">
-                        題目載入中...
-                    </div>
-                </div>
-
-                <!-- 4 個選擇題選項按鈕 -->
-                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                </div>
-
-                <!-- 手寫生字田字格考題區 (第六關專用) -->
-                <div id="handwriting-container" class="hidden max-w-xl mx-auto bg-amber-50/70 p-4 sm:p-6 rounded-3xl border-3 border-amber-300">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <span class="text-xs sm:text-sm font-black text-amber-900 flex items-center gap-1.5">
-                            <span>✍️</span> 請在下方田字格內寫出正確國字：
-                        </span>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <button id="hanzi-pen-1e293b" onclick="setHanziPen('#1e293b')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-white shadow ring-2 ring-offset-1 ring-amber-500 scale-110 transition-transform" title="墨黑筆"></button>
-                            <button id="hanzi-pen-be123c" onclick="setHanziPen('#be123c')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-700 border-2 border-white shadow transition-transform" title="朱紅筆"></button>
-                            <button id="hanzi-undo-btn" onclick="undoHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-2.5 py-1 rounded-xl transition disabled:opacity-40" disabled>
-                                ↩ 復原
-                            </button>
-                            <button onclick="clearHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-3 py-1 rounded-xl transition">
-                                🧹 重寫
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="hanzi-empty-warn" class="hidden text-center text-xs sm:text-sm font-black text-rose-600 bg-rose-50 border border-rose-200 rounded-xl py-1.5 px-3 mb-2 animate-pop">
-                        ⚠️ 請先在田字格裡寫出國字，再揭曉標準字核對喔！
-                    </div>
-
-                    <!-- 手寫與標準字並排對照區 -->
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 my-2">
-                        <!-- 左側：孩子手寫田字格 -->
-                        <div class="flex flex-col items-center">
-                            <div id="hanzi-canvas-wrap" class="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl border-4 border-rose-400 shadow-inner overflow-hidden bg-amber-50">
-                                <canvas id="hanzi-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                                <button onclick="toggleHintBox()" id="hint-btn" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-amber-300 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1 transition shadow-sm">
+                                    <span>💡</span>
+                                    <span>給我一點小提示</span>
+                                </button>
                             </div>
-                            <span class="text-xs font-bold text-slate-500 mt-1.5">你的手寫字跡</span>
-                        </div>
 
-                        <!-- 右側：揭曉後的標準楷體字對照卡 -->
-                        <div id="hanzi-answer-box" class="hidden flex-col items-center animate-pop">
-                            <div class="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl border-4 border-emerald-500 bg-white shadow-md flex items-center justify-center relative">
-                                <span id="hanzi-standard-char" class="standard-hanzi-font text-[130px] sm:text-[145px] leading-none text-slate-900 select-text">字</span>
-                                <span class="absolute top-2 right-2.5 text-[11px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">標準字</span>
+                            <div id="hint-box" class="hidden mb-3 bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-3.5 text-amber-950 text-xs sm:text-sm font-bold flex items-start gap-2.5 animate-pop">
+                                <span class="text-xl shrink-0">🧭</span>
+                                <div>
+                                    <div class="font-black text-amber-800 mb-0.5">語文線索（先想一想再選喔）：</div>
+                                    <div id="hint-text" class="leading-relaxed"></div>
+                                </div>
                             </div>
-                            <span class="text-xs font-black text-emerald-700 mt-1.5">請仔細比對部首與筆畫！</span>
+
+                            <div id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed mb-4">
+                                題目載入中...
+                            </div>
+                        </div>
+
+                        <!-- 4 個選擇題選項按鈕 -->
+                        <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                        </div>
+
+                        <!-- 答題回饋與解析區 -->
+                        <div id="feedback-box" class="hidden mt-5 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
+                            <div class="flex items-start gap-3">
+                                <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
+                                <div class="flex-1">
+                                    <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
+                                    <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                                    <span>下一題</span>
+                                    <span>➡️</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 步驟一：揭曉答案按鈕 -->
-                    <div id="hanzi-reveal-step" class="mt-4 text-center">
-                        <button onclick="revealHanziAnswer()" class="btn-3d bg-amber-500 hover:bg-amber-600 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg inline-flex items-center gap-2">
-                            <span>🔍</span>
-                            <span>寫好了！揭曉標準國字並核對</span>
-                        </button>
-                    </div>
+                    <!-- 手寫生字田字格考題區 (第六關專用，寬螢幕置於右側工作欄) -->
+                    <div id="handwriting-container" class="hidden w-full lg:w-[540px] xl:w-[580px] shrink-0 bg-amber-50/70 p-4 sm:p-6 rounded-3xl border-3 border-amber-300 lg:sticky lg:top-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <span class="text-xs sm:text-sm font-black text-amber-900 flex items-center gap-1.5">
+                                <span>✍️</span> 請在下方田字格內寫出正確國字：
+                            </span>
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <button id="hanzi-pen-1e293b" onclick="setHanziPen('#1e293b')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-white shadow ring-2 ring-offset-1 ring-amber-500 scale-110 transition-transform" title="墨黑筆"></button>
+                                <button id="hanzi-pen-be123c" onclick="setHanziPen('#be123c')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-700 border-2 border-white shadow transition-transform" title="朱紅筆"></button>
+                                <button id="hanzi-undo-btn" onclick="undoHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-2.5 py-1 rounded-xl transition disabled:opacity-40" disabled>
+                                    ↩ 復原
+                                </button>
+                                <button onclick="clearHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-3 py-1 rounded-xl transition">
+                                    🧹 重寫
+                                </button>
+                            </div>
+                        </div>
 
-                    <!-- 步驟二：自我誠實核對按鈕 -->
-                    <div id="hanzi-grade-step" class="hidden mt-4 pt-3 border-t-2 border-amber-200/80 text-center animate-pop">
-                        <p class="text-xs sm:text-sm font-black text-slate-700 mb-3">比對右邊的標準國字，筆畫和部首都有寫對嗎？</p>
-                        <div class="flex flex-wrap justify-center gap-3">
-                            <button onclick="gradeHanzi(true)" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black px-5 py-3 rounded-2xl text-sm sm:text-base flex items-center gap-1.5">
-                                <span>⭕</span>
-                                <span>我寫對了！(+100分)</span>
+                        <div id="hanzi-empty-warn" class="hidden text-center text-xs sm:text-sm font-black text-rose-600 bg-rose-50 border border-rose-200 rounded-xl py-1.5 px-3 mb-2 animate-pop">
+                            ⚠️ 請先在田字格裡寫出國字，再揭曉標準字核對喔！
+                        </div>
+
+                        <!-- 手寫與標準字並排對照區 -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 my-2">
+                            <!-- 左側：孩子手寫田字格 -->
+                            <div class="flex flex-col items-center">
+                                <div id="hanzi-canvas-wrap" class="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl border-4 border-rose-400 shadow-inner overflow-hidden bg-amber-50">
+                                    <canvas id="hanzi-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                                </div>
+                                <span class="text-xs font-bold text-slate-500 mt-1.5">你的手寫字跡</span>
+                            </div>
+
+                            <!-- 右側：揭曉後的標準楷體字對照卡 -->
+                            <div id="hanzi-answer-box" class="hidden flex-col items-center animate-pop">
+                                <div class="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl border-4 border-emerald-500 bg-white shadow-md flex items-center justify-center relative">
+                                    <span id="hanzi-standard-char" class="standard-hanzi-font text-[130px] sm:text-[145px] leading-none text-slate-900 select-text">字</span>
+                                    <span class="absolute top-2 right-2.5 text-[11px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">標準字</span>
+                                </div>
+                                <span class="text-xs font-black text-emerald-700 mt-1.5">請仔細比對部首與筆畫！</span>
+                            </div>
+                        </div>
+
+                        <!-- 步驟一：揭曉答案按鈕 -->
+                        <div id="hanzi-reveal-step" class="mt-4 text-center">
+                            <button onclick="revealHanziAnswer()" class="btn-3d bg-amber-500 hover:bg-amber-600 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg inline-flex items-center gap-2">
+                                <span>🔍</span>
+                                <span>寫好了！揭曉標準國字並核對</span>
                             </button>
-                            <button onclick="gradeHanzi(false)" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-5 py-3 rounded-2xl text-sm sm:text-base flex items-center gap-1.5">
-                                <span>❌</span>
-                                <span>寫錯了，收進錯題本</span>
-                            </button>
                         </div>
-                    </div>
-                </div>
 
-                <!-- 答題回饋與解析區 -->
-                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
-                    <div class="flex items-start gap-3">
-                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
-                        <div class="flex-1">
-                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
-                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                        <!-- 步驟二：自我誠實核對按鈕 -->
+                        <div id="hanzi-grade-step" class="hidden mt-4 pt-3 border-t-2 border-amber-200/80 text-center animate-pop">
+                            <p class="text-xs sm:text-sm font-black text-slate-700 mb-3">比對右邊的標準國字，筆畫和部首都有寫對嗎？</p>
+                            <div class="flex flex-wrap justify-center gap-3">
+                                <button onclick="gradeHanzi(true)" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black px-5 py-3 rounded-2xl text-sm sm:text-base flex items-center gap-1.5">
+                                    <span>⭕</span>
+                                    <span>我寫對了！(+100分)</span>
+                                </button>
+                                <button onclick="gradeHanzi(false)" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-5 py-3 rounded-2xl text-sm sm:text-base flex items-center gap-1.5">
+                                    <span>❌</span>
+                                    <span>寫錯了，收進錯題本</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
-                            <span>下一題</span>
-                            <span>➡️</span>
-                        </button>
                     </div>
                 </div>
 
@@ -408,7 +413,7 @@
     </main>
 
     <!-- 頁尾資訊與非官方免責聲明 -->
-    <footer class="w-full max-w-5xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
+    <footer class="w-full max-w-6xl xl:max-w-7xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
         <div>依據台灣國小四年級上學期國語文課程架構（適用南一版第 7～12 課進度）設計｜題目例句皆由程式原創編寫 ✨</div>
         <div class="text-[11px] text-slate-400 leading-relaxed">
             ※ 免責聲明：本專案為家長自製之免費教育學習工具，僅供居家複習使用，與南一書局企業股份有限公司無任何官方合作、授權或隸屬關係。
