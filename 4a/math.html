@@ -83,6 +83,9 @@
         /* 手寫草稿畫布：點點紙與直式方格紙雙模式 */
         #scratch-canvas {
             touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         .paper-dots {
             background-image: radial-gradient(#cbd5e1 1.3px, transparent 1.3px);
@@ -361,18 +364,30 @@
                             <button onclick="togglePaperStyle()" id="paper-style-btn" class="bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 text-xs font-black px-2.5 py-1 rounded-lg transition">
                                 ⊞ 切換直式方格紙
                             </button>
-                            <button onclick="setPenColor('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white shadow" title="黑筆"></button>
-                            <button onclick="setPenColor('#e11d48')" class="w-6 h-6 rounded-full bg-rose-600 border-2 border-white shadow" title="紅筆"></button>
-                            <button onclick="setPenColor('#0284c7')" class="w-6 h-6 rounded-full bg-sky-600 border-2 border-white shadow" title="藍筆"></button>
-                            <button onclick="clearScratchpad()" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg">
+                            <!-- 切換畫布高度 -->
+                            <button onclick="toggleScratchpadHeight()" id="canvas-size-btn" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-black px-2.5 py-1 rounded-lg transition">
+                                ↕ 加高畫布
+                            </button>
+                            <!-- 畫筆顏色選擇 -->
+                            <button id="pen-btn-1e293b" onclick="setPenColor('#1e293b')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-white shadow ring-2 ring-offset-1 ring-amber-500 scale-110 transition-transform" title="黑筆"></button>
+                            <button id="pen-btn-e11d48" onclick="setPenColor('#e11d48')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-600 border-2 border-white shadow transition-transform" title="紅筆"></button>
+                            <button id="pen-btn-0284c7" onclick="setPenColor('#0284c7')" class="pen-color-btn w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-600 border-2 border-white shadow transition-transform" title="藍筆"></button>
+                            <!-- 橡皮擦與復原 -->
+                            <button onclick="toggleEraser()" id="eraser-btn" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition">
+                                🧽 橡皮擦
+                            </button>
+                            <button onclick="undoScratchpad()" id="undo-btn" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition disabled:opacity-40" disabled>
+                                ↩ 復原
+                            </button>
+                            <button onclick="clearScratchpad(true)" class="bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition">
                                 🧹 擦乾淨
                             </button>
-                            <button onclick="toggleScratchpad()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg">
+                            <button onclick="toggleScratchpad()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg transition">
                                 收起 ▴
                             </button>
                         </div>
                     </div>
-                    <div class="w-full h-48 sm:h-56 bg-white rounded-xl border border-slate-200 overflow-hidden relative">
+                    <div id="scratch-canvas-wrap" class="w-full h-56 sm:h-64 bg-white rounded-xl border border-slate-200 overflow-hidden relative transition-all">
                         <canvas id="scratch-canvas" class="w-full h-full cursor-crosshair paper-dots"></canvas>
                     </div>
                 </div>
@@ -620,92 +635,246 @@
         }
 
         /* ==========================================================================
-           2. 手寫計算草稿板 (改用 Pointer Events 支援 iPad / Apple Pencil 與 Retina 精準對位)
+           2. 手寫計算草稿板 (Pointer Events 跨平台防誤觸、分段繪製與橡皮擦/復原支援)
            ========================================================================== */
         const Scratchpad = {
             canvas: null,
             ctx: null,
             drawing: false,
+            activePointerId: null,
+            activePointerType: null,
+            lastX: 0,
+            lastY: 0,
             color: '#1e293b',
+            isErasing: false,
+            isTall: false,
             paperMode: 'dots', // 'dots' 或 'grid'
+            dpr: 1,
+            history: [],
+            maxHistory: 15,
+            resizeObserver: null,
 
             init() {
                 this.canvas = document.getElementById('scratch-canvas');
                 if (!this.canvas) return;
                 this.ctx = this.canvas.getContext('2d');
                 this.resize();
+                this.updateToolUI();
+                this.updateUndoBtn();
 
                 const getPos = (e) => {
                     const rect = this.canvas.getBoundingClientRect();
+                    const cssW = this.canvas.clientWidth || rect.width || 1;
+                    const cssH = this.canvas.clientHeight || rect.height || 1;
+                    const scaleX = rect.width > 0 ? cssW / rect.width : 1;
+                    const scaleY = rect.height > 0 ? cssH / rect.height : 1;
                     return {
-                        x: e.clientX - rect.left,
-                        y: e.clientY - rect.top
+                        x: (e.clientX - rect.left) * scaleX,
+                        y: (e.clientY - rect.top) * scaleY
                     };
                 };
 
                 const startDraw = (e) => {
-                    const rect = this.canvas.getBoundingClientRect();
+                    // 僅允許滑鼠左鍵，避免右鍵或側鍵觸發畫線造成狀態卡住
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    if (e.cancelable) e.preventDefault();
+
+                    // 鎖定單一 activePointerId 防止手掌與多指誤觸；手寫筆 (pen) 可接管觸控 (touch)
+                    if (this.drawing && this.activePointerId !== null && this.activePointerId !== e.pointerId) {
+                        if (e.pointerType === 'pen' && this.activePointerType === 'touch') {
+                            if (this.canvas.releasePointerCapture) {
+                                try {
+                                    if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(this.activePointerId)) {
+                                        this.canvas.releasePointerCapture(this.activePointerId);
+                                    }
+                                } catch (_) {}
+                            }
+                        } else {
+                            return;
+                        }
+                    }
+
+                    const parent = this.canvas.parentElement;
                     const dpr = window.devicePixelRatio || 1;
-                    if (Math.abs(this.canvas.width - Math.round(rect.width * dpr)) > 2) {
+                    if (parent && (
+                        Math.abs(this.canvas.width - Math.round(parent.clientWidth * dpr)) > 2 ||
+                        Math.abs(this.canvas.height - Math.round(parent.clientHeight * dpr)) > 2
+                    )) {
                         this.resize(true);
                     }
 
+                    if (!this.drawing) {
+                        this.saveHistory();
+                    }
+
                     this.drawing = true;
+                    this.activePointerId = e.pointerId !== undefined ? e.pointerId : null;
+                    this.activePointerType = e.pointerType || 'mouse';
+
                     if (this.canvas.setPointerCapture && e.pointerId !== undefined) {
                         try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
                     }
+
                     const pos = getPos(e);
+                    this.lastX = pos.x;
+                    this.lastY = pos.y;
+
+                    this.applyStrokeStyle(this.activePointerType);
                     this.ctx.beginPath();
                     this.ctx.moveTo(pos.x, pos.y);
-                    this.ctx.lineWidth = e.pointerType === 'pen' ? 2.6 : 3.2;
-                    this.ctx.lineCap = 'round';
-                    this.ctx.lineJoin = 'round';
-                    this.ctx.strokeStyle = this.color;
-                    this.ctx.lineTo(pos.x + 0.1, pos.y + 0.1);
+                    this.ctx.lineTo(pos.x + 0.01, pos.y + 0.01);
                     this.ctx.stroke();
                 };
 
                 const moveDraw = (e) => {
                     if (!this.drawing) return;
+                    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
                     if (e.cancelable) e.preventDefault();
-                    const pos = getPos(e);
-                    this.ctx.lineWidth = e.pointerType === 'pen' ? 2.6 : 3.2;
-                    this.ctx.lineCap = 'round';
-                    this.ctx.lineJoin = 'round';
-                    this.ctx.strokeStyle = this.color;
-                    this.ctx.lineTo(pos.x, pos.y);
-                    this.ctx.stroke();
+
+                    const coalesced = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
+                    const events = (coalesced && coalesced.length > 0) ? coalesced : [e];
+                    const pointerType = e.pointerType || this.activePointerType || 'mouse';
+
+                    this.applyStrokeStyle(pointerType);
+                    for (let i = 0; i < events.length; i++) {
+                        const ev = events[i];
+                        const pos = getPos(ev.clientX !== undefined ? ev : e);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.lastX, this.lastY);
+                        this.ctx.lineTo(pos.x, pos.y);
+                        this.ctx.stroke();
+                        this.lastX = pos.x;
+                        this.lastY = pos.y;
+                    }
                 };
 
                 const endDraw = (e) => {
                     if (!this.drawing) return;
+                    if (this.activePointerId !== null && e.pointerId !== undefined && e.pointerId !== this.activePointerId) {
+                        return;
+                    }
                     this.drawing = false;
-                    if (this.canvas.releasePointerCapture && e.pointerId !== undefined) {
-                        try { this.canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+                    const finishedId = this.activePointerId;
+                    this.activePointerId = null;
+                    this.activePointerType = null;
+                    this.ctx.globalCompositeOperation = 'source-over';
+                    if (this.canvas.releasePointerCapture && finishedId !== null) {
+                        try {
+                            if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(finishedId)) {
+                                this.canvas.releasePointerCapture(finishedId);
+                            }
+                        } catch (_) {}
                     }
                 };
 
-                this.canvas.addEventListener('pointerdown', startDraw);
-                this.canvas.addEventListener('pointermove', moveDraw);
+                this.canvas.addEventListener('pointerdown', startDraw, { passive: false });
+                this.canvas.addEventListener('pointermove', moveDraw, { passive: false });
                 this.canvas.addEventListener('pointerup', endDraw);
                 this.canvas.addEventListener('pointercancel', endDraw);
+                this.canvas.addEventListener('lostpointercapture', endDraw);
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                if (typeof ResizeObserver === 'function' && this.canvas.parentElement) {
+                    this.resizeObserver = new ResizeObserver(() => this.resize(true));
+                    this.resizeObserver.observe(this.canvas.parentElement);
+                }
                 window.addEventListener('resize', () => this.resize(true));
+            },
+
+            applyStrokeStyle(pointerType) {
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                if (this.isErasing) {
+                    this.ctx.globalCompositeOperation = 'destination-out';
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+                    this.ctx.lineWidth = pointerType === 'pen' ? 18 : 24;
+                } else {
+                    this.ctx.globalCompositeOperation = 'source-over';
+                    this.ctx.strokeStyle = this.color;
+                    this.ctx.lineWidth = pointerType === 'pen' ? 2.6 : 3.2;
+                }
+            },
+
+            saveHistory() {
+                if (!this.ctx || !this.canvas || this.canvas.width <= 0 || this.canvas.height <= 0) return;
+                try {
+                    const snapshot = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                    this.history.push(snapshot);
+                    if (this.history.length > this.maxHistory) {
+                        this.history.shift();
+                    }
+                    this.updateUndoBtn();
+                } catch (_) {}
+            },
+
+            undo() {
+                if (!this.ctx || !this.canvas || this.history.length === 0) return;
+                const prev = this.history.pop();
+                this.ctx.save();
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                if (prev) {
+                    this.ctx.putImageData(prev, 0, 0);
+                }
+                this.ctx.restore();
+                this.updateUndoBtn();
+            },
+
+            updateUndoBtn() {
+                const undoBtn = document.getElementById('undo-btn');
+                if (undoBtn) {
+                    undoBtn.disabled = this.history.length === 0;
+                }
+            },
+
+            updateToolUI() {
+                const colorIds = {
+                    '#1e293b': 'pen-btn-1e293b',
+                    '#e11d48': 'pen-btn-e11d48',
+                    '#0284c7': 'pen-btn-0284c7'
+                };
+                Object.entries(colorIds).forEach(([hex, id]) => {
+                    const btn = document.getElementById(id);
+                    if (!btn) return;
+                    const isActive = !this.isErasing && this.color === hex;
+                    btn.classList.toggle('ring-2', isActive);
+                    btn.classList.toggle('ring-offset-1', isActive);
+                    btn.classList.toggle('ring-amber-500', isActive);
+                    btn.classList.toggle('scale-110', isActive);
+                });
+
+                const eraserBtn = document.getElementById('eraser-btn');
+                if (eraserBtn) {
+                    if (this.isErasing) {
+                        eraserBtn.className = 'bg-rose-100 text-rose-700 border border-rose-400 ring-2 ring-rose-300 text-xs font-black px-2.5 py-1 rounded-lg transition';
+                    } else {
+                        eraserBtn.className = 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold px-2.5 py-1 rounded-lg transition';
+                    }
+                }
+
+                if (this.canvas) {
+                    this.canvas.classList.toggle('cursor-crosshair', !this.isErasing);
+                    this.canvas.classList.toggle('cursor-cell', this.isErasing);
+                }
             },
 
             resize(preserveDrawing = false) {
                 if (!this.canvas) return;
                 const parent = this.canvas.parentElement;
                 if (!parent) return;
-                const rect = parent.getBoundingClientRect();
-                if (rect.width <= 0 || rect.height <= 0) return;
+                // 使用 clientWidth / clientHeight 避免 .animate-pop 縮放動畫期間尺寸算錯
+                const width = parent.clientWidth;
+                const height = parent.clientHeight;
+                if (width <= 0 || height <= 0) return;
 
                 const dpr = window.devicePixelRatio || 1;
-                const targetW = Math.round(rect.width * dpr);
-                const targetH = Math.round(rect.height * dpr);
+                const targetW = Math.round(width * dpr);
+                const targetH = Math.round(height * dpr);
 
-                if (this.canvas.width === targetW && this.canvas.height === targetH) return;
+                if (this.canvas.width === targetW && this.canvas.height === targetH && this.dpr === dpr) return;
 
                 let tempCanvas = null;
+                const prevDpr = this.dpr || dpr;
                 if (preserveDrawing && this.canvas.width > 0 && this.canvas.height > 0) {
                     tempCanvas = document.createElement('canvas');
                     tempCanvas.width = this.canvas.width;
@@ -713,12 +882,16 @@
                     tempCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
                 }
 
+                this.dpr = dpr;
                 this.canvas.width = targetW;
                 this.canvas.height = targetH;
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
                 if (tempCanvas) {
-                    this.ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+                    this.ctx.save();
+                    this.ctx.globalCompositeOperation = 'source-over';
+                    this.ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width / prevDpr, tempCanvas.height / prevDpr);
+                    this.ctx.restore();
                 }
             }
         };
@@ -757,16 +930,59 @@
             }
         }
 
+        function toggleScratchpadHeight() {
+            SoundEngine.click();
+            const wrap = document.getElementById('scratch-canvas-wrap');
+            const btn = document.getElementById('canvas-size-btn');
+            if (!wrap || !btn) return;
+            Scratchpad.isTall = !Scratchpad.isTall;
+            if (Scratchpad.isTall) {
+                wrap.classList.remove('h-56', 'sm:h-64');
+                wrap.classList.add('h-80', 'sm:h-96');
+                btn.textContent = '↕ 收合高度';
+            } else {
+                wrap.classList.remove('h-80', 'sm:h-96');
+                wrap.classList.add('h-56', 'sm:h-64');
+                btn.textContent = '↕ 加高畫布';
+            }
+            Scratchpad.resize(true);
+            requestAnimationFrame(() => Scratchpad.resize(true));
+        }
+
         function setPenColor(hex) {
             SoundEngine.click();
             Scratchpad.color = hex;
+            Scratchpad.isErasing = false;
+            Scratchpad.updateToolUI();
         }
 
-        function clearScratchpad() {
+        function toggleEraser() {
             SoundEngine.click();
+            Scratchpad.isErasing = !Scratchpad.isErasing;
+            Scratchpad.updateToolUI();
+        }
+
+        function undoScratchpad() {
+            if (Scratchpad.history.length === 0) return;
+            SoundEngine.click();
+            Scratchpad.undo();
+        }
+
+        function clearScratchpad(fromUser = false) {
+            if (fromUser) SoundEngine.click();
             if (Scratchpad.ctx && Scratchpad.canvas) {
-                const dpr = window.devicePixelRatio || 1;
-                Scratchpad.ctx.clearRect(0, 0, Scratchpad.canvas.width / dpr, Scratchpad.canvas.height / dpr);
+                if (fromUser) {
+                    Scratchpad.saveHistory();
+                } else {
+                    Scratchpad.history = [];
+                    Scratchpad.isErasing = false;
+                    Scratchpad.updateToolUI();
+                }
+                Scratchpad.ctx.save();
+                Scratchpad.ctx.setTransform(1, 0, 0, 1, 0, 0);
+                Scratchpad.ctx.clearRect(0, 0, Scratchpad.canvas.width, Scratchpad.canvas.height);
+                Scratchpad.ctx.restore();
+                Scratchpad.updateUndoBtn();
             }
         }
 
