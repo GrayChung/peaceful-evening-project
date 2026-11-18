@@ -536,6 +536,9 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     gameState = { ...gameState, ...parsed };
+                    if (gameState.stars && Object.prototype.hasOwnProperty.call(gameState.stars, 88)) {
+                        delete gameState.stars[88];
+                    }
                 }
             } catch (e) {
                 console.warn('無法讀取存檔', e);
@@ -604,7 +607,7 @@
         }
 
         function updateHeaderStats() {
-            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
             document.getElementById('total-score').textContent = gameState.totalScore;
 
@@ -835,7 +838,7 @@
                     return {
                         unitId: 32,
                         visual: createLightRefractionSVG(),
-                        hint: '觀察上圖，吸管並沒有真的折斷，而是光線從「水」進入「空氣」時行進方向發生偏折了！',
+                        hint: '觀察下圖，吸管並沒有真的折斷，而是光線從「水」進入「空氣」時行進方向發生偏折了！',
                         text: `把一根直吸管斜放進裝水的透明玻璃杯裡，從側面看吸管好像在水面處「折斷」了，這是因為光的哪一種現象？`,
                         correct: '光的折射現象（光從水進入空氣時行進方向偏折）',
                         options: shuffle([
@@ -916,7 +919,7 @@
                     return {
                         unitId: 41,
                         visual: createBulbCircuitSVG('closed'),
-                        hint: '觀察上圖，一條電線接在燈泡側邊「金屬螺紋」，另一條接在「底部接點」，並分別連到電池正極與負極，電流能順暢繞一圈嗎？',
+                        hint: '觀察下圖，一條電線接在燈泡側邊「金屬螺紋」，另一條接在「底部接點」，並分別連到電池正極與負極，電流能順暢繞一圈嗎？',
                         text: `觀察下方的電路實驗圖（接法 A），兩條電線分別連接電池正、負極與燈泡的「金屬螺紋」和「底部接點」，請問燈泡會發亮嗎？`,
                         correct: '會發亮，因為形成了完整的「通路」',
                         options: shuffle([
@@ -932,7 +935,7 @@
                     return {
                         unitId: 41,
                         visual: createBulbCircuitSVG('open'),
-                        hint: '看看上圖，兩條電線全都擠在側邊「金屬螺紋」上，沒有接到最底下的「底部接點」，電流沒有經過燈絲喔！',
+                        hint: '看看下圖，兩條電線全都擠在側邊「金屬螺紋」上，沒有接到最底下的「底部接點」，電流沒有經過燈絲喔！',
                         text: `觀察下方的電路實驗圖（接法 B），兩條電線都接在燈泡側邊的「金屬螺紋」上，請問燈泡會發亮嗎？`,
                         correct: '不會發亮，因為沒有連接底部接點，無法形成通路（屬於斷路）',
                         options: shuffle([
@@ -1209,10 +1212,27 @@
                 return shuffle(allTemplates);
             }
 
-            const list = [];
-            const usedTexts = new Set();
-            let attempts = 0;
+            // 以洗牌輪播牌堆抽題，避免高題數時連續出現相同題型
+            const decks = {};
+            const drawFromUnit = (uid, prevText) => {
+                if (!decks[uid] || decks[uid].length === 0) {
+                    decks[uid] = shuffle(QuestionBank[uid]);
+                }
+                let q = decks[uid].pop()();
+                if (q.text === prevText && QuestionBank[uid].length > 1) {
+                    if (decks[uid].length === 0) {
+                        decks[uid] = shuffle(QuestionBank[uid]);
+                    }
+                    const altIdx = decks[uid].findIndex(fn => fn().text !== prevText);
+                    if (altIdx !== -1) {
+                        const [altFn] = decks[uid].splice(altIdx, 1);
+                        q = altFn();
+                    }
+                }
+                return q;
+            };
 
+            const list = [];
             let unitSchedule = [];
             if (stageId === 99) {
                 for (let i = 0; i < count; i++) {
@@ -1221,25 +1241,12 @@
                 unitSchedule = shuffle(unitSchedule);
             }
 
-            while (list.length < count && attempts < count * 30) {
-                attempts++;
-                const targetUnit = stageId === 99
-                    ? unitSchedule[list.length % unitSchedule.length]
-                    : stageId;
-                const generatorFn = pickRandom(QuestionBank[targetUnit]);
-                const q = generatorFn();
-                if (!usedTexts.has(q.text)) {
-                    usedTexts.add(q.text);
-                    list.push(q);
-                }
-            }
-
             while (list.length < count) {
                 const targetUnit = stageId === 99
                     ? unitSchedule[list.length % unitSchedule.length]
                     : stageId;
-                const generatorFn = pickRandom(QuestionBank[targetUnit]);
-                list.push(generatorFn());
+                const prevText = list.length > 0 ? list[list.length - 1].text : null;
+                list.push(drawFromUnit(targetUnit, prevText));
             }
 
             return list;
@@ -1302,7 +1309,7 @@
         function openMockExamModal() {
             SoundEngine.click();
             const mockInput = document.getElementById('mock-custom-input');
-            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            if (mockInput) mockInput.value = typeof gameState.questionCountPref === 'number' ? gameState.questionCountPref : 20;
             document.getElementById('mock-exam-modal').classList.remove('hidden');
         }
 
@@ -1354,15 +1361,20 @@
 
             const battleQuestions = gameState.mistakes.map(m => {
                 if (m.rawQuestion) {
-                    return { ...m.rawQuestion, isMistakeRetry: true };
+                    const cloned = { ...m.rawQuestion, isMistakeRetry: true };
+                    if (Array.isArray(cloned.options)) {
+                        cloned.options = shuffle(cloned.options);
+                    }
+                    return cloned;
                 }
+                const opts = Array.from(new Set([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道'].filter(Boolean)));
                 return {
                     unitId: m.unitId || 31,
                     hint: `這題上次誤選了「${m.wrongAnswer}」，再仔細回想科學實驗原理喔！`,
                     text: m.questionText,
                     visual: m.visual || null,
                     correct: m.correctAnswer,
-                    options: shuffle([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道']),
+                    options: shuffle(opts),
                     explanation: m.explanation,
                     isMistakeRetry: true
                 };
@@ -1604,7 +1616,7 @@
                 trophy = '🌱';
             }
 
-            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+            if (!currentSession.isMistakeBattle && earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
                 gameState.stars[currentSession.stageId] = earnedStars;
             }
             saveProgress();
@@ -1764,6 +1776,39 @@
             renderLobby();
             closeConfirmModal();
         }
+
+        // 實體鍵盤快捷鍵支援（作答區）
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const quizScreen = document.getElementById('quiz-screen');
+            if (!quizScreen || quizScreen.classList.contains('hidden')) return;
+            const modalOpen = ['mistake-modal', 'confirm-modal', 'mock-exam-modal'].some(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            });
+            if (modalOpen) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+            const q = currentSession.questions[currentSession.currentIndex];
+            if (!q) return;
+
+            if (currentSession.answered) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+                return;
+            }
+
+            if (Array.isArray(q.options)) {
+                const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, a: 0, b: 1, c: 2, d: 3 };
+                const idx = keyMap[e.key.toLowerCase()];
+                if (idx !== undefined && idx < q.options.length) {
+                    e.preventDefault();
+                    selectOption(idx);
+                }
+            }
+        });
 
         window.onload = function () {
             loadProgress();

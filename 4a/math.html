@@ -1027,6 +1027,9 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     gameState = { ...gameState, ...parsed };
+                    if (gameState.stars && Object.prototype.hasOwnProperty.call(gameState.stars, 88)) {
+                        delete gameState.stars[88];
+                    }
                 }
             } catch (e) {
                 console.warn('無法讀取存檔', e);
@@ -1097,7 +1100,7 @@
         }
 
         function updateHeaderStats() {
-            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
             document.getElementById('total-score').textContent = gameState.totalScore;
 
@@ -1397,8 +1400,8 @@
            ========================================================================== */
         const QuestionGenerators = {
             // 第六單元：除法（含商中間有 0、末尾有 0 消去法餘數還原、多位數直式與估算）
-            6: () => {
-                const template = randInt(1, 6);
+            6: (forcedTemplate = null) => {
+                const template = forcedTemplate || randInt(1, 6);
 
                 if (template === 1) {
                     // 題型 A：三、四位數除以二位數整除商數計算
@@ -1576,18 +1579,24 @@
             },
 
             // 第七單元：三角形與全等（新增三邊長關係判別、全等對應邊角、等腰內角與周長）
-            7: () => {
-                const template = randInt(1, 5);
+            7: (forcedTemplate = null) => {
+                const template = forcedTemplate || randInt(1, 5);
 
                 if (template === 1) {
-                    // 題型 A：全等三角形對應邊與對應角
+                    // 題型 A：全等三角形對應邊與對應角（確保三邊符合兩邊和大於第三邊且數值皆不重複）
                     const askAngle = Math.random() < 0.5;
-                    const sAB = randInt(6, 11);
-                    const sBC = randInt(8, 14);
-                    const sAC = randInt(9, 15);
-                    const aA = randInt(50, 75);
-                    const aB = randInt(55, 80);
-                    const aC = 180 - aA - aB;
+                    const sAB = randInt(6, 9);
+                    const sBC = randInt(sAB + 1, sAB + 4);
+                    const sAC = randInt(sBC + 1, sAB + sBC - 2);
+                    const angleSets = [
+                        [45, 60, 75],
+                        [50, 60, 70],
+                        [40, 65, 75],
+                        [50, 55, 75],
+                        [45, 65, 70],
+                        [35, 65, 80]
+                    ];
+                    const [aA, aB, aC] = shuffle(pickRandom(angleSets));
 
                     if (askAngle) {
                         const targetPick = pickRandom([
@@ -1787,8 +1796,8 @@
             },
 
             // 第八單元：兩步驟問題與併式
-            8: () => {
-                const template = randInt(1, 4);
+            8: (forcedTemplate = null) => {
+                const template = forcedTemplate || randInt(1, 4);
 
                 if (template === 1) {
                     const money = pickRandom([500, 1000]);
@@ -1888,8 +1897,8 @@
             },
 
             // 第九單元：二位小數（新增數線定位判讀題、單位換算加減法、整數減二位小數、化聚與比較）
-            9: () => {
-                const template = randInt(1, 5);
+            9: (forcedTemplate = null) => {
+                const template = forcedTemplate || randInt(1, 5);
 
                 if (template === 1) {
                     // 題型 A：二位小數加法生活應用（含單位換算如 1 公尺 8 公分 = 1.08 公尺）
@@ -2015,8 +2024,10 @@
             },
 
             // 第十單元：統計圖表
-            10: () => {
-                const isLineChart = Math.random() < 0.45;
+            10: (forcedTemplate = null) => {
+                const template = forcedTemplate || randInt(1, 4);
+                const isLineChart = template >= 3;
+                const qSub = (template === 1 || template === 3) ? 1 : 2;
 
                 if (!isLineChart) {
                     const scenarios = [
@@ -2033,7 +2044,6 @@
                     const minIdx = vals.indexOf(minVal);
 
                     const svg = createBarChartSVG(sc.title, sc.unit, sc.labels, vals, 40, 10);
-                    const qSub = randInt(1, 2);
 
                     if (qSub === 1) {
                         const diff = maxVal - minVal;
@@ -2076,21 +2086,22 @@
                     }
                 } else {
                     const times = ['8時', '10時', '12時', '14時', '16時'];
-                    const baseT = randInt(20, 23);
+                    const baseT = randInt(20, 22);
+                    const firstSteeper = Math.random() < 0.5;
+                    const diff1 = firstSteeper ? randInt(4, 5) : randInt(1, 2);
+                    const diff2 = firstSteeper ? randInt(1, 2) : randInt(4, 5);
+                    const peak = baseT + diff1 + diff2;
                     const vals = [
                         baseT,
-                        baseT + randInt(2, 3),
-                        baseT + randInt(5, 7),
-                        baseT + randInt(4, 6),
+                        baseT + diff1,
+                        peak,
+                        peak - randInt(1, 2),
                         baseT + randInt(1, 2)
                     ];
                     const svg = createLineChartSVG('台北市某日白天氣溫變化折線圖', '℃', times, vals, 18, 32, 2);
 
-                    const qSub = randInt(1, 2);
                     if (qSub === 1) {
-                        const diff1 = vals[1] - vals[0];
-                        const diff2 = vals[2] - vals[1];
-                        const bestInterval = diff2 >= diff1 ? '10時到12時' : '8時到10時';
+                        const bestInterval = diff2 > diff1 ? '10時到12時' : '8時到10時';
                         return {
                             unitId: 10,
                             autoScratchpad: false,
@@ -2138,17 +2149,8 @@
                 const allTemplates = [];
                 targetUnits.forEach(uid => {
                     const maxT = templateCounts[uid];
-                    const seenForUnit = new Set();
-                    let guard = 0;
-                    while (seenForUnit.size < maxT && guard < 120) {
-                        guard++;
-                        const q = QuestionGenerators[uid]();
-                        // 依據題目提示文字作為題型指紋，確保每種題型模板各抽 1 題
-                        const fingerprint = q.hint.slice(0, 12);
-                        if (!seenForUnit.has(fingerprint)) {
-                            seenForUnit.add(fingerprint);
-                            allTemplates.push(q);
-                        }
+                    for (let t = 1; t <= maxT; t++) {
+                        allTemplates.push(QuestionGenerators[uid](t));
                     }
                 });
                 return shuffle(allTemplates);
@@ -2246,7 +2248,7 @@
         function openMockExamModal() {
             SoundEngine.click();
             const mockInput = document.getElementById('mock-custom-input');
-            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            if (mockInput) mockInput.value = typeof gameState.questionCountPref === 'number' ? gameState.questionCountPref : 20;
             document.getElementById('mock-exam-modal').classList.remove('hidden');
         }
 
@@ -2301,9 +2303,13 @@
 
             // 將錯題本中的題目轉換為可作答物件（保留原題、圖形與解答）
             const battleQuestions = gameState.mistakes.map(m => {
-                // 若有儲存完整題目資料則直接使用，否則重建選擇題選項
+                // 若有儲存完整題目資料則直接使用，並重新洗牌選項順序
                 if (m.rawQuestion) {
-                    return { ...m.rawQuestion, isMistakeRetry: true };
+                    const cloned = { ...m.rawQuestion, isMistakeRetry: true };
+                    if (Array.isArray(cloned.options)) {
+                        cloned.options = shuffle(cloned.options);
+                    }
+                    return cloned;
                 }
                 const distractorPool = [m.wrongAnswer, '不知道', '再算一次', '以上皆非'].filter(Boolean);
                 return {
@@ -2642,7 +2648,7 @@
                 trophy = '🌱';
             }
 
-            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+            if (!currentSession.isMistakeBattle && earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
                 gameState.stars[currentSession.stageId] = earnedStars;
             }
             saveProgress();
@@ -2803,6 +2809,50 @@
             renderLobby();
             closeConfirmModal();
         }
+
+        // 實體鍵盤快捷鍵支援（作答區）
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const quizScreen = document.getElementById('quiz-screen');
+            if (!quizScreen || quizScreen.classList.contains('hidden')) return;
+            const modalOpen = ['mistake-modal', 'confirm-modal', 'mock-exam-modal'].some(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            });
+            if (modalOpen) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+            const q = currentSession.questions[currentSession.currentIndex];
+            if (!q) return;
+
+            if (currentSession.answered) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+                return;
+            }
+
+            if (q.inputType === 'keypad') {
+                if (/^[0-9]$/.test(e.key) || e.key === '.') {
+                    e.preventDefault();
+                    pressKey(e.key);
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    pressKey('BACK');
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitKeypadAnswer();
+                }
+            } else if (Array.isArray(q.options)) {
+                const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, a: 0, b: 1, c: 2, d: 3 };
+                const idx = keyMap[e.key.toLowerCase()];
+                if (idx !== undefined && idx < q.options.length) {
+                    e.preventDefault();
+                    selectOption(idx);
+                }
+            }
+        });
 
         // 初始化應用程式
         window.onload = function () {

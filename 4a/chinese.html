@@ -70,6 +70,9 @@
         /* 田字格手寫板樣式 */
         #hanzi-canvas {
             touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
             background-color: #fffbeb;
             background-image:
                 linear-gradient(to right, transparent 49.5%, #fca5a5 49.5%, #fca5a5 50.5%, transparent 50.5%),
@@ -290,20 +293,27 @@
                         <span class="text-xs sm:text-sm font-black text-amber-900 flex items-center gap-1.5">
                             <span>✍️</span> 請在下方田字格內寫出正確國字：
                         </span>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="setHanziPen('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white shadow" title="墨黑筆"></button>
-                            <button onclick="setHanziPen('#be123c')" class="w-6 h-6 rounded-full bg-rose-700 border-2 border-white shadow" title="朱紅筆"></button>
-                            <button onclick="clearHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-3 py-1 rounded-xl">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button id="hanzi-pen-1e293b" onclick="setHanziPen('#1e293b')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800 border-2 border-white shadow ring-2 ring-offset-1 ring-amber-500 scale-110 transition-transform" title="墨黑筆"></button>
+                            <button id="hanzi-pen-be123c" onclick="setHanziPen('#be123c')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-700 border-2 border-white shadow transition-transform" title="朱紅筆"></button>
+                            <button id="hanzi-undo-btn" onclick="undoHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-2.5 py-1 rounded-xl transition disabled:opacity-40" disabled>
+                                ↩ 復原
+                            </button>
+                            <button onclick="clearHanziCanvas()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-black px-3 py-1 rounded-xl transition">
                                 🧹 重寫
                             </button>
                         </div>
+                    </div>
+
+                    <div id="hanzi-empty-warn" class="hidden text-center text-xs sm:text-sm font-black text-rose-600 bg-rose-50 border border-rose-200 rounded-xl py-1.5 px-3 mb-2 animate-pop">
+                        ⚠️ 請先在田字格裡寫出國字，再揭曉標準字核對喔！
                     </div>
 
                     <!-- 手寫與標準字並排對照區 -->
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 my-2">
                         <!-- 左側：孩子手寫田字格 -->
                         <div class="flex flex-col items-center">
-                            <div class="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl border-4 border-rose-400 shadow-inner overflow-hidden bg-amber-50">
+                            <div id="hanzi-canvas-wrap" class="w-52 h-52 sm:w-56 sm:h-56 rounded-2xl border-4 border-rose-400 shadow-inner overflow-hidden bg-amber-50">
                                 <canvas id="hanzi-canvas" class="w-full h-full cursor-crosshair"></canvas>
                             </div>
                             <span class="text-xs font-bold text-slate-500 mt-1.5">你的手寫字跡</span>
@@ -472,7 +482,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 36 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 48 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -620,6 +630,9 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     gameState = { ...gameState, ...parsed };
+                    if (gameState.stars && Object.prototype.hasOwnProperty.call(gameState.stars, 88)) {
+                        delete gameState.stars[88];
+                    }
                 }
             } catch (e) {
                 console.warn('無法讀取存檔', e);
@@ -665,7 +678,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單關 7～10 題／總模擬 52 題全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單關 6～10 題／總模擬 48 題全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.4));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -688,7 +701,7 @@
         }
 
         function updateHeaderStats() {
-            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
             document.getElementById('total-score').textContent = gameState.totalScore;
 
@@ -723,28 +736,37 @@
         }
 
         /* ==========================================================================
-           2.5 田字格生字手寫板引擎 (支援 iPad Apple Pencil 與手指精準書寫)
+           2.5 田字格生字手寫板引擎 (跨平台 Pointer Events 防誤觸、分段繪製與復原支援)
            ========================================================================== */
         const HanziPad = {
             canvas: null,
             ctx: null,
             drawing: false,
+            activePointerId: null,
+            activePointerType: null,
+            lastX: 0,
+            lastY: 0,
             hasStrokes: false,
             color: '#1e293b',
+            dpr: 1,
+            history: [],
+            maxHistory: 15,
+            resizeObserver: null,
 
             init() {
                 this.canvas = document.getElementById('hanzi-canvas');
                 if (!this.canvas) return;
                 this.ctx = this.canvas.getContext('2d');
                 this.resize();
+                this.updateToolUI();
+                this.updateUndoBtn();
 
                 const getPos = (e) => {
                     const rect = this.canvas.getBoundingClientRect();
-                    const dpr = window.devicePixelRatio || 1;
-                    const logicalW = (this.canvas.width / dpr) || rect.width;
-                    const logicalH = (this.canvas.height / dpr) || rect.height;
-                    const scaleX = rect.width > 0 ? logicalW / rect.width : 1;
-                    const scaleY = rect.height > 0 ? logicalH / rect.height : 1;
+                    const cssW = this.canvas.clientWidth || rect.width || 1;
+                    const cssH = this.canvas.clientHeight || rect.height || 1;
+                    const scaleX = rect.width > 0 ? cssW / rect.width : 1;
+                    const scaleY = rect.height > 0 ? cssH / rect.height : 1;
                     return {
                         x: (e.clientX - rect.left) * scaleX,
                         y: (e.clientY - rect.top) * scaleY
@@ -753,63 +775,183 @@
 
                 const startDraw = (e) => {
                     if (currentSession.answered) return;
-                    if (this.canvas.width === 0 || this.canvas.height === 0) {
-                        this.resize(false);
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    if (e.cancelable) e.preventDefault();
+
+                    if (this.drawing && this.activePointerId !== null && this.activePointerId !== e.pointerId) {
+                        if (e.pointerType === 'pen' && this.activePointerType === 'touch') {
+                            if (this.canvas.releasePointerCapture) {
+                                try {
+                                    if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(this.activePointerId)) {
+                                        this.canvas.releasePointerCapture(this.activePointerId);
+                                    }
+                                } catch (_) {}
+                            }
+                        } else {
+                            return;
+                        }
                     }
+
+                    const parent = this.canvas.parentElement;
+                    const dpr = window.devicePixelRatio || 1;
+                    if (parent && (
+                        Math.abs(this.canvas.width - Math.round(parent.clientWidth * dpr)) > 2 ||
+                        Math.abs(this.canvas.height - Math.round(parent.clientHeight * dpr)) > 2
+                    )) {
+                        this.resize(true);
+                    }
+
+                    if (!this.drawing) {
+                        this.saveHistory();
+                    }
+
                     this.drawing = true;
                     this.hasStrokes = true;
+                    this.activePointerId = e.pointerId !== undefined ? e.pointerId : null;
+                    this.activePointerType = e.pointerType || 'mouse';
+
+                    const warnEl = document.getElementById('hanzi-empty-warn');
+                    if (warnEl) warnEl.classList.add('hidden');
+
                     if (this.canvas.setPointerCapture && e.pointerId !== undefined) {
                         try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
                     }
+
                     const pos = getPos(e);
+                    this.lastX = pos.x;
+                    this.lastY = pos.y;
+
                     this.ctx.beginPath();
                     this.ctx.moveTo(pos.x, pos.y);
-                    this.ctx.lineWidth = e.pointerType === 'pen' ? 4.5 : 5.5;
+                    this.ctx.lineWidth = this.activePointerType === 'pen' ? 4.5 : 5.5;
                     this.ctx.lineCap = 'round';
                     this.ctx.lineJoin = 'round';
                     this.ctx.strokeStyle = this.color;
-                    this.ctx.lineTo(pos.x + 0.1, pos.y + 0.1);
+                    this.ctx.lineTo(pos.x + 0.01, pos.y + 0.01);
                     this.ctx.stroke();
                 };
 
                 const moveDraw = (e) => {
                     if (!this.drawing) return;
+                    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
                     if (e.cancelable) e.preventDefault();
-                    const pos = getPos(e);
-                    this.ctx.lineWidth = e.pointerType === 'pen' ? 4.5 : 5.5;
+
+                    const coalesced = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
+                    const events = (coalesced && coalesced.length > 0) ? coalesced : [e];
+                    const pointerType = e.pointerType || this.activePointerType || 'mouse';
+
+                    this.ctx.lineWidth = pointerType === 'pen' ? 4.5 : 5.5;
                     this.ctx.lineCap = 'round';
                     this.ctx.lineJoin = 'round';
                     this.ctx.strokeStyle = this.color;
-                    this.ctx.lineTo(pos.x, pos.y);
-                    this.ctx.stroke();
+
+                    for (let i = 0; i < events.length; i++) {
+                        const ev = events[i];
+                        const pos = getPos(ev.clientX !== undefined ? ev : e);
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.lastX, this.lastY);
+                        this.ctx.lineTo(pos.x, pos.y);
+                        this.ctx.stroke();
+                        this.lastX = pos.x;
+                        this.lastY = pos.y;
+                    }
                 };
 
                 const endDraw = (e) => {
                     if (!this.drawing) return;
+                    if (this.activePointerId !== null && e.pointerId !== undefined && e.pointerId !== this.activePointerId) {
+                        return;
+                    }
                     this.drawing = false;
-                    if (this.canvas.releasePointerCapture && e.pointerId !== undefined) {
-                        try { this.canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+                    const finishedId = this.activePointerId;
+                    this.activePointerId = null;
+                    this.activePointerType = null;
+                    if (this.canvas.releasePointerCapture && finishedId !== null) {
+                        try {
+                            if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(finishedId)) {
+                                this.canvas.releasePointerCapture(finishedId);
+                            }
+                        } catch (_) {}
                     }
                 };
 
-                this.canvas.addEventListener('pointerdown', startDraw);
-                this.canvas.addEventListener('pointermove', moveDraw);
+                this.canvas.addEventListener('pointerdown', startDraw, { passive: false });
+                this.canvas.addEventListener('pointermove', moveDraw, { passive: false });
                 this.canvas.addEventListener('pointerup', endDraw);
                 this.canvas.addEventListener('pointercancel', endDraw);
+                this.canvas.addEventListener('lostpointercapture', endDraw);
+                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                if (typeof ResizeObserver === 'function' && this.canvas.parentElement) {
+                    this.resizeObserver = new ResizeObserver(() => this.resize(true));
+                    this.resizeObserver.observe(this.canvas.parentElement);
+                }
                 window.addEventListener('resize', () => this.resize(true));
+            },
+
+            saveHistory() {
+                if (!this.ctx || !this.canvas || this.canvas.width <= 0 || this.canvas.height <= 0) return;
+                try {
+                    const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                    this.history.push({ imgData, hadStrokes: this.hasStrokes });
+                    if (this.history.length > this.maxHistory) {
+                        this.history.shift();
+                    }
+                    this.updateUndoBtn();
+                } catch (_) {}
+            },
+
+            undo() {
+                if (!this.ctx || !this.canvas || this.history.length === 0) return;
+                const prev = this.history.pop();
+                this.ctx.save();
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                if (prev && prev.imgData) {
+                    this.ctx.putImageData(prev.imgData, 0, 0);
+                }
+                this.ctx.restore();
+                this.hasStrokes = Boolean(prev && prev.hadStrokes);
+                this.updateUndoBtn();
+            },
+
+            updateUndoBtn() {
+                const undoBtn = document.getElementById('hanzi-undo-btn');
+                if (undoBtn) {
+                    undoBtn.disabled = this.history.length === 0;
+                }
+            },
+
+            updateToolUI() {
+                const penIds = {
+                    '#1e293b': 'hanzi-pen-1e293b',
+                    '#be123c': 'hanzi-pen-be123c'
+                };
+                Object.entries(penIds).forEach(([hex, id]) => {
+                    const btn = document.getElementById(id);
+                    if (!btn) return;
+                    const isActive = this.color === hex;
+                    btn.classList.toggle('ring-2', isActive);
+                    btn.classList.toggle('ring-offset-1', isActive);
+                    btn.classList.toggle('ring-amber-500', isActive);
+                    btn.classList.toggle('scale-110', isActive);
+                });
             },
 
             resize(preserveDrawing = false) {
                 if (!this.canvas || !this.canvas.parentElement) return;
-                const rect = this.canvas.parentElement.getBoundingClientRect();
-                if (rect.width <= 0 || rect.height <= 0) return;
+                const parent = this.canvas.parentElement;
+                const width = parent.clientWidth;
+                const height = parent.clientHeight;
+                if (width <= 0 || height <= 0) return;
                 const dpr = window.devicePixelRatio || 1;
-                const targetW = Math.round(rect.width * dpr);
-                const targetH = Math.round(rect.height * dpr);
+                const targetW = Math.round(width * dpr);
+                const targetH = Math.round(height * dpr);
 
-                if (this.canvas.width === targetW && this.canvas.height === targetH) return;
+                if (this.canvas.width === targetW && this.canvas.height === targetH && this.dpr === dpr) return;
 
                 let tempCanvas = null;
+                const prevDpr = this.dpr || dpr;
                 if (preserveDrawing && this.canvas.width > 0 && this.canvas.height > 0) {
                     tempCanvas = document.createElement('canvas');
                     tempCanvas.width = this.canvas.width;
@@ -817,36 +959,54 @@
                     tempCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
                 }
 
+                this.dpr = dpr;
                 this.canvas.width = targetW;
                 this.canvas.height = targetH;
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
                 if (tempCanvas) {
-                    this.ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+                    this.ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width / prevDpr, tempCanvas.height / prevDpr);
                 }
             },
 
-            clear() {
-                this.hasStrokes = false;
-                if (this.ctx && this.canvas) {
-                    const dpr = window.devicePixelRatio || 1;
-                    this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
+            clear(fromUser = false) {
+                if (fromUser && this.hasStrokes) {
+                    this.saveHistory();
+                } else if (!fromUser) {
+                    this.history = [];
                 }
+                this.hasStrokes = false;
+                const warnEl = document.getElementById('hanzi-empty-warn');
+                if (warnEl) warnEl.classList.add('hidden');
+                if (this.ctx && this.canvas) {
+                    this.ctx.save();
+                    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.restore();
+                }
+                this.updateUndoBtn();
             }
         };
 
         function setHanziPen(hex) {
             SoundEngine.click();
             HanziPad.color = hex;
+            HanziPad.updateToolUI();
+        }
+
+        function undoHanziCanvas() {
+            if (HanziPad.history.length === 0) return;
+            SoundEngine.click();
+            HanziPad.undo();
         }
 
         function clearHanziCanvas() {
             SoundEngine.click();
-            HanziPad.clear();
+            HanziPad.clear(true);
         }
 
         /* ==========================================================================
-           3. 南一版四上第 7～12 課原創動態題庫（共 46 題，含手寫生字考題與逐步提示）
+           3. 南一版四上第 7～12 課原創動態題庫（共 48 題，含手寫生字考題與逐步提示）
            ========================================================================== */
         const QuestionBank = {
             // 第一關：易錯字音與多音字（10 題）
@@ -1338,21 +1498,39 @@
 
         function generateStageQuestions(stageId, count) {
             const units = [1, 2, 3, 4, 5, 6];
+            const formatQ = (q) => Array.isArray(q.options) ? { ...q, options: shuffle(q.options) } : q;
 
             // 🌟 全題型制霸模式：確保題庫裡每一種題型模板各練習到 1 題
             if (count === 'ALL') {
                 const targetUnits = stageId === 99 ? units : [stageId];
                 const allTemplates = [];
                 targetUnits.forEach(uid => {
-                    QuestionBank[uid].forEach(fn => allTemplates.push(fn()));
+                    QuestionBank[uid].forEach(fn => allTemplates.push(formatQ(fn())));
                 });
                 return shuffle(allTemplates);
             }
 
-            const list = [];
-            const usedTexts = new Set();
-            let attempts = 0;
+            // 以洗牌輪播牌堆抽題，確保同一輪不提前重複、也不會連續出現相同題目
+            const decks = {};
+            const drawFromUnit = (uid, prevText) => {
+                if (!decks[uid] || decks[uid].length === 0) {
+                    decks[uid] = shuffle(QuestionBank[uid]);
+                }
+                let q = formatQ(decks[uid].pop()());
+                if (q.text === prevText && QuestionBank[uid].length > 1) {
+                    if (decks[uid].length === 0) {
+                        decks[uid] = shuffle(QuestionBank[uid]);
+                    }
+                    const altIdx = decks[uid].findIndex(fn => fn().text !== prevText);
+                    if (altIdx !== -1) {
+                        const [altFn] = decks[uid].splice(altIdx, 1);
+                        q = formatQ(altFn());
+                    }
+                }
+                return q;
+            };
 
+            const list = [];
             let unitSchedule = [];
             if (stageId === 99) {
                 for (let i = 0; i < count; i++) {
@@ -1361,25 +1539,12 @@
                 unitSchedule = shuffle(unitSchedule);
             }
 
-            while (list.length < count && attempts < count * 30) {
-                attempts++;
-                const targetUnit = stageId === 99
-                    ? unitSchedule[list.length % unitSchedule.length]
-                    : stageId;
-                const generatorFn = pickRandom(QuestionBank[targetUnit]);
-                const q = generatorFn();
-                if (!usedTexts.has(q.text)) {
-                    usedTexts.add(q.text);
-                    list.push(q);
-                }
-            }
-
             while (list.length < count) {
                 const targetUnit = stageId === 99
                     ? unitSchedule[list.length % unitSchedule.length]
                     : stageId;
-                const generatorFn = pickRandom(QuestionBank[targetUnit]);
-                list.push(generatorFn());
+                const prevText = list.length > 0 ? list[list.length - 1].text : null;
+                list.push(drawFromUnit(targetUnit, prevText));
             }
 
             return list;
@@ -1442,7 +1607,7 @@
         function openMockExamModal() {
             SoundEngine.click();
             const mockInput = document.getElementById('mock-custom-input');
-            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            if (mockInput) mockInput.value = typeof gameState.questionCountPref === 'number' ? gameState.questionCountPref : 20;
             document.getElementById('mock-exam-modal').classList.remove('hidden');
         }
 
@@ -1494,15 +1659,32 @@
 
             const battleQuestions = gameState.mistakes.map(m => {
                 if (m.rawQuestion) {
-                    return { ...m.rawQuestion, isMistakeRetry: true };
+                    const cloned = { ...m.rawQuestion, isMistakeRetry: true };
+                    if (Array.isArray(cloned.options)) {
+                        cloned.options = shuffle(cloned.options);
+                    }
+                    return cloned;
                 }
+                if (m.unitId === 6) {
+                    return {
+                        unitId: 6,
+                        qType: 'handwriting',
+                        lesson: m.stageTitle,
+                        hint: '請在田字格裡仔細回想部首與筆畫，寫完再核對標準國字喔！',
+                        text: m.questionText,
+                        correct: m.correctAnswer,
+                        explanation: m.explanation,
+                        isMistakeRetry: true
+                    };
+                }
+                const opts = Array.from(new Set([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道'].filter(Boolean)));
                 return {
                     unitId: m.unitId || 1,
                     lesson: m.stageTitle,
                     hint: `這題上次誤選了「${m.wrongAnswer}」，再仔細想一想字義與文意喔！`,
                     text: m.questionText,
                     correct: m.correctAnswer,
-                    options: shuffle([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道']),
+                    options: shuffle(opts),
                     explanation: m.explanation,
                     isMistakeRetry: true
                 };
@@ -1624,6 +1806,19 @@
         }
 
         function revealHanziAnswer() {
+            if (!HanziPad.hasStrokes) {
+                SoundEngine.wrong();
+                const warnEl = document.getElementById('hanzi-empty-warn');
+                if (warnEl) warnEl.classList.remove('hidden');
+                const wrap = document.getElementById('hanzi-canvas-wrap');
+                if (wrap) {
+                    wrap.classList.remove('animate-shake');
+                    void wrap.offsetWidth;
+                    wrap.classList.add('animate-shake');
+                    setTimeout(() => wrap.classList.remove('animate-shake'), 450);
+                }
+                return;
+            }
             SoundEngine.click();
             const ansBox = document.getElementById('hanzi-answer-box');
             ansBox.classList.remove('hidden');
@@ -1769,7 +1964,7 @@
                 trophy = '🌱';
             }
 
-            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+            if (!currentSession.isMistakeBattle && earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
                 gameState.stars[currentSession.stageId] = earnedStars;
             }
             saveProgress();
@@ -1929,6 +2124,39 @@
             renderLobby();
             closeConfirmModal();
         }
+
+        // 實體鍵盤快捷鍵支援（作答區）
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const quizScreen = document.getElementById('quiz-screen');
+            if (!quizScreen || quizScreen.classList.contains('hidden')) return;
+            const modalOpen = ['mistake-modal', 'confirm-modal', 'mock-exam-modal'].some(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            });
+            if (modalOpen) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+            const q = currentSession.questions[currentSession.currentIndex];
+            if (!q) return;
+
+            if (currentSession.answered) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+                return;
+            }
+
+            if (q.qType !== 'handwriting' && Array.isArray(q.options)) {
+                const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, a: 0, b: 1, c: 2, d: 3 };
+                const idx = keyMap[e.key.toLowerCase()];
+                if (idx !== undefined && idx < q.options.length) {
+                    e.preventDefault();
+                    selectOption(idx);
+                }
+            }
+        });
 
         window.onload = function () {
             HanziPad.init();

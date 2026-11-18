@@ -409,7 +409,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 30 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 23 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -555,6 +555,9 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     gameState = { ...gameState, ...parsed };
+                    if (gameState.stars && Object.prototype.hasOwnProperty.call(gameState.stars, 88)) {
+                        delete gameState.stars[88];
+                    }
                 }
             } catch (e) {
                 console.warn('無法讀取存檔', e);
@@ -600,7 +603,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單課 5～7 題／總模擬 30 題型全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單課 4～5 題／總模擬 23 題型全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.4));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -623,7 +626,7 @@
         }
 
         function updateHeaderStats() {
-            const totalStars = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+            const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
             document.getElementById('total-score').textContent = gameState.totalScore;
 
@@ -819,7 +822,7 @@
                     return {
                         unitId: 32,
                         visual: createOldStreetMapSVG(),
-                        hint: '觀察上圖，早期沒有高鐵和高速公路，人們要買賣貨物最方便聚集在哪裡？',
+                        hint: '觀察下圖，早期沒有高鐵和高速公路，人們要買賣貨物最方便聚集在哪裡？',
                         text: `觀察下方的家鄉聚落圖，早期家鄉的「老街」通常最容易在下列哪一種地點形成？`,
                         correct: '港口渡口附近或香火鼎盛的廟宇前方',
                         options: shuffle([
@@ -901,7 +904,7 @@
                     return {
                         unitId: 41,
                         visual: createLunarSolarSVG(),
-                        hint: '觀察上圖，早期農業社會需要配合季節播種、收割，是參考哪一種曆法與節氣？',
+                        hint: '觀察下圖，早期農業社會需要配合季節播種、收割，是參考哪一種曆法與節氣？',
                         text: `觀察下方的曆法對照圖，早期家鄉居民從事農耕與漁撈時，主要依據哪一種曆法來安排生活作息？`,
                         correct: '農曆（陰曆）與二十四節氣',
                         options: shuffle([
@@ -1126,10 +1129,27 @@
                 return shuffle(allTemplates);
             }
 
-            const list = [];
-            const usedTexts = new Set();
-            let attempts = 0;
+            // 以洗牌輪播牌堆抽題，避免高題數時連續出現相同題型
+            const decks = {};
+            const drawFromUnit = (uid, prevText) => {
+                if (!decks[uid] || decks[uid].length === 0) {
+                    decks[uid] = shuffle(QuestionBank[uid]);
+                }
+                let q = decks[uid].pop()();
+                if (q.text === prevText && QuestionBank[uid].length > 1) {
+                    if (decks[uid].length === 0) {
+                        decks[uid] = shuffle(QuestionBank[uid]);
+                    }
+                    const altIdx = decks[uid].findIndex(fn => fn().text !== prevText);
+                    if (altIdx !== -1) {
+                        const [altFn] = decks[uid].splice(altIdx, 1);
+                        q = altFn();
+                    }
+                }
+                return q;
+            };
 
+            const list = [];
             let unitSchedule = [];
             if (stageId === 99) {
                 for (let i = 0; i < count; i++) {
@@ -1138,25 +1158,12 @@
                 unitSchedule = shuffle(unitSchedule);
             }
 
-            while (list.length < count && attempts < count * 30) {
-                attempts++;
-                const targetUnit = stageId === 99
-                    ? unitSchedule[list.length % unitSchedule.length]
-                    : stageId;
-                const generatorFn = pickRandom(QuestionBank[targetUnit]);
-                const q = generatorFn();
-                if (!usedTexts.has(q.text)) {
-                    usedTexts.add(q.text);
-                    list.push(q);
-                }
-            }
-
             while (list.length < count) {
                 const targetUnit = stageId === 99
                     ? unitSchedule[list.length % unitSchedule.length]
                     : stageId;
-                const generatorFn = pickRandom(QuestionBank[targetUnit]);
-                list.push(generatorFn());
+                const prevText = list.length > 0 ? list[list.length - 1].text : null;
+                list.push(drawFromUnit(targetUnit, prevText));
             }
 
             return list;
@@ -1219,7 +1226,7 @@
         function openMockExamModal() {
             SoundEngine.click();
             const mockInput = document.getElementById('mock-custom-input');
-            if (mockInput) mockInput.value = gameState.questionCountPref || 20;
+            if (mockInput) mockInput.value = typeof gameState.questionCountPref === 'number' ? gameState.questionCountPref : 20;
             document.getElementById('mock-exam-modal').classList.remove('hidden');
         }
 
@@ -1271,15 +1278,20 @@
 
             const battleQuestions = gameState.mistakes.map(m => {
                 if (m.rawQuestion) {
-                    return { ...m.rawQuestion, isMistakeRetry: true };
+                    const cloned = { ...m.rawQuestion, isMistakeRetry: true };
+                    if (Array.isArray(cloned.options)) {
+                        cloned.options = shuffle(cloned.options);
+                    }
+                    return cloned;
                 }
+                const opts = Array.from(new Set([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道'].filter(Boolean)));
                 return {
                     unitId: m.unitId || 31,
                     hint: `這題上次誤選了「${m.wrongAnswer}」，再仔細回想課文觀念喔！`,
                     text: m.questionText,
                     visual: m.visual || null,
                     correct: m.correctAnswer,
-                    options: shuffle([m.correctAnswer, m.wrongAnswer, '以上皆非', '不知道']),
+                    options: shuffle(opts),
                     explanation: m.explanation,
                     isMistakeRetry: true
                 };
@@ -1521,7 +1533,7 @@
                 trophy = '🌱';
             }
 
-            if (earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
+            if (!currentSession.isMistakeBattle && earnedStars > (gameState.stars[currentSession.stageId] || 0)) {
                 gameState.stars[currentSession.stageId] = earnedStars;
             }
             saveProgress();
@@ -1681,6 +1693,39 @@
             renderLobby();
             closeConfirmModal();
         }
+
+        // 實體鍵盤快捷鍵支援（作答區）
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const quizScreen = document.getElementById('quiz-screen');
+            if (!quizScreen || quizScreen.classList.contains('hidden')) return;
+            const modalOpen = ['mistake-modal', 'confirm-modal', 'mock-exam-modal'].some(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            });
+            if (modalOpen) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+            const q = currentSession.questions[currentSession.currentIndex];
+            if (!q) return;
+
+            if (currentSession.answered) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+                return;
+            }
+
+            if (Array.isArray(q.options)) {
+                const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, a: 0, b: 1, c: 2, d: 3 };
+                const idx = keyMap[e.key.toLowerCase()];
+                if (idx !== undefined && idx < q.options.length) {
+                    e.preventDefault();
+                    selectOption(idx);
+                }
+            }
+        });
 
         window.onload = function () {
             loadProgress();
