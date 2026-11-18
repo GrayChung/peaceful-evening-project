@@ -1,0 +1,96 @@
+/* ==========================================================================
+   全站共用基礎排版與遊戲互動動畫樣式
+   ========================================================================== */
+body {
+    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 立體遊戲按鈕 */
+.btn-3d {
+    transition: all 0.12s ease;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+}
+.btn-3d:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+/* 基礎浮動、彈出與晃動動畫 */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+.animate-float {
+    animation: float 3.5s ease-in-out infinite;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.88); opacity: 0; }
+    70% { transform: scale(1.02); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+.animate-shake {
+    animation: shake 0.4s ease-in-out;
+}
+
+/* 過關星星彈出、飄字與錯題怪獸戰鬥特效動畫 (搭配 Scripts/game-effects.js) */
+@keyframes starPop {
+    0% { transform: scale(0) rotate(-35deg); opacity: 0; }
+    65% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.animate-star-pop {
+    animation: starPop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes floatUpFade {
+    0% { transform: translate(-50%, 0) scale(0.75); opacity: 0; }
+    20% { transform: translate(-50%, -14px) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, -68px) scale(1); opacity: 0; }
+}
+.float-popup {
+    position: fixed;
+    pointer-events: none;
+    z-index: 70;
+    animation: floatUpFade 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes monsterHit {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    20% { transform: translateX(-10px) rotate(-6deg); }
+    45% { transform: translateX(10px) rotate(6deg); }
+    70% { transform: translateX(-6px) rotate(-3deg); }
+}
+.animate-hit {
+    animation: monsterHit 0.38s ease-in-out;
+}
+
+@keyframes monsterLunge {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.16) translateY(6px); }
+}
+.animate-lunge {
+    animation: monsterLunge 0.35s ease-in-out;
+}
+
+@keyframes slashSweep {
+    0% { stroke-dashoffset: 160; opacity: 0; }
+    25% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.animate-slash {
+    stroke-dasharray: 160;
+    animation: slashSweep 0.38s ease-out forwards;
+}

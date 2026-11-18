@@ -11,52 +11,51 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="../Styles/common.css">
     <style>
         body {
-            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
             background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #fef9c3 100%);
-            min-height: 100vh;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+        /* 自然實驗動態 SVG 特效 */
+        @keyframes currentFlow {
+            from { stroke-dashoffset: 24; }
+            to { stroke-dashoffset: 0; }
         }
-        .animate-float {
-            animation: float 3.5s ease-in-out infinite;
+        .flow-fast {
+            stroke-dasharray: 7, 5;
+            animation: currentFlow 0.32s linear infinite;
         }
-
-        @keyframes popIn {
-            0% { transform: scale(0.88); opacity: 0; }
-            70% { transform: scale(1.02); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+        .flow-normal {
+            stroke-dasharray: 7, 5;
+            animation: currentFlow 0.65s linear infinite;
         }
-        .animate-pop {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        .flow-slow {
+            stroke-dasharray: 7, 5;
+            animation: currentFlow 1.15s linear infinite;
         }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
+        @keyframes bulbPulse {
+            0%, 100% { opacity: 0.78; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.06); }
         }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
+        .bulb-glow {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: bulbPulse 1.6s ease-in-out infinite;
         }
-
-        .btn-3d {
-            transition: all 0.12s ease;
-            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+        @keyframes beanBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-9px); }
         }
-        .btn-3d:active:not(:disabled) {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+        .bean-bounce {
+            animation: beanBounce 0.5s ease-in-out infinite;
         }
     </style>
 </head>
 <body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 全螢幕非阻擋過關彩帶畫布 -->
+    <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
 
     <!-- 頂部狀態列 -->
     <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-emerald-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
@@ -220,6 +219,32 @@
                     <div class="flex items-center gap-2">
                         <div id="combo-badge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-3 py-1 rounded-full text-xs sm:text-sm shadow animate-bounce">
                             🔥 2 連擊!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區 -->
+                <div id="mistake-boss-panel" class="hidden mb-5 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3.5 sm:p-4 border-2 border-rose-300 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+                        <div id="monster-stage" class="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center">
+                            <div id="monster-svg-wrap" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center"></div>
+                            <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
+                                <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+                                <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
+                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+                                    😈 錯題魔王登場！答對題目就能削減它的生命值！
+                                </span>
+                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600">HP 5 / 5</span>
+                            </div>
+                            <div class="relative w-full h-5 sm:h-6 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                                <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
+                                <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
+                                <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -391,7 +416,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 30 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 36 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -424,79 +449,9 @@
         </div>
     </div>
 
+    <script src="../Scripts/sound-engine.js"></script>
+    <script src="../Scripts/game-effects.js"></script>
     <script>
-        /* ==========================================================================
-           1. Web Audio API 音效合成引擎
-           ========================================================================== */
-        const SoundEngine = {
-            ctx: null,
-            enabled: true,
-
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            },
-
-            playTone(freq, type, duration, delay = 0, volume = 0.22) {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
-
-                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(this.ctx.currentTime + delay);
-                osc.stop(this.ctx.currentTime + delay + duration);
-            },
-
-            click() {
-                this.playTone(620, 'sine', 0.07, 0, 0.14);
-            },
-
-            correct(combo = 1) {
-                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
-                this.playTone(base, 'triangle', 0.13, 0, 0.25);
-                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
-                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
-            },
-
-            wrong() {
-                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
-                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
-            },
-
-            victory() {
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((n, idx) => {
-                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
-                });
-            }
-        };
-
-        function toggleSound() {
-            SoundEngine.enabled = !SoundEngine.enabled;
-            const icon = document.getElementById('sound-icon');
-            const btn = document.getElementById('sound-toggle');
-            if (SoundEngine.enabled) {
-                icon.textContent = '🔊';
-                btn.classList.replace('bg-slate-400', 'bg-teal-500');
-                SoundEngine.click();
-            } else {
-                icon.textContent = '🔇';
-                btn.classList.replace('bg-teal-500', 'bg-slate-400');
-            }
-        }
 
         /* ==========================================================================
            2. 康軒版四上期末考關卡定義（第三單元：有趣的聲光現象、第四單元：好玩的電路）
@@ -548,13 +503,13 @@
             renderLobby();
         }
 
-        function saveProgress() {
+        function saveProgress(animateScore = false) {
             try {
                 localStorage.setItem('knsh_science_4a_final_v1', JSON.stringify(gameState));
             } catch (e) {
                 console.warn('無法儲存進度', e);
             }
-            updateHeaderStats();
+            updateHeaderStats(animateScore);
         }
 
         function setQuestionCount(count, playSnd = true) {
@@ -584,7 +539,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單主題 6 題／總模擬 30 題型全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單主題 7～8 題／總模擬 36 題型全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.4));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -606,10 +561,14 @@
             setQuestionCount(clamped, true);
         }
 
-        function updateHeaderStats() {
+        function updateHeaderStats(animateScore = false) {
             const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
-            document.getElementById('total-score').textContent = gameState.totalScore;
+            if (animateScore) {
+                animateScoreTo(gameState.totalScore);
+            } else {
+                document.getElementById('total-score').textContent = gameState.totalScore;
+            }
 
             const badge = document.getElementById('mistake-badge');
             const lobbyBanner = document.getElementById('lobby-mistake-banner');
@@ -642,41 +601,74 @@
         }
 
         /* ==========================================================================
-           3. 純程式原創 SVG 科學實驗圖解生成器（電路接法、串並聯、光的反射與折射）
+           3. 純程式原創 SVG 科學實驗圖解生成器（聲波振動、電路接法、串並聯、光的反射與折射）
            ========================================================================== */
-        // SVG 1：燈泡通路、斷路、短路接法實驗圖
+        // SVG 0：聲音振動實驗（大鼓鼓面綠豆跳動 + 聲波擴散）
+        function createDrumVibrationSVG() {
+            return `
+                <svg width="320" height="165" viewBox="0 0 320 165" class="max-w-full bg-amber-50/40 rounded-xl border border-amber-200 shadow-sm">
+                    <!-- 聲波擴散圓弧 -->
+                    <path d="M 62,62 Q 48,85 62,108" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="0.65"/>
+                    <path d="M 48,50 Q 28,85 48,120" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+                    <path d="M 258,62 Q 272,85 258,108" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="0.65"/>
+                    <path d="M 272,50 Q 292,85 272,120" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+                    <!-- 大鼓鼓身與鼓面 -->
+                    <rect x="85" y="72" width="150" height="62" rx="12" fill="#dc2626" stroke="#991b1b" stroke-width="3"/>
+                    <ellipse cx="160" cy="72" rx="75" ry="18" fill="#fef3c7" stroke="#92400e" stroke-width="3"/>
+                    <!-- 跳動的綠豆 -->
+                    <g class="bean-bounce">
+                        <circle cx="132" cy="60" r="4.5" fill="#16a34a" stroke="#14532d" stroke-width="1.2"/>
+                        <circle cx="158" cy="54" r="5" fill="#22c55e" stroke="#14532d" stroke-width="1.2"/>
+                        <circle cx="185" cy="61" r="4.5" fill="#16a34a" stroke="#14532d" stroke-width="1.2"/>
+                        <circle cx="146" cy="66" r="4" fill="#15803d" stroke="#14532d" stroke-width="1.2"/>
+                    </g>
+                    <text x="160" y="153" text-anchor="middle" font-size="11" font-weight="900" fill="#1e293b">敲擊大鼓時，鼓面振動讓綠豆上下跳動並發出聲音</text>
+                </svg>
+            `;
+        }
+
+        // SVG 1：燈泡通路、斷路、短路接法實驗圖（作答後啟用電流與發光動畫）
         function createBulbCircuitSVG(mode) {
-            // mode: 'closed' (通路), 'open' (斷路-沒接金屬螺紋), 'short' (短路-電線直接連正負極)
             let wireTop = '';
             let wireBottom = '';
+            let flowSvg = '';
+            let glowSvg = '';
             let label = '';
 
             if (mode === 'closed') {
-                // 正極 → 燈泡金屬螺紋；負極 → 燈泡底部接點
                 wireTop = `<path d="M 105,65 L 185,65 L 222,78" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>`;
                 wireBottom = `<path d="M 105,120 L 235,120 L 235,98" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>`;
+                flowSvg = `
+                    <g class="circuit-flow-layer hidden">
+                        <path d="M 105,65 L 185,65 L 222,78" fill="none" stroke="#fde047" stroke-width="2" class="flow-normal"/>
+                        <path d="M 235,98 L 235,120 L 105,120" fill="none" stroke="#93c5fd" stroke-width="2" class="flow-normal"/>
+                    </g>
+                `;
+                glowSvg = `<circle cx="235" cy="52" r="32" fill="#fde047" opacity="0.7" class="circuit-glow-layer hidden bulb-glow"/>`;
                 label = '接法 A：電線分別連接燈泡「金屬螺紋」與「底部接點」';
             } else if (mode === 'open') {
-                // 兩條電線都接在玻璃罩或同一處（斷路）
                 wireTop = `<path d="M 105,65 L 185,65 L 222,78" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>`;
                 wireBottom = `<path d="M 105,120 L 185,120 L 222,85" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>`;
                 label = '接法 B：兩條電線都接在燈泡側邊「金屬螺紋」上';
             } else {
-                // 短路：電線直接把電池正極和負極接在一起
                 wireTop = `<path d="M 105,65 L 145,65 L 145,120 L 105,120" fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>`;
+                flowSvg = `
+                    <g class="circuit-flow-layer hidden">
+                        <path d="M 105,65 L 145,65 L 145,120 L 105,120" fill="none" stroke="#fef08a" stroke-width="2.2" class="flow-fast"/>
+                    </g>
+                `;
                 wireBottom = `<text x="235" y="128" text-anchor="middle" font-size="11" font-weight="bold" fill="#94a3b8">（燈泡未形成完整迴路）</text>`;
                 label = '接法 C：電線沒有經過燈泡，直接把電池正、負極連起來';
             }
 
             return `
                 <svg width="350" height="165" viewBox="0 0 350 165" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
-                    <!-- 電池 -->
+                    ${glowSvg}
                     <rect x="75" y="55" width="30" height="75" rx="4" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
                     <rect x="84" y="47" width="12" height="8" fill="#ca8a04"/>
                     <text x="90" y="75" text-anchor="middle" font-size="14" font-weight="900" fill="#dc2626">＋</text>
                     <text x="90" y="118" text-anchor="middle" font-size="14" font-weight="900" fill="#2563eb">－</text>
 
-                    <!-- 燈泡 -->
                     <circle cx="235" cy="52" r="22" fill="#fef9c3" stroke="#eab308" stroke-width="2.5"/>
                     <rect x="223" y="71" width="24" height="18" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
                     <circle cx="235" cy="93" r="5" fill="#475569"/>
@@ -685,6 +677,7 @@
 
                     ${wireTop}
                     ${wireBottom}
+                    ${flowSvg}
                     <text x="175" y="153" text-anchor="middle" font-size="11" font-weight="900" fill="#1e293b">${label}</text>
                 </svg>
             `;
@@ -694,17 +687,146 @@
         function createLightRefractionSVG() {
             return `
                 <svg width="320" height="165" viewBox="0 0 320 165" class="max-w-full bg-sky-50/50 rounded-xl border border-sky-200">
-                    <!-- 透明水杯與水面 -->
                     <rect x="95" y="30" width="130" height="110" rx="6" fill="#ffffff" stroke="#64748b" stroke-width="2.5"/>
                     <rect x="97" y="80" width="126" height="58" rx="4" fill="#bae6fd" opacity="0.75"/>
                     <line x1="97" y1="80" x2="223" y2="80" stroke="#0284c7" stroke-width="2" stroke-dasharray="4,3"/>
                     <text x="242" y="65" font-size="11" font-weight="bold" fill="#475569">空氣</text>
                     <text x="242" y="110" font-size="11" font-weight="bold" fill="#0369a1">水裡</text>
 
-                    <!-- 吸管（水面上與水面下看起來錯開折斷） -->
                     <line x1="185" y1="20" x2="155" y2="80" stroke="#f43f5e" stroke-width="7" stroke-linecap="round"/>
                     <line x1="143" y1="80" x2="122" y2="132" stroke="#f43f5e" stroke-width="7" stroke-linecap="round"/>
                     <text x="160" y="156" text-anchor="middle" font-size="11" font-weight="900" fill="#0f172a">光從水進入空氣時行進方向發生偏折</text>
+                </svg>
+            `;
+        }
+
+        // SVG 3：光的反射實驗圖（手電筒照射平面鏡反彈）
+        function createLightReflectionSVG() {
+            return `
+                <svg width="340" height="165" viewBox="0 0 340 165" class="max-w-full bg-slate-900 rounded-xl border border-slate-700 shadow-sm">
+                    <!-- 平面鏡 -->
+                    <line x1="60" y1="130" x2="280" y2="130" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="65" y1="136" x2="275" y2="136" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,4"/>
+                    <text x="170" y="154" text-anchor="middle" font-size="11" font-weight="bold" fill="#e2e8f0">光滑的平面鏡</text>
+                    <!-- 手電筒 -->
+                    <rect x="44" y="34" width="34" height="16" rx="4" transform="rotate(34 61 42)" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+                    <!-- 入射光與反射光線 -->
+                    <line x1="76" y1="54" x2="170" y2="128" stroke="#fde047" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="170" y1="128" x2="264" y2="54" stroke="#fde047" stroke-width="3.5" stroke-linecap="round" class="flow-normal"/>
+                    <circle cx="272" cy="48" r="10" fill="#fde047" opacity="0.85" class="bulb-glow"/>
+                    <text x="106" y="70" font-size="10" font-weight="bold" fill="#fef08a">入射光</text>
+                    <text x="218" y="70" font-size="10" font-weight="bold" fill="#fef08a">反射光</text>
+                </svg>
+            `;
+        }
+
+        // SVG 4：電池與燈泡串並聯實驗圖（4-2 專用，作答後啟動電流與亮度演示）
+        function createSeriesParallelSVG(mode) {
+            const bat = (cx, cy, lbl) => `
+                <g transform="translate(${cx}, ${cy})">
+                    <rect x="-15" y="-32" width="30" height="64" rx="5" fill="#fef08a" stroke="#ca8a04" stroke-width="2.2"/>
+                    <rect x="-7" y="-40" width="14" height="8" rx="2" fill="#ca8a04"/>
+                    <text x="0" y="-12" text-anchor="middle" font-size="13" font-weight="900" fill="#dc2626">＋</text>
+                    <text x="0" y="22" text-anchor="middle" font-size="13" font-weight="900" fill="#2563eb">－</text>
+                    <text x="0" y="46" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">${lbl}</text>
+                </g>
+            `;
+            const bulb = (cx, cy, glowRadius, lbl, removed = false) => `
+                <g transform="translate(${cx}, ${cy + (removed ? -22 : 0)})">
+                    ${!removed && glowRadius > 0 ? `<circle cx="0" cy="-18" r="${glowRadius}" fill="#fde047" opacity="0.72" class="circuit-glow-layer hidden bulb-glow"/>` : ''}
+                    ${removed ? `<text x="0" y="-42" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">❌ 拔起</text>` : ''}
+                    <circle cx="0" cy="-18" r="19" fill="#fef9c3" stroke="#eab308" stroke-width="2.2"/>
+                    <rect x="-11" y="0" width="22" height="16" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="1.8"/>
+                    <circle cx="0" cy="21" r="4.5" fill="#475569"/>
+                    <text x="0" y="38" text-anchor="middle" font-size="11" font-weight="900" fill="#1e293b">${lbl}</text>
+                </g>
+            `;
+
+            if (mode === 'battery-series') {
+                return `
+                    <svg width="370" height="205" viewBox="0 0 370 205" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                        <text x="185" y="20" text-anchor="middle" font-size="12" font-weight="900" fill="#0f172a">電池串聯：正極接負極</text>
+                        <path d="M 75,92 L 75,60 L 254,60 L 254,104" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 265,117 L 265,170 L 140,170 L 140,164" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 75,164 L 75,170 L 108,170 L 108,86 L 140,86 L 140,92" fill="none" stroke="#16a34a" stroke-width="3.5" stroke-linecap="round"/>
+                        <g class="circuit-flow-layer hidden">
+                            <path d="M 75,92 L 75,60 L 254,60 L 254,104" fill="none" stroke="#fde047" stroke-width="2" class="flow-fast"/>
+                            <path d="M 265,117 L 265,170 L 140,170 L 140,164" fill="none" stroke="#93c5fd" stroke-width="2" class="flow-fast"/>
+                            <path d="M 75,164 L 75,170 L 108,170 L 108,86 L 140,86 L 140,92" fill="none" stroke="#bbf7d0" stroke-width="2" class="flow-fast"/>
+                        </g>
+                        ${bat(75, 132, '電池 1')}
+                        ${bat(140, 132, '電池 2')}
+                        ${bulb(265, 96, 36, '小燈泡')}
+                        <text x="185" y="194" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">兩顆電池串接在同一條迴路上</text>
+                    </svg>
+                `;
+            }
+            if (mode === 'battery-parallel') {
+                return `
+                    <svg width="370" height="205" viewBox="0 0 370 205" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                        <text x="185" y="20" text-anchor="middle" font-size="12" font-weight="900" fill="#0f172a">電池並聯：正極接正極、負極接負極</text>
+                        <path d="M 75,92 L 75,60 L 254,60 L 254,104" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 140,92 L 140,60" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 265,117 L 265,170 L 75,170 L 75,164" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 140,164 L 140,170" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                        <g class="circuit-flow-layer hidden">
+                            <path d="M 75,92 L 75,60 L 254,60 L 254,104" fill="none" stroke="#fde047" stroke-width="2" class="flow-normal"/>
+                            <path d="M 265,117 L 265,170 L 75,170 L 75,164" fill="none" stroke="#93c5fd" stroke-width="2" class="flow-normal"/>
+                        </g>
+                        <circle cx="140" cy="60" r="4" fill="#b91c1c"/>
+                        <circle cx="140" cy="170" r="4" fill="#1d4ed8"/>
+                        ${bat(75, 132, '電池 1')}
+                        ${bat(140, 132, '電池 2')}
+                        ${bulb(265, 96, 26, '小燈泡')}
+                        <text x="185" y="194" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">兩顆電池並排分擔電力輸出</text>
+                    </svg>
+                `;
+            }
+            if (mode === 'bulb-series' || mode === 'bulb-series-fault') {
+                const fault = mode === 'bulb-series-fault';
+                return `
+                    <svg width="370" height="205" viewBox="0 0 370 205" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                        <text x="185" y="20" text-anchor="middle" font-size="12" font-weight="900" fill="#0f172a">燈泡串聯：兩顆燈泡共用同一條路徑</text>
+                        <path d="M 65,92 L 65,58 L 169,58 L 169,104" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 180,117 L 180,136 L 235,136 L 235,104 L 274,104" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M 285,117 L 285,170 L 65,170 L 65,164" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                        ${!fault ? `
+                            <g class="circuit-flow-layer hidden">
+                                <path d="M 65,92 L 65,58 L 169,58 L 169,104" fill="none" stroke="#fde047" stroke-width="2" class="flow-slow"/>
+                                <path d="M 180,117 L 180,136 L 235,136 L 235,104 L 274,104" fill="none" stroke="#fef08a" stroke-width="2" class="flow-slow"/>
+                                <path d="M 285,117 L 285,170 L 65,170 L 65,164" fill="none" stroke="#93c5fd" stroke-width="2" class="flow-slow"/>
+                            </g>
+                        ` : ''}
+                        ${bat(65, 132, '1 顆電池')}
+                        ${bulb(180, 96, fault ? 0 : 18, '燈泡甲', fault)}
+                        ${bulb(285, 96, fault ? 0 : 18, '燈泡乙', false)}
+                        <text x="185" y="194" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">${fault ? '拔起燈泡甲後，觀察燈泡乙會怎麼樣？' : '兩顆燈泡串接在同一條電路上'}</text>
+                    </svg>
+                `;
+            }
+
+            const fault = mode === 'bulb-parallel-fault';
+            return `
+                <svg width="370" height="205" viewBox="0 0 370 205" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <text x="185" y="20" text-anchor="middle" font-size="12" font-weight="900" fill="#0f172a">燈泡並聯：兩顆燈泡各自獨立迴路</text>
+                    <path d="M 65,92 L 65,56 L 274,56 L 274,104" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M 169,56 L 169,104" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M 285,117 L 285,170 L 65,170 L 65,164" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M 180,117 L 180,170" fill="none" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
+                    <g class="circuit-flow-layer hidden">
+                        ${!fault ? `
+                            <path d="M 65,92 L 65,56 L 169,56 L 169,104" fill="none" stroke="#fde047" stroke-width="2" class="flow-normal"/>
+                            <path d="M 180,117 L 180,170 L 65,170 L 65,164" fill="none" stroke="#93c5fd" stroke-width="2" class="flow-normal"/>
+                        ` : ''}
+                        <path d="M 65,92 L 65,56 L 274,56 L 274,104" fill="none" stroke="#fde047" stroke-width="2" class="flow-normal"/>
+                        <path d="M 285,117 L 285,170 L 65,170 L 65,164" fill="none" stroke="#93c5fd" stroke-width="2" class="flow-normal"/>
+                    </g>
+                    <circle cx="169" cy="56" r="4" fill="#b91c1c"/>
+                    <circle cx="180" cy="170" r="4" fill="#1d4ed8"/>
+                    ${bat(65, 132, '1 顆電池')}
+                    ${bulb(180, 96, fault ? 0 : 26, '燈泡甲', fault)}
+                    ${bulb(285, 96, 26, '燈泡乙', false)}
+                    <text x="185" y="194" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">${fault ? '拔起燈泡甲後，觀察燈泡乙的獨立迴路！' : '每顆燈泡各自連通電池形成獨立迴路'}</text>
                 </svg>
             `;
         }
@@ -715,7 +837,7 @@
         const CHARACTERS = ['小宇', '小美', '阿傑', '品妍', '子軒', '羽彤'];
 
         const QuestionBank = {
-            // 3-1：聲音的產生與傳播
+            // 3-1：聲音的產生與傳播（7 題）
             31: [
                 () => {
                     const instruments = [
@@ -726,6 +848,7 @@
                     const exp = pickRandom(instruments);
                     return {
                         unitId: 31,
+                        visual: createDrumVibrationSVG(),
                         hint: '當物體發出聲音時，摸一摸會感覺麻麻的；一旦用手按住停止晃動，聲音就會立刻停止喔！',
                         text: `自然課做實驗時，${exp.item}，會觀察到「${exp.phenomenon}」。這個現象主要證明了什麼科學原理？`,
                         correct: exp.concept,
@@ -814,10 +937,25 @@
                         ]),
                         explanation: '聲音可以透過氣體（空氣）、液體（水）和固體（棉線、桌面）傳播；拉直的棉線能有效傳遞聲波振動。'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 31,
+                        hint: '把耳朵貼在長木桌的一端，請同學在另一端輕敲桌面，聽起來比透過空氣聽更清楚喔！',
+                        text: `測試不同介質傳遞聲音的效果時，把耳朵貼在木桌面上聽同學輕敲桌角，和耳朵離開桌面透過空氣聽相比，哪一種聽起來更清楚、傳得更快？`,
+                        correct: '貼在木桌面上（固體介質）聽起來更清楚且聲音傳播更快',
+                        options: shuffle([
+                            '貼在木桌面上（固體介質）聽起來更清楚且聲音傳播更快',
+                            '透過空氣聽一定比較大聲且比較快',
+                            '固體完全不能傳遞任何聲音',
+                            '兩種方式聽起來完全一模一樣'
+                        ]),
+                        explanation: '聲音在固體（如木桌、金屬）中傳播的速度比液體（水）和氣體（空氣）都快，能量散失也較少，所以聽起來更清楚！'
+                    };
                 }
             ],
 
-            // 3-2 & 3-3：光的特性與應用（擴充至 6 題型）
+            // 3-2 & 3-3：光的特性與應用（擴充至 7 題型）
             32: [
                 () => {
                     return {
@@ -910,10 +1048,26 @@
                         ]),
                         explanation: '製造彩虹時必須「背對太陽」，讓太陽光從背後射入前方的小水滴中，經過折射與反射後進入眼睛，就能看見七彩光譜！'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        visual: createLightReflectionSVG(),
+                        hint: '看看下圖，光線照到光滑平面鏡後會改變行進方向彈射出去；在太陽下立竹竿看影子時，影子方向則會剛好和太陽在相反邊！',
+                        text: `觀察下圖手電筒照射平面鏡的實驗：當光線斜射到光滑的鏡面上時，會發生什麼現象？（提示：也想想看生活中陽光照射與影子的位置關係）`,
+                        correct: '光線會在鏡面發生「反射」彈向另一側；生活中物體影子則會出現在太陽的相反方向',
+                        options: shuffle([
+                            '光線會在鏡面發生「反射」彈向另一側；生活中物體影子則會出現在太陽的相反方向',
+                            '光線照射鏡子後會立刻停在鏡子裡消失不見',
+                            '太陽在東邊時，操場上旗杆的影子也會朝向東邊',
+                            '手電筒的光線會穿過不透明的厚木板直直前進'
+                        ]),
+                        explanation: '光遇到光滑鏡面會發生「反射」改變方向；而光在空氣中沿直線前進，被不透明物體阻擋後，影子一定會落在光源的「相反方向」！'
+                    };
                 }
             ],
 
-            // 4-1：如何讓燈泡發亮（擴充至 6 題型）
+            // 4-1：如何讓燈泡發亮（擴充至 7 題型）
             41: [
                 () => {
                     return {
@@ -1007,16 +1161,32 @@
                         ]),
                         explanation: '小燈泡通電時，電流通過內部的金屬「燈絲」，使燈絲達到高溫而發光；玻璃罩則用來隔絕空氣保護燈絲不易燒斷。'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        hint: '從燈泡外觀來看，燈絲的兩端分別連接到「側面金屬螺紋」和最底部的「灰色底部接點」（中間有黑色絕緣體隔開）。',
+                        text: `拆開報廢的小燈泡觀察內部構造，可以發現燈絲的兩端分別連接到燈泡外部的哪兩個位置，才能接電形成通路？`,
+                        correct: '側面的「金屬螺紋」和最底端的「底部接點」',
+                        options: shuffle([
+                            '側面的「金屬螺紋」和最底端的「底部接點」',
+                            '透明玻璃罩的左側和右側',
+                            '全部都接在黑色的絕緣體環上',
+                            '兩端都只接在同一個螺紋點上'
+                        ]),
+                        explanation: '小燈泡內部的兩條連接線，一條連到側邊金屬螺紋，另一條連到底部接點（兩者之間有絕緣體隔開），因此電線必須分接這兩處才能通電發光！'
+                    };
                 }
             ],
 
-            // 4-2：電路的連接方式（擴充至 6 題型）
+            // 4-2：電路的連接方式（擴充至 8 題型，含動態 SVG 串並聯圖解）
             42: [
                 () => {
                     return {
                         unitId: 42,
-                        hint: '把兩顆電池頭尾相接（正極接負極）排成一排，電力會疊加起來，燈泡會變得很亮喔！',
-                        text: `將兩顆電池「正極接負極」排成一列連接一個小燈泡（電池串聯），和只用一顆電池相比，燈泡的亮度會有什麼變化？`,
+                        visual: createSeriesParallelSVG('battery-series'),
+                        hint: '觀察下圖，兩顆電池頭尾相接（正極接負極）排成一排，電力會疊加起來，燈泡會變得很亮喔！',
+                        text: `將兩顆電池「正極接負極」排成一列連接一個小燈泡（如圖的<strong>電池串聯</strong>），和只用一顆電池相比，燈泡的亮度會有什麼變化？`,
                         correct: '燈泡變得更亮（電力增強）',
                         options: shuffle([
                             '燈泡變得更亮（電力增強）',
@@ -1030,8 +1200,9 @@
                 () => {
                     return {
                         unitId: 42,
-                        hint: '兩顆電池「正極接正極、負極接負極」並排在一起（電池並聯），亮度跟一顆電池差不多，但可以撐更久喔！',
-                        text: `將兩顆電池「正極接正極、負極接負極」並排連接（電池並聯），和只用一顆電池相比，燈泡的亮度與使用時間有什麼特點？`,
+                        visual: createSeriesParallelSVG('battery-parallel'),
+                        hint: '觀察下圖，兩顆電池「正極接正極、負極接負極」並排在一起（電池並聯），亮度跟一顆電池差不多，但可以撐更久喔！',
+                        text: `將兩顆電池「正極接正極、負極接負極」並排連接（如圖的<strong>電池並聯</strong>），和只用一顆電池相比，燈泡的亮度與使用時間有什麼特點？`,
                         correct: '亮度與接一顆電池差不多，但電池可以使用得更久',
                         options: shuffle([
                             '亮度與接一顆電池差不多，但電池可以使用得更久',
@@ -1045,14 +1216,15 @@
                 () => {
                     return {
                         unitId: 42,
-                        hint: '兩顆燈泡串成同一條路（燈泡串聯），只要拔掉其中一顆燈泡，整條路就斷掉了喔！',
-                        text: `將兩個小燈泡串接在同一個迴路上（燈泡串聯），如果把其中一顆燈泡轉鬆拔下來，另一顆燈泡會怎麼樣？`,
-                        correct: '另一顆燈泡也會立刻熄滅（因為整條電路變成斷路）',
+                        visual: createSeriesParallelSVG('bulb-series-fault'),
+                        hint: '觀察下圖，兩顆燈泡串成同一條路（燈泡串聯），只要拔掉燈泡甲，整條路就斷掉了喔！',
+                        text: `如圖將兩個小燈泡串接在同一個迴路上（<strong>燈泡串聯</strong>），如果把「燈泡甲」轉鬆拔下來，另一顆「燈泡乙」會怎麼樣？`,
+                        correct: '燈泡乙也會立刻熄滅（因為整條電路變成斷路）',
                         options: shuffle([
-                            '另一顆燈泡也會立刻熄滅（因為整條電路變成斷路）',
-                            '另一顆燈泡會變得更亮',
-                            '另一顆燈泡完全不受影響，繼續發亮',
-                            '另一顆燈泡會開始發出蜂鳴聲'
+                            '燈泡乙也會立刻熄滅（因為整條電路變成斷路）',
+                            '燈泡乙會變得更亮',
+                            '燈泡乙完全不受影響，繼續發亮',
+                            '燈泡乙會開始發出蜂鳴聲'
                         ]),
                         explanation: '「燈泡串聯」只有一條電流路徑，只要其中一顆燈泡壞掉或拔除，整條迴路就會變成「斷路」，另一顆燈泡也會跟著熄滅。'
                     };
@@ -1060,8 +1232,9 @@
                 () => {
                     return {
                         unitId: 42,
+                        visual: createSeriesParallelSVG('bulb-series'),
                         hint: '只用一顆電池卻要同時推亮串成一排的兩顆燈泡，電力分給兩顆燈泡後，每顆燈泡會變暗喔！',
-                        text: `用「一顆電池」串聯連接「兩顆小燈泡」（燈泡串聯），和只接一顆小燈泡相比，這兩顆燈泡的亮度會如何？`,
+                        text: `如圖用「一顆電池」串聯連接「兩顆小燈泡」（<strong>燈泡串聯</strong>），和只接一顆小燈泡相比，這兩顆燈泡的亮度會如何？`,
                         correct: '兩顆燈泡都會變暗（電力由兩顆燈泡共同分擔）',
                         options: shuffle([
                             '兩顆燈泡都會變暗（電力由兩顆燈泡共同分擔）',
@@ -1075,8 +1248,9 @@
                 () => {
                     return {
                         unitId: 42,
+                        visual: createSeriesParallelSVG('bulb-parallel'),
                         hint: '家裡的電燈和教室的日光燈，關掉一盞燈時其他燈還是亮著，因為它們是「並聯」各自有獨立的通路！',
-                        text: `教室裡有好幾盞電燈，當老師關掉講台上的電燈時，同學座位上方的電燈依然亮著。請問教室裡的電燈是採用哪一種連接方式？`,
+                        text: `教室裡有好幾盞電燈，當老師關掉講台上的電燈時，同學座位上方的電燈依然亮著（如同下圖的連接法）。請問這是採用哪一種連接方式？`,
                         correct: '燈泡並聯（各自形成獨立迴路，互不影響）',
                         options: shuffle([
                             '燈泡並聯（各自形成獨立迴路，互不影響）',
@@ -1090,8 +1264,9 @@
                 () => {
                     return {
                         unitId: 42,
+                        visual: createSeriesParallelSVG('battery-series'),
                         hint: '裝玩具遙控車的電池盒時，如果有一顆電池正負極裝反了（正極對正極），電流就無法順利通過囉！',
-                        text: `遙控器需要裝兩顆串聯的乾電池（正極接負極）才能啟動，如果小朋友不小心把其中一顆電池裝反了，會發生什麼事？`,
+                        text: `遙控器需要像上圖一樣裝兩顆串聯的乾電池（正極接負極）才能啟動，如果小朋友不小心把其中一顆電池裝反了，會發生什麼事？`,
                         correct: '電路無法形成正常通路，遙控器不會運作',
                         options: shuffle([
                             '電路無法形成正常通路，遙控器不會運作',
@@ -1101,10 +1276,42 @@
                         ]),
                         explanation: '串聯電池時必須「一顆的正極接另一顆的負極」，若裝反導致正極對正極（或負極對負極），電力互相抵消就無法讓電器正常運作。'
                     };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        visual: createSeriesParallelSVG('bulb-parallel-fault'),
+                        hint: '觀察下圖「燈泡並聯」電路：雖然燈泡甲被拔掉了，但從電池正極出發到燈泡乙再回到負極的那一圈迴路還有通嗎？',
+                        text: `觀察下圖的「<strong>燈泡並聯</strong>」實驗：當我們把「燈泡甲」轉鬆拔掉後，另一顆「燈泡乙」會發生什麼變化？`,
+                        correct: '燈泡乙依然保持正常亮度繼續發亮（各自有獨立通路）',
+                        options: shuffle([
+                            '燈泡乙依然保持正常亮度繼續發亮（各自有獨立通路）',
+                            '燈泡乙也會跟著一起熄滅',
+                            '燈泡乙會立刻燒壞爆裂',
+                            '電池會瞬間結冰'
+                        ]),
+                        explanation: '燈泡並聯時，每顆燈泡各自擁有獨立的電流迴路，因此拔掉「燈泡甲」只會讓甲支路斷開，燈泡乙的迴路完全暢通、依舊維持正常亮度！'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 42,
+                        visual: createSeriesParallelSVG('bulb-parallel'),
+                        hint: '比較四種接法：電池串聯最亮；電池並聯與燈泡並聯都跟 1 顆電池接 1 顆燈泡一樣亮；只有燈泡串聯分擔電力會變暗！',
+                        text: `在下面四種「串聯或並聯」的實驗接法中，哪一種接法能讓小燈泡發出<strong>最亮</strong>的光芒？`,
+                        correct: '兩顆電池「串聯」接一顆小燈泡',
+                        options: shuffle([
+                            '兩顆電池「串聯」接一顆小燈泡',
+                            '兩顆電池「並聯」接一顆小燈泡',
+                            '一顆電池接兩顆「串聯」的小燈泡',
+                            '一顆電池接兩顆「並聯」的小燈泡'
+                        ]),
+                        explanation: '「兩顆電池串聯」會把兩顆電池的電力疊加在一起，流過燈泡的電流最強，因此燈泡最亮；電池並聯與燈泡並聯則維持原本單顆的亮度，燈泡串聯則會變暗。'
+                    };
                 }
             ],
 
-            // 4-3：導體與安全用電（擴充至 6 題型）
+            // 4-3：導體與安全用電（擴充至 7 題型）
             43: [
                 () => {
                     const conductors = ['鐵製迴紋針', '銅製硬幣', '鋁箔紙', '不鏽鋼湯匙'];
@@ -1195,6 +1402,21 @@
                             '放進微波爐裡加熱充電繼續使用'
                         ]),
                         explanation: '廢乾電池含有重金屬與化學物質，不可隨意丟棄或拆解、加熱，應妥善分類並投入超商或學校的廢電池回收筒。'
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 43,
+                        hint: '家裡牆壁插座提供的是電力公司輸送的高電壓電力（危險！絕對不能拿來做電路實驗），小實驗要用安全的乾電池喔！',
+                        text: `關於「乾電池」與「牆壁電源插座」的比較與安全觀念，下列哪一項敘述是<strong>正確</strong>的？`,
+                        correct: '自然課做電路實驗只能使用安全的「乾電池」，絕對不可以將電線插進牆壁插座',
+                        options: shuffle([
+                            '自然課做電路實驗只能使用安全的「乾電池」，絕對不可以將電線插進牆壁插座',
+                            '牆壁插座的電力和 1 顆乾電池一模一樣小，可以直接接小燈泡玩',
+                            '為了節約用電，出門時應該把所有電器開關永遠保持開啟',
+                            '手機充電器和電暖器屬於高耗電產品，用完不用拔插頭也沒關係'
+                        ]),
+                        explanation: '牆壁插座電力非常強大（110V 交流電），會造成嚴重觸電危險！做實驗只能使用乾電池，且平時隨手關燈與拔除不用的插頭更能節約能源。'
                     };
                 }
             ]
@@ -1383,6 +1605,8 @@
             currentSession = {
                 stageId: 88,
                 isMistakeBattle: true,
+                bossHp: battleQuestions.length,
+                bossMaxHp: battleQuestions.length,
                 questions: battleQuestions,
                 currentIndex: 0,
                 correctCount: 0,
@@ -1459,6 +1683,7 @@
             }
 
             document.getElementById('question-text').innerHTML = q.text;
+            MonsterBoss.renderUI();
 
             const visualEl = document.getElementById('question-visual');
             if (q.visual) {
@@ -1533,9 +1758,20 @@
 
                 SoundEngine.correct(currentSession.combo);
 
+                const qContainer = document.getElementById('question-text');
+                if (qContainer && qContainer.getBoundingClientRect) {
+                    const rect = qContainer.getBoundingClientRect();
+                    spawnFloatingText(rect.left + rect.width / 2, rect.top + 10, `+${points}${currentSession.combo >= 2 ? ' 🔥' : ''}`, 'text-emerald-600');
+                }
+
                 const prevLen = gameState.mistakes.length;
                 gameState.mistakes = gameState.mistakes.filter(m => m.questionText !== q.text);
                 const eliminated = gameState.mistakes.length < prevLen;
+                if (currentSession.isMistakeBattle) {
+                    currentSession.bossHp = Math.max(0, (currentSession.bossHp || 1) - 1);
+                    MonsterBoss.triggerHit();
+                    MonsterBoss.renderUI();
+                }
 
                 const praises = ['太棒了！實驗推理完全正確！', '好厲害！小小科學家！', '答對囉！自然原理很清楚！', '漂亮的一擊！繼續保持！'];
                 feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
@@ -1547,6 +1783,9 @@
             } else {
                 currentSession.combo = 0;
                 SoundEngine.wrong();
+                if (currentSession.isMistakeBattle) {
+                    MonsterBoss.triggerCounter();
+                }
 
                 const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
                 if (!gameState.mistakes.some(m => m.questionText === q.text)) {
@@ -1568,6 +1807,13 @@
                 feedbackExp.innerHTML = `正確答案是 <strong>${q.correct}</strong>。<br>${q.explanation}`;
             }
 
+            // 作答後啟用動態電路電流與發光演示
+            if (typeof document.querySelectorAll === 'function') {
+                document.querySelectorAll('.circuit-flow-layer, .circuit-glow-layer').forEach(el => {
+                    el.classList.remove('hidden');
+                });
+            }
+
             const nextBtn = document.getElementById('next-btn');
             if (currentSession.currentIndex === currentSession.questions.length - 1) {
                 nextBtn.innerHTML = '<span>查看本輪成績</span><span>🏆</span>';
@@ -1575,7 +1821,7 @@
                 nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
             }
 
-            saveProgress();
+            saveProgress(isCorrect);
         }
 
         function nextQuestion() {
@@ -1640,11 +1886,29 @@
             document.getElementById('result-score').textContent = `+${currentSession.sessionScore}`;
             document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
 
-            document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
-                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+            const starsRow = document.getElementById('result-stars');
+            starsRow.innerHTML = [1, 2, 3].map(() =>
+                `<span class="opacity-20 grayscale inline-block">⭐</span>`
             ).join('');
 
             showScreen('result-screen');
+
+            if (starsRow.querySelectorAll) {
+                const starEls = starsRow.querySelectorAll('span');
+                for (let i = 0; i < earnedStars; i++) {
+                    setTimeout(() => {
+                        if (starEls[i]) {
+                            starEls[i].className = 'animate-star-pop inline-block';
+                        }
+                    }, i * 180);
+                }
+            }
+
+            if (currentSession.isMistakeBattle && gameState.mistakes.length === 0) {
+                ConfettiEngine.fireFireworks();
+            } else if (earnedStars === 3) {
+                ConfettiEngine.fireCannons();
+            }
         }
 
         /* ==========================================================================
@@ -1811,6 +2075,7 @@
         });
 
         window.onload = function () {
+            ConfettiEngine.init();
             loadProgress();
         };
     </script>

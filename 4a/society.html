@@ -11,54 +11,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="../Styles/common.css">
     <style>
-        /* 自訂遊戲字體與溫暖人文色調背景 */
+        /* 社會專屬溫暖人文色調背景 */
         body {
-            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
             background: linear-gradient(135deg, #fef3c7 0%, #ffedd5 45%, #e0e7ff 100%);
-            min-height: 100vh;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-float {
-            animation: float 3.5s ease-in-out infinite;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.88); opacity: 0; }
-            70% { transform: scale(1.02); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-pop {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
-        }
-
-        /* 立體遊戲按鈕 */
-        .btn-3d {
-            transition: all 0.12s ease;
-            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
-        }
-        .btn-3d:active:not(:disabled) {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
         }
     </style>
 </head>
 <body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 全螢幕非阻擋過關彩帶畫布 -->
+    <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
 
     <!-- 頂部狀態列 -->
     <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-orange-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
@@ -229,6 +193,32 @@
                     <div class="flex items-center gap-2">
                         <div id="combo-badge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-3 py-1 rounded-full text-xs sm:text-sm shadow animate-bounce">
                             🔥 2 連擊!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區 -->
+                <div id="mistake-boss-panel" class="hidden mb-5 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3.5 sm:p-4 border-2 border-rose-300 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+                        <div id="monster-stage" class="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center">
+                            <div id="monster-svg-wrap" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center"></div>
+                            <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
+                                <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+                                <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
+                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+                                    😈 錯題魔王登場！答對題目就能削減它的生命值！
+                                </span>
+                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600">HP 5 / 5</span>
+                            </div>
+                            <div class="relative w-full h-5 sm:h-6 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                                <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
+                                <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
+                                <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -409,7 +399,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 23 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 35 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -442,79 +432,9 @@
         </div>
     </div>
 
+    <script src="../Scripts/sound-engine.js"></script>
+    <script src="../Scripts/game-effects.js"></script>
     <script>
-        /* ==========================================================================
-           1. Web Audio API 音效合成引擎
-           ========================================================================== */
-        const SoundEngine = {
-            ctx: null,
-            enabled: true,
-
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            },
-
-            playTone(freq, type, duration, delay = 0, volume = 0.22) {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
-
-                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(this.ctx.currentTime + delay);
-                osc.stop(this.ctx.currentTime + delay + duration);
-            },
-
-            click() {
-                this.playTone(620, 'sine', 0.07, 0, 0.14);
-            },
-
-            correct(combo = 1) {
-                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
-                this.playTone(base, 'triangle', 0.13, 0, 0.25);
-                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
-                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
-            },
-
-            wrong() {
-                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
-                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
-            },
-
-            victory() {
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((n, idx) => {
-                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
-                });
-            }
-        };
-
-        function toggleSound() {
-            SoundEngine.enabled = !SoundEngine.enabled;
-            const icon = document.getElementById('sound-icon');
-            const btn = document.getElementById('sound-toggle');
-            if (SoundEngine.enabled) {
-                icon.textContent = '🔊';
-                btn.classList.replace('bg-slate-400', 'bg-emerald-500');
-                SoundEngine.click();
-            } else {
-                icon.textContent = '🔇';
-                btn.classList.replace('bg-emerald-500', 'bg-slate-400');
-            }
-        }
 
         /* ==========================================================================
            2. 康軒版四上期末考關卡定義（第三單元、第四單元共 5 課 + 期末模擬考）
@@ -567,13 +487,13 @@
             renderLobby();
         }
 
-        function saveProgress() {
+        function saveProgress(animateScore = false) {
             try {
                 localStorage.setItem('knsh_society_4a_final_v1', JSON.stringify(gameState));
             } catch (e) {
                 console.warn('無法儲存進度', e);
             }
-            updateHeaderStats();
+            updateHeaderStats(animateScore);
         }
 
         function setQuestionCount(count, playSnd = true) {
@@ -603,7 +523,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單課 4～5 題／總模擬 23 題型全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單課 7 題／總模擬 35 題型全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.4));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -625,10 +545,14 @@
             setQuestionCount(clamped, true);
         }
 
-        function updateHeaderStats() {
+        function updateHeaderStats(animateScore = false) {
             const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
-            document.getElementById('total-score').textContent = gameState.totalScore;
+            if (animateScore) {
+                animateScoreTo(gameState.totalScore);
+            } else {
+                document.getElementById('total-score').textContent = gameState.totalScore;
+            }
 
             const badge = document.getElementById('mistake-badge');
             const lobbyBanner = document.getElementById('lobby-mistake-banner');
@@ -813,6 +737,38 @@
                         ]),
                         explanation: '現代信仰文化與時俱進，許多廟宇推動「一爐一香」、「金紙集中燒」或「以米代金、以功代金」，在虔誠敬神的同時也守護空氣與環境品質。'
                     };
+                },
+                () => {
+                    const faiths = [
+                        { place: '天主教堂與基督教會', desc: '建築常見十字架與彩繪玻璃，信徒在星期日做禮拜、唱聖詩', wrong1: '信徒面向西方麥加祈禱，禁止食用豬肉', wrong2: '供奉媽祖與千里眼、順風耳等道教神明', wrong3: '以「祖靈信仰」為核心的達悟族海祭場' },
+                        { place: '清真寺', desc: '信奉伊斯蘭教的穆斯林進行禮拜與慶祝開齋節的神聖場所', wrong1: '屋頂通常有燕尾脊並供奉土地公與關聖帝君', wrong2: '基督教與天主教進行受洗與聖誕彌撒的教堂', wrong3: '供奉三寶佛並舉行浴佛節的佛教道場' },
+                        { place: '佛教寺院（佛寺）', desc: '供奉釋迦牟尼佛與觀世音菩薩，常舉行浴佛節與禪修活動', wrong1: '清真寺內信奉阿拉並遵守齋戒月規範', wrong2: '歐洲哥德式尖塔與十字架為主的教堂', wrong3: '原住民族在山林中舉行射耳祭的獵場' }
+                    ];
+                    const item = pickRandom(faiths);
+                    return {
+                        unitId: 31,
+                        hint: `家鄉除了傳統宮廟，也有許多不同宗教的建築場所，想一想「${item.place}」屬於哪一種宗教與文化？`,
+                        text: `多元文化融入家鄉後，街道上能看見不同宗教的信仰場所。關於「<strong>${item.place}</strong>」的敘述，哪一項是<strong>正確</strong>的？`,
+                        correct: item.desc,
+                        options: shuffle([item.desc, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `「${item.place}」的主要特色是：${item.desc}。尊重各種宗教文化是民主社會的重要素養！`
+                    };
+                },
+                () => {
+                    const gods = [
+                        { god: '文昌帝君', role: '保佑學子聰明開智慧、讀書考試順利與文運昌盛', wrong1: '保佑漁民出海捕魚平安歸來的海神', wrong2: '掌管土地界線與五穀豐收的土地公', wrong3: '保佑房屋建構與木匠工藝的魯班公' },
+                        { god: '保生大帝', role: '古代名醫得道，專門保佑居民健康平安、醫治病痛', wrong1: '專責保護海上船隻與討海人的媽祖', wrong2: '掌管山林與狩獵安全的祖靈', wrong3: '專門管理考生功名與考試成績的考神' },
+                        { god: '神農大帝（五穀先帝）', role: '教導先民耕種五穀與辨識百草，保佑農業收成與作物豐碩', wrong1: '西方宗教中在聖誕節送禮物的聖誕老人', wrong2: '管理商船航運安全的天上聖母', wrong3: '保佑學生考上理想學校的魁星爺' }
+                    ];
+                    const item = pickRandom(gods);
+                    return {
+                        unitId: 31,
+                        hint: `從神明的稱呼「${item.god}」猜猜看，早期先民最常向他祈求什麼願望？`,
+                        text: `早期先民依不同職業與生活需求祭拜神明。請問許多居民前往廟宇祭拜「<strong>${item.god}</strong>」，主要是祈求什麼？`,
+                        correct: item.role,
+                        options: shuffle([item.role, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `臺灣傳統信仰中，「${item.god}」主要是${item.role}。`
+                    };
                 }
             ],
 
@@ -895,6 +851,37 @@
                         ]),
                         explanation: '透過社區營造，保留老街歷史建築與「亭仔腳」風貌，並結合文創商店、在地特產與文化導覽，能讓老街既留住記憶又帶動觀光。'
                     };
+                },
+                () => {
+                    const oldStreets = [
+                        { name: '新北三峽老街', feat: '擁有保存完整的紅磚拱廊與巴洛克風格華麗牌樓立面，並以藍染與金牛角聞名', wrong1: '位在蘭嶼海岸邊的達悟族地下屋聚落', wrong2: '專門停放國際貨櫃輪的高雄現代化深水港', wrong3: '位在玉山山頂的高山氣象觀測站' },
+                        { name: '彰化鹿港老街', feat: '早期因海運貿易興盛（「一府二鹿三艋舺」），保留紅磚古道、九曲巷與傳統工藝', wrong1: '因高速鐵路地下化才剛剛蓋好的現代商城', wrong2: '臺灣海拔最高的原住民族高山部落', wrong3: '沒有任何廟宇與傳統街屋的新興工業園區' },
+                        { name: '桃園大溪老街', feat: '早期靠大漢溪河運起家，以華麗的商號牌樓立面與傳統木藝、豆干文化聞名', wrong1: '以漁船捕撈飛魚為主要經濟活動的小島港口', wrong2: '全街都是玻璃帷幕摩天大樓的金融中心', wrong3: '專門生產半導體晶圓的高科技科學園區' }
+                    ];
+                    const item = pickRandom(oldStreets);
+                    return {
+                        unitId: 32,
+                        hint: `想一想「${item.name}」當初是如何發展起來的，以及現在有什麼代表性的老街景觀與特產！`,
+                        text: `臺灣各地保有許多極具歷史特色的老街。關於「<strong>${item.name}</strong>」的介紹，下列哪一項是<strong>正確</strong>的？`,
+                        correct: item.feat,
+                        options: shuffle([item.feat, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `「${item.name}」${item.feat}，展現了臺灣早期商業繁榮與建築工藝之美。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 32,
+                        hint: '傳統老街的街屋常是狹長型（面寬窄、縱深長），前面臨街做生意，後面則是全家人住的地方！',
+                        text: `傳統老街的街屋建築大多呈「狹長條狀」，屋主通常採用「前店後住」的空間安排，這樣設計的主要好處是什麼？`,
+                        correct: '前面臨街方便擺設商品做生意，後方安靜空間則供家人起居生活',
+                        options: shuffle([
+                            '前面臨街方便擺設商品做生意，後方安靜空間則供家人起居生活',
+                            '為了讓每戶人家都在屋頂上停放直升機',
+                            '因為以前的人不喜歡接觸陽光，故意蓋成地下室',
+                            '為了方便把整條馬路全部封閉起來不讓人走'
+                        ]),
+                        explanation: '老街臨街土地寸土寸金，因此街屋發展出窄門面、深縱深的「前店後住」格局，前段開店迎客、後段作為家庭起居與倉庫空間，非常有效率！'
+                    };
                 }
             ],
 
@@ -962,6 +949,52 @@
                         ]),
                         explanation: '現代人的作息除了工作與學習，也重視「休閒生活」，透過戶外踏青、藝文參觀或運動，能讓身心獲得充分休息與充實。'
                     };
+                },
+                () => {
+                    const moonCases = [
+                        { day: '農曆初一', phase: '完全看不到月亮（朔月／新月）', wrong1: '看到又圓又亮的滿月（望月）', wrong2: '只看得到右半邊亮的上弦月', wrong3: '月亮變成紅色的太陽' },
+                        { day: '農曆十五', phase: '看到最圓最亮的滿月（望月）', wrong1: '完全看不到月亮（新月）', wrong2: '太陽整天都不會升起', wrong3: '這一天一定會放颱風假' }
+                    ];
+                    const m = pickRandom(moonCases);
+                    return {
+                        unitId: 41,
+                        hint: `農曆（陰曆）是依照「月亮圓缺」變化的周期制定的，想一想「${m.day}」晚上的月亮是什麼樣子？`,
+                        text: `農曆是先民觀察月亮圓缺制定出來的曆法。請問在天氣晴朗的「<strong>${m.day}</strong>」晚上抬頭看天空，通常會觀察到哪一種月相？`,
+                        correct: m.phase,
+                        options: shuffle([m.phase, m.wrong1, m.wrong2, m.wrong3]),
+                        explanation: `農曆每月「初一」月亮幾乎看不見（朔／新月），到了「十五」則是又圓又亮的滿月（望／滿月），像是中秋節（八月十五）和元宵節（正月十五）都能欣賞圓月！`
+                    };
+                },
+                () => {
+                    const moreTerms = [
+                        { term: '立春', desc: '春季的開始，氣溫漸漸回暖、萬物開始復甦', wrong1: '一年中最炎熱、準備放暑假的夏天正中央', wrong2: '冬天快結束前最冷的大寒', wrong3: '秋天楓葉飄落準備過中秋節' },
+                        { term: '夏至', desc: '一年當中白天最長、黑夜最短的一天，天氣變得炎熱', wrong1: '一年當中白天最短、黑夜最長的一天', wrong2: '春天播種稻秧的第一天', wrong3: '農曆除夕全家人吃團圓飯的日子' },
+                        { term: '秋分', desc: '秋季的中間點，這一天白天和黑夜的時間幾乎一樣長，天氣漸涼', wrong1: '夏天颱風最多、白天最長的一天', wrong2: '冬天吃湯圓的節氣', wrong3: '準備貼春聯迎新年的臘月' }
+                    ];
+                    const t = pickRandom(moreTerms);
+                    return {
+                        unitId: 41,
+                        hint: `先民依據太陽位置把一年分成二十四節氣，「${t.term}」這個名字裡藏著季節和太陽變化的線索喔！`,
+                        text: `下列關於二十四節氣中「<strong>${t.term}</strong>」的說明，哪一項最正確？`,
+                        correct: t.desc,
+                        options: shuffle([t.desc, t.wrong1, t.wrong2, t.wrong3]),
+                        explanation: `二十四節氣反映太陽運行與氣候規律：「${t.term}」是指${t.desc}。`
+                    };
+                },
+                () => {
+                    return {
+                        unitId: 41,
+                        hint: '以前農業社會配合陽光作息「日出而作、日落而息」，現代社會有電燈與便利商店，作息時間有什麼轉變？',
+                        text: `比較早期「農業社會」與現代「工商業社會」的作息差異，下列哪一項敘述是<strong>正確</strong>的？`,
+                        correct: '現代因電力照明與多元行業需求，部分行業採輪班制，作息較不受日落限制',
+                        options: shuffle([
+                            '現代因電力照明與多元行業需求，部分行業採輪班制，作息較不受日落限制',
+                            '現代人都必須在太陽下山後立刻熄燈睡覺，完全沒有夜間活動',
+                            '早期農夫都是看電視氣象預報和星期幾才決定要不要插秧',
+                            '現代人上學上班完全不用看國曆，只看農曆節氣決定'
+                        ]),
+                        explanation: '早期農業社會受自然光照影響，多半「日出而作、日落而息」；現代社會依賴國曆與星期制運作，加上照明與科技發達，出現輪班制與豐富夜間活動，作息更加多元。'
+                    };
                 }
             ],
 
@@ -1028,6 +1061,54 @@
                         correct: item.origin,
                         options: shuffle([item.origin, item.wrong1, item.wrong2, item.wrong3]),
                         explanation: `「${item.fest}」是${item.origin}，讓我們的家鄉文化變得更加多元繽紛！`
+                    };
+                },
+                () => {
+                    const moreFest = [
+                        { name: '清明節', custom: '前往祖先墳前除草祭拜（掃墓），並吃潤餅、草仔粿慎終追遠', wrong1: '提燈籠猜燈謎與吃湯圓', wrong2: '在河上舉行盛大的龍舟競賽', wrong3: '在門口掛艾草與配戴香包' },
+                        { name: '中元節（農曆七月十五）', custom: '準備豐盛供品祭拜祖先與無主孤魂（中元普渡），並放水燈祈求平安', wrong1: '貼春聯迎財神與發壓歲錢', wrong2: '全家人賞滿月吃月餅剝柚子', wrong3: '登高插茱萸並敬老尊賢' },
+                        { name: '重陽節（農曆九月初九）', custom: '舉辦敬老活動關心長輩健康，傳統也有登高、放風箏等習俗', wrong1: '吃粽子紀念愛國詩人屈原', wrong2: '除夕夜全家人守歲圍爐', wrong3: '端午節正午立雞蛋比賽' }
+                    ];
+                    const mf = pickRandom(moreFest);
+                    return {
+                        unitId: 42,
+                        hint: `想一想「${mf.name}」是大家在哪個季節會參與的傳統節慶，有什麼代表性的習俗？`,
+                        text: `下列關於傳統節慶「<strong>${mf.name}</strong>」的習俗與意義，哪一項說明是<strong>正確</strong>的？`,
+                        correct: mf.custom,
+                        options: shuffle([mf.custom, mf.wrong1, mf.wrong2, mf.wrong3]),
+                        explanation: `「${mf.name}」的傳統習俗為：${mf.custom}。`
+                    };
+                },
+                () => {
+                    const rituals = [
+                        { tribe: '賽夏族', ritual: '矮靈祭（巴斯達隘 Pasta\'ay）', desc: '向傳說中的矮人表達感恩與懺悔祈福，是族人極為莊嚴神聖的祭儀', wrong1: '在蘭嶼划拼板舟捕捉飛魚', wrong2: '舉辦元宵節萬人放天燈活動', wrong3: '農曆正月初二回娘家拜年' },
+                        { tribe: '排灣族', ritual: '五年祭（Maljeveq）', desc: '每五年舉辦一次，以長竹竿刺福球迎接並送別祖靈，祈求部落平安順遂', wrong1: '慶祝基督教復活節彩蛋活動', wrong2: '在清真寺前慶祝開齋節', wrong3: '端午節舉辦海上划龍舟比賽' },
+                        { tribe: '噶瑪蘭族', ritual: '海祭（Laligi）', desc: '出海前在海邊祭拜海神與祖靈，祈求漁獲豐收與海上作業平安', wrong1: '上高山打獵舉辦射耳祭', wrong2: '在中秋夜全族人烤肉賞月', wrong3: '冬天在街上發放紅包拜年' }
+                    ];
+                    const r = pickRandom(rituals);
+                    return {
+                        unitId: 42,
+                        hint: `每個原住民族都有各自珍貴的歲時祭儀，「${r.tribe}」的「${r.ritual}」充滿了對自然或祖靈的敬意！`,
+                        text: `認識臺灣原住民族文化時，請問「<strong>${r.tribe}</strong>」的傳統祭儀「<strong>${r.ritual}</strong>」主要特色是什麼？`,
+                        correct: r.desc,
+                        options: shuffle([r.desc, r.wrong1, r.wrong2, r.wrong3]),
+                        explanation: `「${r.tribe}」的「${r.ritual}」：${r.desc}。`
+                    };
+                },
+                () => {
+                    const who = pickRandom(CHARACTERS);
+                    return {
+                        unitId: 42,
+                        hint: '學校或社區舉辦東南亞、原住民或傳統漢人節慶體驗時，我們可以用開放的心胸互相學習彼此的文化！',
+                        text: `學校舉辦「家鄉多元文化節慶園遊會」，現場有新住民的越南春捲、原住民的傳統歌舞和漢人的包粽子攤位。${who}抱持哪一種態度最恰當？`,
+                        correct: '好奇了解各族群節慶背後的故事，欣賞並尊重彼此的文化特色',
+                        options: shuffle([
+                            '好奇了解各族群節慶背後的故事，欣賞並尊重彼此的文化特色',
+                            '只吃自己家習慣的食物，嘲笑其他國家的傳統料理很奇怪',
+                            '覺得只有漢人四大節慶才重要，其他族群節日都不必理會',
+                            '看到原住民族傳統服飾就隨意拉扯拍照取笑'
+                        ]),
+                        explanation: '臺灣是一座多元文化共融的家鄉，主動了解、欣賞並尊重漢人、原住民族與新住民的節慶文化，能讓社會更和諧美好。'
                     };
                 }
             ],
@@ -1111,6 +1192,51 @@
                             '整天滑手機不跟家人說話'
                         ]),
                         explanation: '母親節、父親節與八月第四個星期日的「祖父母節」，都是提醒我們感念家人辛勞、主動關懷與陪伴的溫馨節日。'
+                    };
+                },
+                () => {
+                    // 曆法分類反選題（3 個農曆傳統節慶 vs 1 個國曆現代節日，或反之）
+                    const lunarSet = ['春節（正月初一）', '元宵節（正月十五）', '端午節（五月初五）', '中秋節（八月十五）', '重陽節（九月初九）'];
+                    const solarSet = ['國慶日（10 月 10 日）', '教師節（9 月 28 日）', '和平紀念日（2 月 28 日）', '世界地球日（4 月 22 日）', '原住民族日（8 月 1 日）'];
+                    const askSolarOdd = Math.random() < 0.5;
+                    if (askSolarOdd) {
+                        const odd = pickRandom(solarSet);
+                        const others = shuffle(lunarSet).slice(0, 3);
+                        return {
+                            unitId: 43,
+                            hint: '看看四個節日後面括號裡的日期：哪一個是固定依照「國曆（陽曆）」舉行的現代節日，而不是「農曆」傳統節慶？',
+                            text: `下面四個節慶與節日中，哪一個所依據的<strong>曆法</strong>與其他三個<strong>不同</strong>？`,
+                            correct: odd,
+                            options: shuffle([odd, ...others]),
+                            explanation: `「${odd}」是依照「國曆（陽曆）」日期訂定的現代節日；而其餘三個（${others.join('、')}）皆屬於依照「農曆」舉行的傳統節慶！`
+                        };
+                    } else {
+                        const odd = pickRandom(lunarSet);
+                        const others = shuffle(solarSet).slice(0, 3);
+                        return {
+                            unitId: 43,
+                            hint: '看看哪一個是依照「農曆（陰曆）」舉行的傳統節慶，而其他三個都是固定國曆日期的現代節日？',
+                            text: `下面四個節日與節慶中，哪一個主要是依照「<strong>農曆</strong>」日期舉行，與其他三個（國曆）不同？`,
+                            correct: odd,
+                            options: shuffle([odd, ...others]),
+                            explanation: `「${odd}」是依照「農曆」舉行的傳統節慶；而${others.join('、')}則都是固定於「國曆」舉行的現代節日！`
+                        };
+                    }
+                },
+                () => {
+                    const careDays = [
+                        { day: '兒童節（4 月 4 日）', meaning: '重視兒童身心健康與受教權益，給小朋友快樂成長的祝福', wrong1: '專門給退休長輩放假的重陽節', wrong2: '紀念先民過海來臺開墾的宗教祭典', wrong3: '感謝護理師照護病人的國際護師節' },
+                        { day: '婦女節（3 月 8 日）', meaning: '肯定女性對家庭與社會的貢獻，倡導性別平等與互相尊重', wrong1: '紀念國慶日總統府升旗典禮', wrong2: '農曆七月十五祭祀祖先的普渡節日', wrong3: '慶祝五月一日勞工休假的勞動節' },
+                        { day: '祖父母節（8 月第 4 個星期日）', meaning: '提醒孫子女關心並陪伴爺爺奶奶、外公外婆，促進代間情感交流', wrong1: '清明節前往公墓除草掃墓', wrong2: '紀念二二八事件的和平紀念日', wrong3: '萬聖節小朋友扮鬼要糖果的活動' }
+                    ];
+                    const item = pickRandom(careDays);
+                    return {
+                        unitId: 43,
+                        hint: `從「${item.day}」的名稱想一想，這個現代節日最主要想關懷哪一群對象或倡導什麼價值？`,
+                        text: `現代節日中也包含許多重視人權、平權與家庭關懷的日子。請問設立「<strong>${item.day}</strong>」最主要的意義是什麼？`,
+                        correct: item.meaning,
+                        options: shuffle([item.meaning, item.wrong1, item.wrong2, item.wrong3]),
+                        explanation: `「${item.day}」主要意義是${item.meaning}，讓社會充滿關懷與尊重。`
                     };
                 }
             ]
@@ -1300,6 +1426,8 @@
             currentSession = {
                 stageId: 88,
                 isMistakeBattle: true,
+                bossHp: battleQuestions.length,
+                bossMaxHp: battleQuestions.length,
                 questions: battleQuestions,
                 currentIndex: 0,
                 correctCount: 0,
@@ -1376,6 +1504,7 @@
             }
 
             document.getElementById('question-text').innerHTML = q.text;
+            MonsterBoss.renderUI();
 
             const visualEl = document.getElementById('question-visual');
             if (q.visual) {
@@ -1450,9 +1579,20 @@
 
                 SoundEngine.correct(currentSession.combo);
 
+                const qContainer = document.getElementById('question-text');
+                if (qContainer && qContainer.getBoundingClientRect) {
+                    const rect = qContainer.getBoundingClientRect();
+                    spawnFloatingText(rect.left + rect.width / 2, rect.top + 10, `+${points}${currentSession.combo >= 2 ? ' 🔥' : ''}`, 'text-orange-600');
+                }
+
                 const prevLen = gameState.mistakes.length;
                 gameState.mistakes = gameState.mistakes.filter(m => m.questionText !== q.text);
                 const eliminated = gameState.mistakes.length < prevLen;
+                if (currentSession.isMistakeBattle) {
+                    currentSession.bossHp = Math.max(0, (currentSession.bossHp || 1) - 1);
+                    MonsterBoss.triggerHit();
+                    MonsterBoss.renderUI();
+                }
 
                 const praises = ['太棒了！完全正確！', '好厲害！社會觀念很清楚！', '答對囉！家鄉文化小達人！', '漂亮的一擊！繼續保持！'];
                 feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
@@ -1464,6 +1604,9 @@
             } else {
                 currentSession.combo = 0;
                 SoundEngine.wrong();
+                if (currentSession.isMistakeBattle) {
+                    MonsterBoss.triggerCounter();
+                }
 
                 const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
                 if (!gameState.mistakes.some(m => m.questionText === q.text)) {
@@ -1492,7 +1635,7 @@
                 nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
             }
 
-            saveProgress();
+            saveProgress(isCorrect);
         }
 
         function nextQuestion() {
@@ -1557,11 +1700,29 @@
             document.getElementById('result-score').textContent = `+${currentSession.sessionScore}`;
             document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
 
-            document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
-                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+            const starsRow = document.getElementById('result-stars');
+            starsRow.innerHTML = [1, 2, 3].map(() =>
+                `<span class="opacity-20 grayscale inline-block">⭐</span>`
             ).join('');
 
             showScreen('result-screen');
+
+            if (starsRow.querySelectorAll) {
+                const starEls = starsRow.querySelectorAll('span');
+                for (let i = 0; i < earnedStars; i++) {
+                    setTimeout(() => {
+                        if (starEls[i]) {
+                            starEls[i].className = 'animate-star-pop inline-block';
+                        }
+                    }, i * 180);
+                }
+            }
+
+            if (currentSession.isMistakeBattle && gameState.mistakes.length === 0) {
+                ConfettiEngine.fireFireworks();
+            } else if (earnedStars === 3) {
+                ConfettiEngine.fireCannons();
+            }
         }
 
         /* ==========================================================================
@@ -1728,6 +1889,7 @@
         });
 
         window.onload = function () {
+            ConfettiEngine.init();
             loadProgress();
         };
     </script>

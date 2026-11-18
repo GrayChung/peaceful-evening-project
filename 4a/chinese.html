@@ -11,48 +11,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="../Styles/common.css">
     <style>
         body {
-            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
             background: linear-gradient(135deg, #ffe4e6 0%, #fef3c7 50%, #f3e8ff 100%);
-            min-height: 100vh;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-float {
-            animation: float 3.5s ease-in-out infinite;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.88); opacity: 0; }
-            70% { transform: scale(1.02); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-pop {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
-        }
-
-        .btn-3d {
-            transition: all 0.12s ease;
-            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
-        }
-        .btn-3d:active:not(:disabled) {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
         }
 
         /* 國字注音凸顯框 */
@@ -86,6 +48,9 @@
     </style>
 </head>
 <body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 過關全螢幕彩帶 / 煙火畫布 -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
 
     <!-- 頂部狀態列 -->
     <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-rose-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
@@ -249,6 +214,32 @@
                     <div class="flex items-center gap-2">
                         <div id="combo-badge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-3 py-1 rounded-full text-xs sm:text-sm shadow animate-bounce">
                             🔥 2 連擊!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區 -->
+                <div id="mistake-boss-panel" class="hidden mb-5 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3.5 sm:p-4 border-2 border-rose-300 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+                        <div id="monster-stage" class="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center">
+                            <div id="monster-svg-wrap" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center"></div>
+                            <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
+                                <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+                                <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
+                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+                                    😈 錯題魔王登場！答對題目就能削減它的生命值！
+                                </span>
+                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600">HP 5 / 5</span>
+                            </div>
+                            <div class="relative w-full h-5 sm:h-6 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                                <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
+                                <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
+                                <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -482,7 +473,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 48 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 56 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -515,80 +506,9 @@
         </div>
     </div>
 
+    <script src="../Scripts/sound-engine.js"></script>
+    <script src="../Scripts/game-effects.js"></script>
     <script>
-        /* ==========================================================================
-           1. Web Audio API 音效合成引擎
-           ========================================================================== */
-        const SoundEngine = {
-            ctx: null,
-            enabled: true,
-
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            },
-
-            playTone(freq, type, duration, delay = 0, volume = 0.22) {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
-
-                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(this.ctx.currentTime + delay);
-                osc.stop(this.ctx.currentTime + delay + duration);
-            },
-
-            click() {
-                this.playTone(620, 'sine', 0.07, 0, 0.14);
-            },
-
-            correct(combo = 1) {
-                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
-                this.playTone(base, 'triangle', 0.13, 0, 0.25);
-                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
-                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
-            },
-
-            wrong() {
-                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
-                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
-            },
-
-            victory() {
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((n, idx) => {
-                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
-                });
-            }
-        };
-
-        function toggleSound() {
-            SoundEngine.enabled = !SoundEngine.enabled;
-            const icon = document.getElementById('sound-icon');
-            const btn = document.getElementById('sound-toggle');
-            if (SoundEngine.enabled) {
-                icon.textContent = '🔊';
-                btn.classList.replace('bg-slate-400', 'bg-emerald-500');
-                SoundEngine.click();
-            } else {
-                icon.textContent = '🔇';
-                btn.classList.replace('bg-emerald-500', 'bg-slate-400');
-            }
-        }
-
         /* ==========================================================================
            2. 南一版四上期末考關卡定義（第 7～12 課核心語文能力 + 生字手寫 + 期末模擬考）
            第 7 課〈到此「藝」遊〉、第 8 課〈四季的頭髮〉、第 9 課〈阿白觀察記〉、
@@ -596,7 +516,7 @@
            ========================================================================== */
         const STAGES = [
             { id: 1, title: '第一關：易錯字音與多音字', subtitle: '第 7～12 課破音字、難讀字注音精準辨析', icon: '🔤', color: 'from-rose-400 to-pink-600', border: 'border-rose-300' },
-            { id: 2, title: '第二關：形近字與錯別字偵探', subtitle: '部首偏旁區分、抓出句子裡的錯別字', icon: '🔍', color: 'from-amber-400 to-orange-600', border: 'border-amber-300' },
+            { id: 2, title: '第二關：形近字與錯別字偵探', subtitle: '部首偏旁區分、抓出錯別字與一字多義辨析', icon: '🔍', color: 'from-amber-400 to-orange-600', border: 'border-amber-300' },
             { id: 3, title: '第三關：四字成語與歇後語', subtitle: '第 7～12 課延伸成語與語文天地歇後語運用', icon: '🏮', color: 'from-emerald-400 to-teal-600', border: 'border-emerald-300' },
             { id: 4, title: '第四關：修辭魔法與句型結構', subtitle: '譬喻、擬人、設問、誇飾與關聯詞造句', icon: '✨', color: 'from-sky-400 to-indigo-600', border: 'border-sky-300' },
             { id: 5, title: '第五關：故事寓意與文意理解', subtitle: '第 7～12 課篇章主旨、民間故事啟示判讀', icon: '📜', color: 'from-purple-400 to-violet-600', border: 'border-purple-300' },
@@ -642,13 +562,13 @@
             renderLobby();
         }
 
-        function saveProgress() {
+        function saveProgress(animateScore = false) {
             try {
                 localStorage.setItem('nani_chinese_4a_final_v1', JSON.stringify(gameState));
             } catch (e) {
                 console.warn('無法儲存進度', e);
             }
-            updateHeaderStats();
+            updateHeaderStats(animateScore);
         }
 
         function setQuestionCount(count, playSnd = true) {
@@ -678,7 +598,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單關 6～10 題／總模擬 48 題全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單關 6～12 題／總模擬 56 題全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.4));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -700,10 +620,14 @@
             setQuestionCount(clamped, true);
         }
 
-        function updateHeaderStats() {
+        function updateHeaderStats(animateScore = false) {
             const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
-            document.getElementById('total-score').textContent = gameState.totalScore;
+            if (animateScore) {
+                animateScoreTo(gameState.totalScore);
+            } else {
+                document.getElementById('total-score').textContent = gameState.totalScore;
+            }
 
             const badge = document.getElementById('mistake-badge');
             const lobbyBanner = document.getElementById('lobby-mistake-banner');
@@ -1103,7 +1027,7 @@
                 })
             ],
 
-            // 第二關：形近字與錯別字偵探（8 題）
+            // 第二關：形近字與錯別字偵探（含一字多義，12 題）
             2: [
                 () => ({
                     unitId: 2,
@@ -1176,6 +1100,42 @@
                     correct: '剪',
                     options: ['剪', '煎', '箭', '前'],
                     explanation: '「修剪（ㄒㄧㄡ ㄐㄧㄢˇ）」指用剪刀把多餘的部分剪齊，下方是「刀」部。'
+                }),
+                () => ({
+                    unitId: 2,
+                    lesson: '第 7～12 課「一字多義」辨析',
+                    hint: '先分辨「張開嘴巴」是動作（打開），「一張紙」是單位量詞，「東張西望」則是向四周看喔！',
+                    text: '下列哪一個詞語中的「<span class="char-highlight">張</span>」字，意思與「東<span class="char-highlight">張</span>西望」的「張」最相近？',
+                    correct: '張望',
+                    options: ['張望', '一張畫', '張嘴', '緊張'],
+                    explanation: '「東張西望」與「張望」裡的「張」都是「看、望」的意思；「一張畫」是計算紙張的量詞，「張嘴」是打開，「緊張」則是焦急繃緊。'
+                }),
+                () => ({
+                    unitId: 2,
+                    lesson: '第 7～12 課「一字多義」辨析',
+                    hint: '想想看：「街道」是可以走的路，「說道」是說話，「一道彩虹」是量詞！',
+                    text: '「村子裡有一<span class="char-highlight">道</span>石橋。」句中「道」的意思，與下列哪個選項中的「道」<strong>相同</strong>？',
+                    correct: '一「道」光線',
+                    options: ['一「道」光線', '「道」歉認錯', '人行「道」', '微不足「道」'],
+                    explanation: '「一道石橋」和「一道光線」裡的「道」都當作計算長條形事物的量詞使用；「道歉」是說，「人行道」是道路，「微不足道」則是值得一提。'
+                }),
+                () => ({
+                    unitId: 2,
+                    lesson: '第 7～12 課「一字多義」辨析',
+                    hint: '「很深的井」指空間距離大；「深夜」指時間久晚；「深深的感謝」則是感情濃厚！',
+                    text: '下列哪個詞語裡的「<span class="char-highlight">深</span>」字，是用來表示「時間很晚、夜已久」的意思？',
+                    correct: '夜深人靜',
+                    options: ['夜深人靜', '深淺不一', '深厚友誼', '深入研究'],
+                    explanation: '「夜深人靜」的「深」指時間已晚（深夜）；「深淺不一」指空間距離，「深厚友誼」指感情濃厚，「深入研究」指程度透徹。'
+                }),
+                () => ({
+                    unitId: 2,
+                    lesson: '第 7～12 課「一字多義」辨析',
+                    hint: '「滿滿一碗」是裝得極多沒有空隙，「滿意」則是心理感到足夠、高興喔！',
+                    text: '「老奶奶煮了一鍋<span class="char-highlight">滿</span>屋飄香的紅豆粥，大家吃得十分<span class="char-highlight">滿</span>意。」這兩個「滿」字的意思分別是什麼？',
+                    correct: '充滿整個空間 ／ 感到足夠快樂',
+                    options: ['充滿整個空間 ／ 感到足夠快樂', '全部都一樣 ／ 時間到達終點', '感到足夠快樂 ／ 裝到溢出來', '驕傲自大 ／ 充滿整個空間'],
+                    explanation: '「滿屋飄香」的「滿」指充滿、佈滿整個空間；「滿意」的「滿」則是指心裡覺得足夠、稱心快樂。'
                 })
             ],
 
@@ -1255,7 +1215,7 @@
                 })
             ],
 
-            // 第四關：修辭魔法與句型結構（6 題）
+            // 第四關：修辭魔法與句型結構（含句型／修辭改寫，10 題）
             4: [
                 () => ({
                     unitId: 4,
@@ -1310,6 +1270,62 @@
                     correct: '擬人法',
                     options: ['擬人法', '譬喻法', '設問法', '排比法'],
                     explanation: '「怒吼」是人或動物的動作，用來形容北風吹拂的聲音，屬於「擬人」修辭。'
+                }),
+                () => ({
+                    unitId: 4,
+                    lesson: '語文天地修辭辨析（誇飾）',
+                    hint: '把聲音寫成「震破屋頂」、把高寫成「頂到雲端」，用超過常理的誇張說法來加強語氣，就是「誇飾法」！',
+                    text: '如果想要把「老鼠迎親的隊伍非常吵鬧」改寫得更有畫面感，下列哪一句成功運用了<strong>誇飾法</strong>？',
+                    correct: '老鼠迎親的鑼鼓聲響亮得幾乎快把雲朵震散了！',
+                    options: [
+                        '老鼠迎親的鑼鼓聲響亮得幾乎快把雲朵震散了！',
+                        '老鼠迎親的隊伍一邊吹嗩吶一邊向前走。',
+                        '老鼠迎親的時候，太陽公公在天上看著大家。',
+                        '為什麼老鼠迎親要挑選最強大的新郎呢？'
+                    ],
+                    explanation: '聲音不可能真的把天上的雲朵震散，這是刻意放大程度的「誇飾法」，能讓讀者感受到極度熱鬧響亮的氣氛。'
+                }),
+                () => ({
+                    unitId: 4,
+                    lesson: '第 8 課〈四季的頭髮〉修辭改寫（排比）',
+                    hint: '用三個以上結構相似、語氣一致的短語連續並列，能讓文章更有節奏感，這就是「排比法」喔！',
+                    text: '想把「四季的風景很美」改寫成<strong>排比句</strong>，下面哪一個句子最適合？',
+                    correct: '春天換上嫩綠新裝，夏天頂著濃密捲髮，秋天披上金黃披肩。',
+                    options: [
+                        '春天換上嫩綠新裝，夏天頂著濃密捲髮，秋天披上金黃披肩。',
+                        '春天的葉子綠綠的，冬天的樹枝都光禿禿的，看起來好冷。',
+                        '大樹像一位魔術師，能變出許多顏色。',
+                        '你最喜歡大樹在哪一個季節的造型呢？'
+                    ],
+                    explanation: '連用三個「季節＋動作＋色彩服飾」的相似句型並列，形成層層推進的節奏美感，屬於「排比法」。'
+                }),
+                () => ({
+                    unitId: 4,
+                    lesson: '第 12 課〈戴斗笠的地藏〉句型改寫（轉折複句）',
+                    hint: '要把「老爺爺沒賣出斗笠」和「心裡很溫暖」這兩件想法相反的事連在一起，要挑轉折關聯詞喔！',
+                    text: '要把兩句話合併為一句通順的轉折句：「老爺爺沒有賣出斗笠。」＋「老爺爺的心裡非常溫暖。」下列哪一句改寫最正確？',
+                    correct: '雖然老爺爺沒有賣出斗笠，心裡卻感到非常溫暖。',
+                    options: [
+                        '雖然老爺爺沒有賣出斗笠，心裡卻感到非常溫暖。',
+                        '因為老爺爺沒有賣出斗笠，所以心裡非常溫暖。',
+                        '只要老爺爺沒有賣出斗笠，心裡就會非常溫暖。',
+                        '不但老爺爺沒有賣出斗笠，而且心裡非常溫暖。'
+                    ],
+                    explanation: '前後兩件事語意出現相反轉折，應使用「雖然……卻（但是）……」連接最恰當；用「因為……所以……」或「只要……就……」會造成邏輯不通。'
+                }),
+                () => ({
+                    unitId: 4,
+                    lesson: '語文天地句型重組（條件複句）',
+                    hint: '「無論（不管）遇到什麼情況，結果都不會改變」，找找看哪一句的語意和關聯詞搭配最自然！',
+                    text: '下列哪一個句子正確運用了「無論……都……」來表達「在任何情況下都不會改變」的意思？',
+                    correct: '無論刮風還是下雪，善良的老爺爺都想幫助受苦的人。',
+                    options: [
+                        '無論刮風還是下雪，善良的老爺爺都想幫助受苦的人。',
+                        '無論今天天氣很好，所以我們決定去公園野餐。',
+                        '無論這道點心好吃，而且價格也很便宜。',
+                        '無論哥哥考了滿分，但是他沒有驕傲。'
+                    ],
+                    explanation: '「無論……都……」用來排除條件限制，表示任何情形下結論皆相同；其餘選項將轉折、因果或遞進詞與「無論」混用，語法不通。'
                 })
             ],
 
@@ -1693,6 +1709,8 @@
             currentSession = {
                 stageId: 88,
                 isMistakeBattle: true,
+                bossHp: battleQuestions.length,
+                bossMaxHp: battleQuestions.length,
                 questions: battleQuestions,
                 currentIndex: 0,
                 correctCount: 0,
@@ -1772,6 +1790,7 @@
 
             document.getElementById('question-text').innerHTML = q.text;
             document.getElementById('feedback-box').classList.add('hidden');
+            MonsterBoss.renderUI();
 
             const optionsGrid = document.getElementById('options-grid');
             const hwContainer = document.getElementById('handwriting-container');
@@ -1830,7 +1849,7 @@
         function gradeHanzi(isCorrect) {
             if (currentSession.answered) return;
             document.getElementById('hanzi-grade-step').classList.add('hidden');
-            handleAnswerResult(isCorrect, isCorrect ? '手寫正確' : '手寫筆畫/部首有誤');
+            handleAnswerResult(isCorrect, isCorrect ? '手寫正確' : '手寫筆畫/部首有誤', document.getElementById('hanzi-canvas-wrap'));
         }
 
         function selectOption(selectedIndex) {
@@ -1854,10 +1873,10 @@
                 }
             });
 
-            handleAnswerResult(isCorrect, chosen);
+            handleAnswerResult(isCorrect, chosen, buttons[selectedIndex]);
         }
 
-        function handleAnswerResult(isCorrect, userDisplayAnswer) {
+        function handleAnswerResult(isCorrect, userDisplayAnswer, sourceEl = null) {
             currentSession.answered = true;
             const q = currentSession.questions[currentSession.currentIndex];
 
@@ -1882,9 +1901,20 @@
 
                 SoundEngine.correct(currentSession.combo);
 
+                if (sourceEl && sourceEl.getBoundingClientRect) {
+                    const rect = sourceEl.getBoundingClientRect();
+                    spawnFloatingText(rect.left + rect.width / 2, rect.top + 8, `+${points} 🌟`, 'text-emerald-600');
+                }
+
                 const prevLen = gameState.mistakes.length;
                 gameState.mistakes = gameState.mistakes.filter(m => m.questionText !== q.text);
                 const eliminated = gameState.mistakes.length < prevLen;
+
+                if (currentSession.isMistakeBattle) {
+                    currentSession.bossHp = Math.max(0, (currentSession.bossHp || 0) - 1);
+                    MonsterBoss.renderUI();
+                    MonsterBoss.triggerHit();
+                }
 
                 const praises = ['太棒了！完全正確！', '好厲害！語文功力深厚！', '答對囉！小小文學家！', '漂亮的一擊！繼續保持！'];
                 feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
@@ -1896,6 +1926,10 @@
             } else {
                 currentSession.combo = 0;
                 SoundEngine.wrong();
+
+                if (currentSession.isMistakeBattle) {
+                    MonsterBoss.triggerCounter();
+                }
 
                 const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
                 if (!gameState.mistakes.some(m => m.questionText === q.text)) {
@@ -1923,7 +1957,7 @@
                 nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
             }
 
-            saveProgress();
+            saveProgress(isCorrect);
         }
 
         function nextQuestion() {
@@ -1989,10 +2023,22 @@
             document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
 
             document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
-                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+                `<span class="${i <= earnedStars ? 'animate-star-pop inline-block opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500" style="${i <= earnedStars ? `animation-delay: ${(i - 1) * 140}ms` : ''}">⭐</span>`
             ).join('');
 
             showScreen('result-screen');
+
+            if (typeof ConfettiEngine !== 'undefined') {
+                if (currentSession.isMistakeBattle && gameState.mistakes.length === 0) {
+                    ConfettiEngine.fireCannons();
+                    setTimeout(() => ConfettiEngine.fireFireworks(), 220);
+                } else if (!currentSession.isMistakeBattle && earnedStars === 3) {
+                    ConfettiEngine.fireCannons();
+                    setTimeout(() => ConfettiEngine.fireFireworks(), 260);
+                } else if (earnedStars >= 2) {
+                    ConfettiEngine.fireCannons();
+                }
+            }
         }
 
         /* ==========================================================================
@@ -2159,6 +2205,7 @@
         });
 
         window.onload = function () {
+            ConfettiEngine.init();
             HanziPad.init();
             loadProgress();
         };

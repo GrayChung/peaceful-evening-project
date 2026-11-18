@@ -11,50 +11,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="../Styles/common.css">
     <style>
-        /* 自訂遊戲字體與活潑背景 */
+        /* 數學專屬活潑背景、全等動畫、直式分數與草稿紙樣式 */
         body {
-            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
             background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #dcfce7 100%);
-            min-height: 100vh;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+        @keyframes congruentMerge {
+            0% { transform: scaleX(1); opacity: 0.95; }
+            45% { transform: scaleX(0.25) translateY(-10px); opacity: 0.95; }
+            100% { transform: scaleX(-1); opacity: 0.72; }
         }
-        .animate-float {
-            animation: float 3.5s ease-in-out infinite;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.88); opacity: 0; }
-            70% { transform: scale(1.02); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-pop {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
-        }
-
-        /* 立體遊戲按鈕 */
-        .btn-3d {
-            transition: all 0.12s ease;
-            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
-        }
-        .btn-3d:active:not(:disabled) {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+        .animate-congruent-merge {
+            animation: congruentMerge 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         /* 標準數學上下橫線分數排版 */
@@ -100,6 +70,9 @@
     </style>
 </head>
 <body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 全螢幕非阻擋過關彩帶畫布 -->
+    <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
 
     <!-- 頂部狀態列 -->
     <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-amber-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
@@ -275,6 +248,32 @@
                             <span>✏️</span>
                             <span>手寫草稿板 ▾</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- 消滅錯題大作戰專屬：錯題怪獸 Boss 血條區 -->
+                <div id="mistake-boss-panel" class="hidden mb-5 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3.5 sm:p-4 border-2 border-rose-300 shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+                        <div id="monster-stage" class="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 flex items-center justify-center">
+                            <div id="monster-svg-wrap" class="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center"></div>
+                            <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
+                                <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+                                <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
+                                <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+                                    😈 錯題魔王登場！答對題目就能削減它的生命值！
+                                </span>
+                                <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600">HP 5 / 5</span>
+                            </div>
+                            <div class="relative w-full h-5 sm:h-6 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                                <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
+                                <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
+                                <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -527,7 +526,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
                 <button onclick="launchMockExam('ALL')" class="btn-3d bg-amber-50 hover:bg-amber-100 border-2 border-amber-400 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-base sm:text-lg font-black text-amber-700">🌟 全題型</span>
-                    <span class="text-[11px] font-bold text-slate-600">全部 24 題型</span>
+                    <span class="text-[11px] font-bold text-slate-600">全部 30 題型</span>
                 </button>
                 <button onclick="launchMockExam(10)" class="btn-3d bg-sky-50 hover:bg-sky-100 border-2 border-sky-300 rounded-2xl p-3 flex flex-col items-center">
                     <span class="text-lg font-black text-sky-700">10 題</span>
@@ -560,79 +559,9 @@
         </div>
     </div>
 
+    <script src="../Scripts/sound-engine.js"></script>
+    <script src="../Scripts/game-effects.js"></script>
     <script>
-        /* ==========================================================================
-           1. Web Audio API 音效合成引擎
-           ========================================================================== */
-        const SoundEngine = {
-            ctx: null,
-            enabled: true,
-
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                }
-                if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            },
-
-            playTone(freq, type, duration, delay = 0, volume = 0.22) {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
-
-                gain.gain.setValueAtTime(volume, this.ctx.currentTime + delay);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-
-                osc.start(this.ctx.currentTime + delay);
-                osc.stop(this.ctx.currentTime + delay + duration);
-            },
-
-            click() {
-                this.playTone(620, 'sine', 0.07, 0, 0.14);
-            },
-
-            correct(combo = 1) {
-                const base = 523.25 * Math.pow(1.05, Math.min(combo - 1, 5));
-                this.playTone(base, 'triangle', 0.13, 0, 0.25);
-                this.playTone(base * 1.25, 'triangle', 0.13, 0.09, 0.25);
-                this.playTone(base * 1.5, 'triangle', 0.26, 0.18, 0.28);
-            },
-
-            wrong() {
-                this.playTone(230, 'sawtooth', 0.18, 0, 0.16);
-                this.playTone(180, 'sawtooth', 0.3, 0.14, 0.16);
-            },
-
-            victory() {
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((n, idx) => {
-                    this.playTone(n, 'triangle', 0.24, idx * 0.11, 0.26);
-                });
-            }
-        };
-
-        function toggleSound() {
-            SoundEngine.enabled = !SoundEngine.enabled;
-            const icon = document.getElementById('sound-icon');
-            const btn = document.getElementById('sound-toggle');
-            if (SoundEngine.enabled) {
-                icon.textContent = '🔊';
-                btn.classList.replace('bg-slate-400', 'bg-emerald-500');
-                SoundEngine.click();
-            } else {
-                icon.textContent = '🔇';
-                btn.classList.replace('bg-emerald-500', 'bg-slate-400');
-            }
-        }
 
         /* ==========================================================================
            2. 手寫計算草稿板 (Pointer Events 跨平台防誤觸、分段繪製與橡皮擦/復原支援)
@@ -1039,13 +968,13 @@
             renderLobby();
         }
 
-        function saveProgress() {
+        function saveProgress(animateScore = false) {
             try {
                 localStorage.setItem('hanlin_math_4a_final_v2', JSON.stringify(gameState));
             } catch (e) {
                 console.warn('無法儲存進度', e);
             }
-            updateHeaderStats();
+            updateHeaderStats(animateScore);
         }
 
         function setQuestionCount(count, playSnd = true) {
@@ -1077,7 +1006,7 @@
             const estEl = document.getElementById('qcount-estimate');
             if (estEl) {
                 if (isAll) {
-                    estEl.textContent = '目前設定：🌟 全題型制霸（單單元 4～6 題／總模擬 24 題型全掃描）';
+                    estEl.textContent = '目前設定：🌟 全題型制霸（單單元 5～8 題／總模擬 30 題型全掃描）';
                 } else {
                     const estMinutes = Math.max(1, Math.round(validCount * 0.6));
                     const modeLabel = validCount <= 5 ? '快速暖身'
@@ -1099,10 +1028,14 @@
             setQuestionCount(clamped, true);
         }
 
-        function updateHeaderStats() {
+        function updateHeaderStats(animateScore = false) {
             const totalStars = STAGES.reduce((sum, s) => sum + (gameState.stars[s.id] || 0), 0);
             document.getElementById('total-stars').textContent = totalStars;
-            document.getElementById('total-score').textContent = gameState.totalScore;
+            if (animateScore) {
+                animateScoreTo(gameState.totalScore);
+            } else {
+                document.getElementById('total-score').textContent = gameState.totalScore;
+            }
 
             const badge = document.getElementById('mistake-badge');
             const lobbyBanner = document.getElementById('lobby-mistake-banner');
@@ -1220,12 +1153,12 @@
             `;
         }
 
-        // 動態繪製雙全等三角形 SVG（含旋轉/翻轉對應頂點、邊長與角度標示）
+        // 動態繪製雙全等三角形 SVG（含翻轉疊合動畫群組、對應頂點、邊長與角度標示）
         function createCongruentTrianglesSVG({ sideAB, sideBC, sideAC, angleA, angleB, angleC, showTarget }) {
             // 左圖：三角形 ABC（正立）
-            // 右圖：三角形 DEF（左右翻轉或旋轉呈現，對應關係：A↔D, B↔E, C↔F）
+            // 右圖：三角形 DEF（左右翻轉呈現，對應關係：A↔D, B↔E, C↔F）
             return `
-                <svg width="360" height="185" viewBox="0 0 360 185" class="max-w-full">
+                <svg width="360" height="196" viewBox="0 0 360 196" class="max-w-full overflow-visible">
                     <!-- 左側：△ABC -->
                     <polygon points="55,32 30,148 150,148" fill="#e0e7ff" stroke="#4f46e5" stroke-width="3" stroke-linejoin="round"/>
                     <text x="52" y="24" text-anchor="middle" font-weight="900" fill="#312e81" font-size="14">A</text>
@@ -1243,8 +1176,16 @@
                     <!-- 全等符號提示 -->
                     <text x="180" y="95" text-anchor="middle" font-weight="900" fill="#94a3b8" font-size="16">≌</text>
 
-                    <!-- 右側：△DEF（水平翻轉全等呈現：D在右上、E在右下、F在左下） -->
-                    <polygon points="305,32 330,148 210,148" fill="#fce7f3" stroke="#db2777" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- 右側原位虛線輪廓（翻轉疊合後仍看得到原本的位置） -->
+                    <polygon points="305,32 330,148 210,148" fill="#fdf2f8" stroke="#f472b6" stroke-width="2" stroke-dasharray="5,4" stroke-linejoin="round"/>
+
+                    <!-- 右側：△DEF 可翻轉疊合群組（對稱軸 x=180） -->
+                    <g transform="translate(180, 0)">
+                        <g class="congruent-def-group" style="transform-origin: 0px 0px;">
+                            <polygon points="125,32 150,148 30,148" fill="#fce7f3" stroke="#db2777" stroke-width="3" stroke-linejoin="round"/>
+                        </g>
+                    </g>
+
                     <text x="308" y="24" text-anchor="middle" font-weight="900" fill="#831843" font-size="14">D</text>
                     <text x="342" y="156" text-anchor="middle" font-weight="900" fill="#831843" font-size="14">E</text>
                     <text x="200" y="156" text-anchor="middle" font-weight="900" fill="#831843" font-size="14">F</text>
@@ -1256,6 +1197,27 @@
                     ${showTarget === 'angleD' ? `<text x="299" y="58" text-anchor="middle" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
                     ${showTarget === 'angleE' ? `<text x="312" y="140" text-anchor="end" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
                     ${showTarget === 'angleF' ? `<text x="232" y="140" text-anchor="start" font-weight="900" fill="#e11d48" font-size="14">？</text>` : ''}
+
+                    <text class="congruent-merge-label hidden" x="180" y="188" text-anchor="middle" font-size="12" font-weight="900" fill="#db2777">✨ 翻轉疊合到 △ABC 上，對應邊與對應角完全重合！</text>
+                </svg>
+            `;
+        }
+
+        // 動態繪製平角（180°）＋ 三角形複合角度 SVG (第七單元)
+        function createExteriorAngleTriangleSVG(topLabel, leftLabel, extRightLabel) {
+            return `
+                <svg width="330" height="175" viewBox="0 0 330 175" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <!-- 底邊向右延伸成平角 -->
+                    <line x1="35" y1="140" x2="305" y2="140" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+                    <!-- 三角形 -->
+                    <polygon points="120,28 50,140 205,140" fill="#fef3c7" stroke="#d97706" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- 角度標示 -->
+                    <text x="120" y="60" text-anchor="middle" font-size="13" font-weight="900" fill="#1e293b">${topLabel}</text>
+                    <text x="72" y="132" text-anchor="start" font-size="13" font-weight="900" fill="#1e293b">${leftLabel}</text>
+                    <!-- 平角外角弧線 -->
+                    <path d="M 192,120 A 22,22 0 0,1 227,140" fill="none" stroke="#e11d48" stroke-width="2.5"/>
+                    <text x="232" y="128" text-anchor="start" font-size="13" font-weight="900" fill="#e11d48">${extRightLabel}</text>
+                    <text x="165" y="164" text-anchor="middle" font-size="11" font-weight="bold" fill="#64748b">提示：直線上的平角合計 180°</text>
                 </svg>
             `;
         }
@@ -1308,31 +1270,43 @@
             `;
         }
 
-        // 動態繪製折線圖 SVG (第十單元)
+        // 動態繪製折線圖 SVG (第十單元，minAxis > 0 時繪製波浪省略符號)
         function createLineChartSVG(title, yUnit, labels, values, minAxis, maxAxis, step) {
             const w = 360;
-            const h = 215;
+            const h = 225;
             const padL = 48;
             const padR = 25;
             const padT = 34;
             const padB = 38;
             const plotW = w - padL - padR;
             const plotH = h - padT - padB;
+            const hasBreak = minAxis > 0;
+            const breakGap = hasBreak ? 24 : 0;
+            const usableH = plotH - breakGap;
+            const baseY = padT + plotH;
+            const plotBottom = baseY - breakGap;
             const range = maxAxis - minAxis;
 
             let gridLines = '';
             for (let v = minAxis; v <= maxAxis; v += step) {
-                const y = padT + plotH - ((v - minAxis) / range) * plotH;
+                const y = plotBottom - ((v - minAxis) / range) * usableH;
                 gridLines += `
-                    <line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="${v === minAxis ? '0' : '3,3'}"/>
+                    <line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
                     <text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#475569">${v}</text>
                 `;
             }
 
+            const breakSvg = hasBreak ? `
+                <text x="${padL - 8}" y="${baseY + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#475569">0</text>
+                <rect x="${padL - 5}" y="${baseY - 17}" width="10" height="10" fill="#ffffff"/>
+                <path d="M ${padL - 6},${baseY - 15} Q ${padL - 2},${baseY - 19} ${padL},${baseY - 15} T ${padL + 6},${baseY - 15}" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/>
+                <path d="M ${padL - 6},${baseY - 9} Q ${padL - 2},${baseY - 13} ${padL},${baseY - 9} T ${padL + 6},${baseY - 9}" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/>
+            ` : '';
+
             const slot = plotW / (labels.length - 1 || 1);
             const coords = values.map((val, idx) => ({
                 x: padL + idx * slot,
-                y: padT + plotH - ((val - minAxis) / range) * plotH,
+                y: plotBottom - ((val - minAxis) / range) * usableH,
                 val,
                 lbl: labels[idx]
             }));
@@ -1348,8 +1322,9 @@
                 <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="max-w-full bg-white rounded-xl border border-slate-200 shadow-sm">
                     <text x="${w / 2}" y="20" text-anchor="middle" font-size="13" font-weight="900" fill="#0f172a">${title}（單位：${yUnit}）</text>
                     ${gridLines}
-                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#334155" stroke-width="2"/>
-                    <line x1="${padL}" y1="${padT + plotH}" x2="${w - padR}" y2="${padT + plotH}" stroke="#334155" stroke-width="2"/>
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${baseY}" stroke="#334155" stroke-width="2"/>
+                    <line x1="${padL}" y1="${baseY}" x2="${w - padR}" y2="${baseY}" stroke="#334155" stroke-width="2"/>
+                    ${breakSvg}
                     <polyline points="${polyPts}" fill="none" stroke="#f97316" stroke-width="3" stroke-linejoin="round"/>
                     ${pointsSvg}
                 </svg>
@@ -1399,9 +1374,9 @@
            六、除法 | 七、三角形與全等 | 八、兩步驟問題與併式 | 九、二位小數 | 十、統計圖表
            ========================================================================== */
         const QuestionGenerators = {
-            // 第六單元：除法（含商中間有 0、末尾有 0 消去法餘數還原、多位數直式與估算）
+            // 第六單元：除法（含商中間有 0、末尾有 0 消去法餘數還原、進一法與極值逆推）
             6: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 6);
+                const template = forcedTemplate || randInt(1, 8);
 
                 if (template === 1) {
                     // 題型 A：三、四位數除以二位數整除商數計算
@@ -1552,7 +1527,7 @@
                         options: shuffle(['一位數', '二位數', '三位數', '四位數']),
                         explanation: `比較被除數的前兩位「${prefixStr}」和除數「${divisor}」：因為 ${prefixStr} ${isTwoDigitQuotient ? '≥' : '<'} ${divisor}，所以商是「${correctAns}」！`
                     };
-                } else {
+                } else if (template === 6) {
                     // 題型 F：被除數、除數、商與餘數關係逆推
                     const divisor = randInt(16, 35);
                     const quotient = randInt(11, 24);
@@ -1575,12 +1550,64 @@
                         ]),
                         explanation: `利用除法驗算公式：「被除數 = 除數 × 商 + 餘數」，先算 ${divisor} × ${quotient} = ${divisor * quotient}，再加上餘數 ${remainder}，得到 ${dividend}。`
                     };
+                } else if (template === 7) {
+                    // 題型 G：【期末必考】進一法生活應用題（全部載完/裝完最少需要幾個）
+                    const cap = randInt(24, 42);
+                    const quotient = randInt(5, 11);
+                    const rem = randInt(3, cap - 3);
+                    const total = cap * quotient + rem;
+                    const ans = quotient + 1;
+                    const scenarios = [
+                        { who: '四年級校外教學共有', unit: '位學生', container: '輛遊覽車', act: '全部搭上車', verb: '載' },
+                        { who: '果農採收了', unit: '顆水梨', container: '個紙箱', act: '全部裝完', verb: '裝' }
+                    ];
+                    const sc = pickRandom(scenarios);
+
+                    return {
+                        unitId: 6,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: sc.container.slice(0, 1),
+                        hint: `先算出 ${total} ÷ ${cap}，剩下的 ${rem} 也要再多派 1 ${sc.container.slice(0, 1)}才能全部處理完，記得「商 + 1」喔！`,
+                        text: `${sc.who} <strong>${total} ${sc.unit}</strong>，每${sc.container}最多可以${sc.verb} <strong>${cap}</strong>，要<strong>${sc.act}</strong>最少需要幾${sc.container}？`,
+                        correct: String(ans),
+                        options: buildOptions(ans, [
+                            () => quotient,
+                            () => rem,
+                            () => ans + 1,
+                            () => Math.max(2, quotient - 1)
+                        ]),
+                        explanation: `列式：${total} ÷ ${cap} = ${quotient} ⋯ ${rem}。雖然已經滿了 ${quotient} ${sc.container.slice(0, 1)}，但剩下的 ${rem} 仍需要再多 1 ${sc.container.slice(0, 1)}，所以最少需要 ${quotient} + 1 = ${ans} ${sc.container.slice(0, 1)}！`
+                    };
+                } else {
+                    // 題型 H：【期末必考】餘數必小於除數極值逆推題
+                    const divisor = randInt(14, 28);
+                    const quotient = randInt(12, 22);
+                    const maxRem = divisor - 1;
+                    const dividend = divisor * quotient + maxRem;
+
+                    return {
+                        unitId: 6,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        hint: `餘數一定要比除數「${divisor}」小，所以餘數 ★ 最大只能是「${divisor} － 1 = ${maxRem}」，再用驗算公式反推！`,
+                        text: `在除法算式「<strong>( ？ ) ÷ ${divisor} = ${quotient} ⋯ ★</strong>」中，當餘數 <strong>★ 是最大可能值</strong>時，括號裡的被除數是多少？`,
+                        correct: String(dividend),
+                        options: buildOptions(dividend, [
+                            () => divisor * quotient + divisor,
+                            () => divisor * quotient + 1,
+                            () => divisor * quotient,
+                            () => dividend - 2
+                        ]),
+                        explanation: `餘數必須小於除數 ${divisor}，因此最大餘數 ★ = ${divisor} － 1 = ${maxRem}。再算被除數 = ${divisor} × ${quotient} + ${maxRem} = ${dividend}！`
+                    };
                 }
             },
 
-            // 第七單元：三角形與全等（新增三邊長關係判別、全等對應邊角、等腰內角與周長）
+            // 第七單元：三角形與全等（新增三邊長關係、全等對應邊角、等腰內角、周長與平角複合題）
             7: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 5);
+                const template = forcedTemplate || randInt(1, 6);
 
                 if (template === 1) {
                     // 題型 A：全等三角形對應邊與對應角（確保三邊符合兩邊和大於第三邊且數值皆不重複）
@@ -1771,7 +1798,7 @@
                             explanation: `正三角形的三個角都是 60 度（都小於 90 度），所以它同時是「正三角形」也是「銳角三角形」，不可能是鈍角三角形喔！`
                         };
                     }
-                } else {
+                } else if (template === 5) {
                     // 題型 E：等腰與正三角形周長反推邊長
                     const leg = randInt(10, 18);
                     const base = randInt(6, leg - 2);
@@ -1792,12 +1819,35 @@
                         ]),
                         explanation: `等腰三角形有兩條一樣長的腰！先從周長減掉底邊：${perim} － ${base} = ${perim - base} 公分，再平分成 2 條腰：${perim - base} ÷ 2 = ${leg} 公分。`
                     };
+                } else {
+                    // 題型 F：平角（180°）與三角形內角複合角度題
+                    const topA = randInt(42, 72);
+                    const leftA = randInt(45, 75);
+                    const innerRight = 180 - topA - leftA;
+                    const extAngle = 180 - innerRight;
+                    return {
+                        unitId: 7,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '度',
+                        hint: `先用三角形內角和 180° 算出右下角的內角（180 － ${topA} － ${leftA}），再用平角 180° 減掉它就是外角 ★ 喔！`,
+                        text: `觀察下圖，三角形底邊向右延伸成一條直線，已知上面兩角分別為 <strong>${topA}°</strong> 和 <strong>${leftA}°</strong>，請問紅色的外角（<strong>★</strong>）是多少度？`,
+                        visual: createExteriorAngleTriangleSVG(`${topA}°`, `${leftA}°`, '★'),
+                        correct: String(extAngle),
+                        options: buildOptions(extAngle, [
+                            () => innerRight,
+                            () => 180 - topA,
+                            () => 180 - leftA,
+                            () => extAngle - 10
+                        ]),
+                        explanation: `三角形內角和是 180°，先算出右下角內角 = 180 － ${topA} － ${leftA} = ${innerRight}°；因為底邊延伸為平角（180°），所以外角 ★ = 180 － ${innerRight} = ${extAngle}°（正好等於 ${topA} + ${leftA}）！`
+                    };
                 }
             },
 
             // 第八單元：兩步驟問題與併式
             8: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 4);
+                const template = forcedTemplate || randInt(1, 5);
 
                 if (template === 1) {
                     const money = pickRandom([500, 1000]);
@@ -1873,7 +1923,7 @@
                         ]),
                         explanation: `四則運算規則：「有括號時，括號裡面的算式要先算」！先算 ${b} － ${c} = ${b - c}，再算 ${a} × ${b - c} = ${ans}。`
                     };
-                } else {
+                } else if (template === 4) {
                     const p1 = randInt(35, 65);
                     const p2 = randInt(20, 40);
                     const n = randInt(3, 6);
@@ -1893,12 +1943,33 @@
                         ]),
                         explanation: `一組套餐是「${p1} + ${p2}」元，買了 ${n} 組要先算一組多少錢再乘以 ${n}，所以要用括號寫成 (${p1} + ${p2}) × ${n}。`
                     };
+                } else {
+                    // 題型 E：【期末必考】連減與括號等價算式辨析
+                    const money = pickRandom([500, 800, 1000]);
+                    const p1 = randInt(115, 195);
+                    const p2 = randInt(65, 135);
+                    const correctExpr = `${money} － (${p1} + ${p2})`;
+                    return {
+                        unitId: 8,
+                        autoScratchpad: false,
+                        inputType: 'choice',
+                        hint: `連續減掉兩樣東西的價錢，等於先算「兩樣東西一共花多少錢（加起來）」，再從總錢數裡面一起減掉喔！`,
+                        text: `小美帶 ${money} 元買了一本 ${p1} 元的筆記本和一個 ${p2} 元的鉛筆盒，算剩下的錢時，哪一個算式和「<strong>${money} － ${p1} － ${p2}</strong>」的結果相同？`,
+                        correct: correctExpr,
+                        options: shuffle([
+                            correctExpr,
+                            `${money} － (${p1} － ${p2})`,
+                            `${money} + (${p1} － ${p2})`,
+                            `(${money} － ${p1}) + ${p2}`
+                        ]),
+                        explanation: `連減兩個數等於減掉這兩個數的和！先把花的錢合起來 (${p1} + ${p2})，再用 ${money} 元去減，所以 ${money} － ${p1} － ${p2} = ${money} － (${p1} + ${p2})。`
+                    };
                 }
             },
 
-            // 第九單元：二位小數（新增數線定位判讀題、單位換算加減法、整數減二位小數、化聚與比較）
+            // 第九單元：二位小數（新增數線定位判讀、單位換算、整數減二位小數、化聚比較與小數點對齊）
             9: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 5);
+                const template = forcedTemplate || randInt(1, 6);
 
                 if (template === 1) {
                     // 題型 A：二位小數加法生活應用（含單位換算如 1 公尺 8 公分 = 1.08 公尺）
@@ -2001,7 +2072,7 @@
                         ]),
                         explanation: `1 是 100 個 0.01，0.1 是 10 個 0.01，所以 ${decStr} 總共是 ${total001} 個 0.01 合起來的。`
                     };
-                } else {
+                } else if (template === 5) {
                     // 題型 E：二位小數大小比較
                     const base = randInt(2, 7);
                     const d1 = randInt(4, 8);
@@ -2020,14 +2091,44 @@
                         options: shuffle([nBig, nSmall1, nSmall2, nSmall3]),
                         explanation: `比較小數要從最高位（個位 → 十分位 → 百分位）依序比！${nBig} 的十分位是 ${d1}，比 ${nSmall1} 的十分位 ${d1 - 1} 還要大，所以 ${nBig} 最大！`
                     };
+                } else {
+                    // 題型 F：【期末必考】小數點對齊迷思改錯（一位小數 + 二位小數）
+                    const aWhole = randInt(2, 6);
+                    const aTenth = randInt(2, 8);
+                    const bWhole = randInt(1, 4);
+                    const bTenth = randInt(1, 6);
+                    const bHundredth = randInt(3, 9);
+                    const c1 = aWhole * 100 + aTenth * 10;
+                    const c2 = bWhole * 100 + bTenth * 10 + bHundredth;
+                    const s1 = `${aWhole}.${aTenth}`;
+                    const s2 = `${bWhole}.${String(bTenth)}${String(bHundredth)}`;
+                    const ans = formatDecFromCents(c1 + c2);
+                    const wrongAlignC = (aWhole * 10 + aTenth) + c2; // 誤把末位對齊百分位
+
+                    return {
+                        unitId: 9,
+                        autoScratchpad: true,
+                        inputType: Math.random() < 0.5 ? 'keypad' : 'choice',
+                        unitSuffix: '',
+                        hint: `小數直式加減最重要的是「小數點要對齊」！把 ${s1} 補 0 寫成「${s1}0」再和 ${s2} 相加！`,
+                        text: `寫直式計算「<strong>${s1} + ${s2}</strong>」時，記得要把小數點對齊（不能把末位數字硬對在一起），請問正確的計算結果是多少？`,
+                        correct: ans,
+                        options: buildOptions(ans, [
+                            () => formatDecFromCents(wrongAlignC),
+                            () => formatDecFromCents(c1 + c2 + 10),
+                            () => formatDecFromCents(c1 + c2 - 10),
+                            () => formatDecFromCents(Math.abs(c1 - c2))
+                        ]),
+                        explanation: `小數加法要對齊「小數點」（不是對齊最右邊的數字）！把 ${s1} 看成 ${s1}0，再加上 ${s2}，答案是 ${ans}。`
+                    };
                 }
             },
 
             // 第十單元：統計圖表
             10: (forcedTemplate = null) => {
-                const template = forcedTemplate || randInt(1, 4);
+                const template = forcedTemplate || randInt(1, 5);
                 const isLineChart = template >= 3;
-                const qSub = (template === 1 || template === 3) ? 1 : 2;
+                const qSub = template === 5 ? 3 : ((template === 1 || template === 3) ? 1 : 2);
 
                 if (!isLineChart) {
                     const scenarios = [
@@ -2113,7 +2214,7 @@
                             options: shuffle(['8時到10時', '10時到12時', '12時到14時', '14時到16時']),
                             explanation: `折線圖中，線段往右上傾斜得越陡，代表增加越多！8時到10時上升 ${diff1}℃，10時到12時上升 ${diff2}℃，所以「${bestInterval}」上升最多。`
                         };
-                    } else {
+                    } else if (qSub === 2) {
                         const maxT = Math.max(...vals);
                         const minT = Math.min(...vals);
                         const diff = maxT - minT;
@@ -2134,6 +2235,23 @@
                             ]),
                             explanation: `圖中最高氣溫是 ${maxT}℃，最低氣溫是 ${minT}℃，兩者相差 ${maxT} － ${minT} = ${diff}℃。`
                         };
+                    } else {
+                        return {
+                            unitId: 10,
+                            autoScratchpad: false,
+                            inputType: 'choice',
+                            hint: `看看縱軸「0」和「18」之間的紅色波浪記號，把沒有數據的 0～18℃ 省略掉後，上面的刻度（18、20、22…）就能畫得更清楚！`,
+                            text: `觀察下面折線圖縱軸（0 到 18 之間）的<strong>紅色波浪省略符號</strong>，以及縱軸上一小格的刻度代表多少℃？`,
+                            visual: svg,
+                            correct: '省略 0～18℃ 的空白段讓折線變化更明顯，且每小格代表 2℃',
+                            options: shuffle([
+                                '省略 0～18℃ 的空白段讓折線變化更明顯，且每小格代表 2℃',
+                                '代表那一段時間發生了大地震，且每小格代表 10℃',
+                                '代表氣溫降到 0℃ 以下結冰了，且每小格代表 5℃',
+                                '只是裝飾用的圖案，沒有任何數學意義'
+                            ]),
+                            explanation: `折線圖中 0 與起始刻度（18℃）之間加上「省略符號（波浪線）」，是為了省去沒有數據的區間，讓折線起伏更容易判讀；從 18、20、22 刻度可知每格代表 2℃。`
+                        };
                     }
                 }
             }
@@ -2142,7 +2260,7 @@
         // 為指定關卡生成 N 題不重複題目（支援 'ALL' 全題型制霸，確保每種題型模板各練習 1 題）
         function generateStageQuestions(stageId, count) {
             const units = [6, 7, 8, 9, 10];
-            const templateCounts = { 6: 6, 7: 5, 8: 4, 9: 5, 10: 4 }; // 合計 24 種核心題型
+            const templateCounts = { 6: 8, 7: 6, 8: 5, 9: 6, 10: 5 }; // 合計 30 種核心題型
 
             if (count === 'ALL') {
                 const targetUnits = stageId === 99 ? units : [stageId];
@@ -2216,7 +2334,7 @@
                     `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
                 ).join('');
                 const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
-                const unitTemplateMap = { 6: 6, 7: 5, 8: 4, 9: 5, 10: 4, 99: 24 };
+                const unitTemplateMap = { 6: 8, 7: 6, 8: 5, 9: 6, 10: 5, 99: 30 };
                 const unitTotal = unitTemplateMap[stage.id] || 5;
                 const countHint = gameState.questionCountPref === 'ALL'
                     ? `🌟 全部 ${unitTotal} 種題型`
@@ -2329,6 +2447,8 @@
             currentSession = {
                 stageId: 88,
                 isMistakeBattle: true,
+                bossHp: battleQuestions.length,
+                bossMaxHp: battleQuestions.length,
                 questions: battleQuestions,
                 currentIndex: 0,
                 correctCount: 0,
@@ -2417,6 +2537,9 @@
                 typeTag.textContent = '🎯 四選一觀念題';
                 typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-700';
             }
+
+            // 更新錯題怪獸 Boss 血條（若非錯題模式則自動隱藏）
+            MonsterBoss.renderUI();
 
             // 填入題目文字與輔助圖形
             document.getElementById('question-text').innerHTML = q.text;
@@ -2559,10 +2682,21 @@
 
                 SoundEngine.correct(currentSession.combo);
 
-                // 若在「消滅錯題大作戰」中答對，或原本錯題本就有這題，將該錯題從錯題本移除！
+                const qContainer = document.getElementById('question-text');
+                if (qContainer && qContainer.getBoundingClientRect) {
+                    const rect = qContainer.getBoundingClientRect();
+                    spawnFloatingText(rect.left + rect.width / 2, rect.top + 10, `+${points}${currentSession.combo >= 2 ? ' 🔥' : ''}`, 'text-amber-500');
+                }
+
+                // 若在「消滅錯題大作戰」中答對，扣怪獸 1 滴血並從錯題本移除！
                 const prevLen = gameState.mistakes.length;
                 gameState.mistakes = gameState.mistakes.filter(m => m.questionText !== q.text);
                 const eliminated = gameState.mistakes.length < prevLen;
+                if (currentSession.isMistakeBattle) {
+                    currentSession.bossHp = Math.max(0, (currentSession.bossHp || 1) - 1);
+                    MonsterBoss.triggerHit();
+                    MonsterBoss.renderUI();
+                }
 
                 const praises = ['太棒了！完全正確！', '好厲害！期末考一定沒問題！', '答對囉！觀念非常清楚！', '漂亮的一擊！繼續保持！'];
                 feedbackBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
@@ -2574,6 +2708,9 @@
             } else {
                 currentSession.combo = 0;
                 SoundEngine.wrong();
+                if (currentSession.isMistakeBattle) {
+                    MonsterBoss.triggerCounter();
+                }
 
                 const stageTitle = STAGES.find(s => s.id === q.unitId)?.title || '期末考綜合練習';
                 const correctDisplay = q.inputType === 'keypad' && q.unitSuffix
@@ -2600,6 +2737,18 @@
                 feedbackExp.innerHTML = `正確答案是 <strong>${correctDisplay}</strong>。<br>${q.explanation}`;
             }
 
+            // 觸發全等三角形翻轉疊合解析動畫
+            if (typeof document.querySelector === 'function') {
+                const defGroup = document.querySelector('.congruent-def-group');
+                if (defGroup) {
+                    defGroup.classList.add('animate-congruent-merge');
+                }
+                const mergeLabel = document.querySelector('.congruent-merge-label');
+                if (mergeLabel) {
+                    mergeLabel.classList.remove('hidden');
+                }
+            }
+
             const nextBtn = document.getElementById('next-btn');
             if (currentSession.currentIndex === currentSession.questions.length - 1) {
                 nextBtn.innerHTML = '<span>查看本輪成績</span><span>🏆</span>';
@@ -2607,7 +2756,7 @@
                 nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
             }
 
-            saveProgress();
+            saveProgress(isCorrect);
         }
 
         function nextQuestion() {
@@ -2672,11 +2821,31 @@
             document.getElementById('result-score').textContent = `+${currentSession.sessionScore}`;
             document.getElementById('result-combo').textContent = `${currentSession.maxCombo} 連擊`;
 
-            document.getElementById('result-stars').innerHTML = [1, 2, 3].map(i =>
-                `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-20 grayscale'} transition-all duration-500">⭐</span>`
+            const starsRow = document.getElementById('result-stars');
+            starsRow.innerHTML = [1, 2, 3].map(() =>
+                `<span class="opacity-20 grayscale inline-block">⭐</span>`
             ).join('');
 
             showScreen('result-screen');
+
+            // 星星依序 Q 彈登場
+            if (starsRow.querySelectorAll) {
+                const starEls = starsRow.querySelectorAll('span');
+                for (let i = 0; i < earnedStars; i++) {
+                    setTimeout(() => {
+                        if (starEls[i]) {
+                            starEls[i].className = 'animate-star-pop inline-block';
+                        }
+                    }, i * 180);
+                }
+            }
+
+            // 錯題清零施放煙火，一般關卡滿 3 星發射雙砲彩帶
+            if (currentSession.isMistakeBattle && gameState.mistakes.length === 0) {
+                ConfettiEngine.fireFireworks();
+            } else if (earnedStars === 3) {
+                ConfettiEngine.fireCannons();
+            }
         }
 
         /* ==========================================================================
@@ -2856,6 +3025,7 @@
 
         // 初始化應用程式
         window.onload = function () {
+            ConfettiEngine.init();
             Scratchpad.init();
             loadProgress();
         };
