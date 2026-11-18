@@ -7,6 +7,14 @@ function animateScoreTo(targetScore, elementId = 'total-score') {
     const el = document.getElementById(elementId) || document.getElementById('demo-score');
     if (!el) return;
     const startVal = parseInt(el.textContent, 10) || 0;
+    if (startVal !== targetScore) {
+        const badge = (el.parentElement && el.parentElement.classList) ? el.parentElement : el;
+        if (badge.classList) {
+            badge.classList.remove('animate-score-bump');
+            void badge.offsetWidth;
+            badge.classList.add('animate-score-bump');
+        }
+    }
     if (startVal === targetScore || typeof requestAnimationFrame !== 'function' || typeof performance === 'undefined') {
         el.textContent = targetScore;
         return;
@@ -29,13 +37,16 @@ function animateScoreTo(targetScore, elementId = 'total-score') {
 
 function spawnFloatingText(x, y, text, colorClass = 'text-emerald-600') {
     if (!document.body || typeof document.createElement !== 'function') return;
+    const winW = typeof window !== 'undefined' && window.innerWidth ? window.innerWidth : 800;
+    const safeX = Math.max(90, Math.min(winW - 90, x));
+    const safeY = Math.max(64, y);
     const el = document.createElement('div');
-    el.className = `float-popup font-black text-xl sm:text-2xl drop-shadow-sm ${colorClass}`;
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
+    el.className = `float-popup font-black text-2xl sm:text-3xl tracking-wide ${colorClass}`;
+    el.style.left = `${safeX}px`;
+    el.style.top = `${safeY}px`;
     el.textContent = text;
     document.body.appendChild(el);
-    setTimeout(() => { if (el.remove) el.remove(); }, 920);
+    setTimeout(() => { if (el.remove) el.remove(); }, 1280);
 }
 
 const ConfettiEngine = {

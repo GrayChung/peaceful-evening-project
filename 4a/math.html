@@ -352,7 +352,24 @@
                     </button>
                 </div>
 
-                <!-- 手寫計算草稿板區 (置於題目與答案選項的下方，支援點點紙與直式方格紙切換) -->
+                <!-- 答題回饋與詳解區（置於草稿紙上方，作答後免滑動即可看結果與按下一題） -->
+                <div id="feedback-box" class="hidden mt-5 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
+                        <div class="flex-1">
+                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
+                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
+                            <span>下一題</span>
+                            <span>➡️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 手寫計算草稿板區 (置於解答區下方，支援點點紙與直式方格紙切換) -->
                 <div id="scratchpad-panel" class="hidden mt-6 bg-slate-50 rounded-2xl border-2 border-amber-300 p-3 animate-pop shadow-sm">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <span class="text-xs sm:text-sm font-black text-amber-800 flex items-center gap-1">
@@ -388,23 +405,6 @@
                     </div>
                     <div id="scratch-canvas-wrap" class="w-full h-56 sm:h-64 bg-white rounded-xl border border-slate-200 overflow-hidden relative transition-all">
                         <canvas id="scratch-canvas" class="w-full h-full cursor-crosshair paper-dots"></canvas>
-                    </div>
-                </div>
-
-                <!-- 答題回饋與詳解區 -->
-                <div id="feedback-box" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 animate-pop">
-                    <div class="flex items-start gap-3">
-                        <div id="feedback-icon" class="text-3xl sm:text-4xl">🎉</div>
-                        <div class="flex-1">
-                            <h3 id="feedback-title" class="text-lg sm:text-xl font-black mb-1">太棒了！答對囉！</h3>
-                            <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed font-medium"></p>
-                        </div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl text-base sm:text-lg flex items-center gap-2">
-                            <span>下一題</span>
-                            <span>➡️</span>
-                        </button>
                     </div>
                 </div>
 
@@ -2627,7 +2627,7 @@
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-50');
 
-            handleAnswerResult(isCorrect, `${raw} ${q.unitSuffix || ''}`.trim());
+            handleAnswerResult(isCorrect, `${raw} ${q.unitSuffix || ''}`.trim(), submitBtn);
         }
 
         // 選擇題作答
@@ -2652,11 +2652,11 @@
                 }
             });
 
-            handleAnswerResult(isCorrect, chosen);
+            handleAnswerResult(isCorrect, chosen, buttons[selectedIndex]);
         }
 
         // 統一處理答對或答錯邏輯
-        function handleAnswerResult(isCorrect, userDisplayAnswer) {
+        function handleAnswerResult(isCorrect, userDisplayAnswer, sourceEl = null) {
             currentSession.answered = true;
             const q = currentSession.questions[currentSession.currentIndex];
 
@@ -2682,10 +2682,12 @@
 
                 SoundEngine.correct(currentSession.combo);
 
-                const qContainer = document.getElementById('question-text');
-                if (qContainer && qContainer.getBoundingClientRect) {
-                    const rect = qContainer.getBoundingClientRect();
-                    spawnFloatingText(rect.left + rect.width / 2, rect.top + 10, `+${points}${currentSession.combo >= 2 ? ' 🔥' : ''}`, 'text-amber-500');
+                const targetEl = (sourceEl && sourceEl.getBoundingClientRect) ? sourceEl : document.getElementById('question-text');
+                if (targetEl && targetEl.getBoundingClientRect) {
+                    const rect = targetEl.getBoundingClientRect();
+                    const popupText = currentSession.combo >= 2 ? `🔥 ${currentSession.combo}連擊 +${points}分！` : `🌟 +${points}分！`;
+                    const popupColor = currentSession.combo >= 2 ? 'text-amber-600' : 'text-emerald-600';
+                    spawnFloatingText(rect.left + rect.width / 2, rect.top, popupText, popupColor);
                 }
 
                 // 若在「消滅錯題大作戰」中答對，扣怪獸 1 滴血並從錯題本移除！

@@ -56,15 +56,31 @@ body {
 }
 
 @keyframes floatUpFade {
-    0% { transform: translate(-50%, 0) scale(0.75); opacity: 0; }
-    20% { transform: translate(-50%, -14px) scale(1.15); opacity: 1; }
-    100% { transform: translate(-50%, -68px) scale(1); opacity: 0; }
+    0% { transform: translate(-50%, 10px) scale(0.55); opacity: 0; }
+    16% { transform: translate(-50%, -12px) scale(1.22); opacity: 1; }
+    32% { transform: translate(-50%, -22px) scale(1.06); opacity: 1; }
+    78% { transform: translate(-50%, -56px) scale(1.04); opacity: 1; }
+    100% { transform: translate(-50%, -92px) scale(0.95); opacity: 0; }
 }
 .float-popup {
     position: fixed;
     pointer-events: none;
     z-index: 70;
-    animation: floatUpFade 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    background: rgba(255, 255, 255, 0.97);
+    border: 3px solid currentColor;
+    border-radius: 9999px;
+    padding: 6px 18px;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.24), 0 0 0 3px rgba(255, 255, 255, 0.92);
+    animation: floatUpFade 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes scoreBump {
+    0%, 100% { transform: scale(1); }
+    35% { transform: scale(1.18); box-shadow: 0 0 18px rgba(245, 158, 11, 0.65); }
+}
+.animate-score-bump {
+    animation: scoreBump 0.48s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes monsterHit {

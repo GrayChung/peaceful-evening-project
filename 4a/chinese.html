@@ -1901,9 +1901,12 @@
 
                 SoundEngine.correct(currentSession.combo);
 
-                if (sourceEl && sourceEl.getBoundingClientRect) {
-                    const rect = sourceEl.getBoundingClientRect();
-                    spawnFloatingText(rect.left + rect.width / 2, rect.top + 8, `+${points} 🌟`, 'text-emerald-600');
+                const targetEl = (sourceEl && sourceEl.getBoundingClientRect) ? sourceEl : document.getElementById('question-text');
+                if (targetEl && targetEl.getBoundingClientRect) {
+                    const rect = targetEl.getBoundingClientRect();
+                    const popupText = currentSession.combo >= 2 ? `🔥 ${currentSession.combo}連擊 +${points}分！` : `🌟 +${points}分！`;
+                    const popupColor = currentSession.combo >= 2 ? 'text-amber-600' : 'text-emerald-600';
+                    spawnFloatingText(rect.left + rect.width / 2, rect.top, popupText, popupColor);
                 }
 
                 const prevLen = gameState.mistakes.length;
