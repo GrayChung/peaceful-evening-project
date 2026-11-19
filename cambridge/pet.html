@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cambridge PET (B1) 倫敦特快車｜劍橋英檢互動特訓</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans (俐落英文字體) + Fredoka + Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy-deep: #0b132b;
+            --navy-card: #1c2541;
+            --teal-accent: #14b8a6;
+            --gold-accent: #f59e0b;
+            --crimson-accent: #e11d48;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Fredoka', 'Noto Sans TC', sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at 15% 15%, #1e293b 0%, #0f172a 45%, #090d16 100%);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        /* 英檢專屬背景格線裝飾 */
+        .bg-grid-pattern {
+            background-image:
+                linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* 玻璃擬態深色外框 */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(148, 163, 184, 0.22);
+        }
+
+        /* 護照印章質感按鈕 */
+        .btn-express {
+            transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.14s ease, filter 0.14s ease;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.35);
+        }
+        .btn-express:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+        }
+
+        /* 專屬動畫：卡片滑入、護照蓋章、晃動、聲波 */
+        @keyframes slideUpFade {
+            0% { transform: translateY(18px) scale(0.98); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUpFade 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes stampSlam {
+            0% { transform: scale(2.1) rotate(-18deg); opacity: 0; }
+            65% { transform: scale(0.92) rotate(4deg); opacity: 1; }
+            100% { transform: scale(1) rotate(-4deg); opacity: 1; }
+        }
+        .animate-stamp {
+            animation: stampSlam 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes cardShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-7px); }
+            40%, 80% { transform: translateX(7px); }
+        }
+        .animate-shake {
+            animation: cardShake 0.36s ease-in-out;
+        }
+
+        @keyframes soundBar {
+            0%, 100% { transform: scaleY(0.35); }
+            50% { transform: scaleY(1); }
+        }
+        .sound-bar {
+            transform-origin: bottom;
+            animation: soundBar 0.7s ease-in-out infinite;
+        }
+        .sound-bar.paused {
+            animation: none;
+            transform: scaleY(0.35);
+        }
+
+        @keyframes floatScore {
+            0% { transform: translate(-50%, 6px) scale(0.7); opacity: 0; }
+            20% { transform: translate(-50%, -14px) scale(1.15); opacity: 1; }
+            80% { transform: translate(-50%, -48px) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -74px) scale(0.9); opacity: 0; }
+        }
+        .pet-float-text {
+            position: fixed;
+            z-index: 80;
+            pointer-events: none;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 2px solid currentColor;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            animation: floatScore 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Input focus & iPad friendly */
+        input.pet-input {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        /* 粒子畫布 */
+        #pet-fx-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 75;
+        }
+    </style>
+</head>
+<body class="bg-grid-pattern flex flex-col items-center p-3 sm:p-6">
+
+    <!-- 專屬粒子特效 Canvas -->
+    <canvas id="pet-fx-canvas"></canvas>
+
+    <!-- 頂部倫敦特快車狀態列 -->
+    <header class="w-full max-w-5xl glass-panel rounded-2xl sm:rounded-3xl px-4 py-3 sm:px-6 sm:py-4 flex flex-wrap items-center justify-between gap-3 shadow-2xl mb-5">
+        <div class="flex items-center gap-3">
+            <a href="../index.html"
+               class="btn-express bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5">
+                <span>←</span>
+                <span class="hidden sm:inline">回大廳</span>
+            </a>
+            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg border border-white/25">
+                🚆
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white">
+                        Cambridge PET <span class="text-teal-300">Express</span>
+                    </h1>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">
+                        CEFR B1
+                    </span>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 font-medium">
+                    小學生劍橋中級英檢互動特訓站・本機測試版
+                </p>
+            </div>
+        </div>
+
+        <!-- 右側儀表與控制鈕 -->
+        <div class="flex flex-wrap items-center gap-2">
+            <div class="bg-slate-900/80 border border-amber-500/35 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold text-amber-300 flex items-center gap-1">
+                <span>⭐</span>
+                <span id="hdr-stars">0</span>
+                <span class="text-slate-500 text-[11px]">/ 18</span>
+            </div>
+            <div class="bg-slate-900/80 border border-teal-500/35 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-extrabold text-teal-300 flex items-center gap-1">
+                <span>🏆</span>
+                <span id="hdr-score">0</span>
+            </div>
+            <button id="btn-accent" onclick="toggleAccent()"
+                    class="btn-express bg-indigo-950 hover:bg-indigo-900 border border-indigo-400/40 text-indigo-200 px-2.5 py-1.5 rounded-xl text-xs font-bold"
+                    title="切換聽力發音口音">
+                🇬🇧 UK
+            </button>
+            <button id="btn-sound" onclick="toggleSound()"
+                    class="btn-express bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-bold"
+                    title="音效開關">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- 主內容容器 -->
+    <main class="w-full max-w-5xl flex-1 flex flex-col">
+
+        <!-- ================= 視圖 1：關卡護照大廳 ================= -->
+        <section id="view-lobby" class="space-y-5 animate-slide-up">
+
+            <!-- 錯題大作戰橫幅 -->
+            <div id="mistake-banner"
+                 class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 border-l-4 border-l-rose-500">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-2xl">
+                        🎯
+                    </div>
+                    <div>
+                        <h2 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+                            錯題特訓營（Mistake Clinic）
+                            <span id="mistake-count-pill" class="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-0.5 rounded-full">
+                                0 題待消滅
+                            </span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            答錯的題目會自動收錄於此，必須<strong class="text-amber-300">連續答對 2 次</strong>才會移出錯題本！
+                        </p>
+                    </div>
+                </div>
+                <button id="btn-start-mistakes" onclick="startMistakeMode()" disabled
+                        class="btn-express bg-rose-600 hover:bg-rose-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-extrabold px-5 py-2.5 rounded-xl text-xs sm:text-sm">
+                    開始消滅錯題 ➔
+                </button>
+            </div>
+
+            <!-- 五大題型 + 綜合衝刺卡片網格 -->
+            <div id="stage-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 由 JS 動態渲染 -->
+            </div>
+
+            <!-- 測試與重置提示 -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 px-1 pt-2">
+                <span>💡 提示：點擊「🇬🇧 UK / 🇺🇸 US」可切換聽力口音；Stage 4 支援 iPad 點擊兩段式填入與電腦拖曳。</span>
+                <button onclick="resetProgress()" class="text-slate-500 hover:text-rose-400 underline">
+                    重置本機測試進度
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= 視圖 2：遊戲答題區 ================= -->
+        <section id="view-game" class="hidden flex-1 flex flex-col gap-4 animate-slide-up">
+
+            <!-- 關卡進度與 Combo 條 -->
+            <div class="glass-panel rounded-2xl p-3.5 sm:px-5 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <button onclick="backToLobby()"
+                            class="btn-express bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold">
+                        ✕ 離開
+                    </button>
+                    <div>
+                        <div id="game-stage-badge" class="text-[11px] font-extrabold uppercase tracking-wider text-teal-300"></div>
+                        <div id="game-stage-title" class="text-sm sm:text-base font-extrabold text-white"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div id="game-timer-box" class="hidden bg-rose-950/80 border border-rose-400/50 text-rose-200 px-3 py-1 rounded-xl text-xs sm:text-sm font-extrabold">
+                        ⏱️ <span id="game-timer-val">00</span>s
+                    </div>
+                    <div id="game-combo-box" class="bg-amber-500/20 border border-amber-400/40 text-amber-300 px-3 py-1 rounded-xl text-xs sm:text-sm font-extrabold">
+                        🔥 Combo <span id="game-combo-val">0</span>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-700 text-slate-200 px-3 py-1 rounded-xl text-xs sm:text-sm font-extrabold">
+                        <span id="game-progress-text">1 / 5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 進度條 -->
+            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div id="game-progress-bar" class="h-full bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- 亮面高可讀性答題主卡片 -->
+            <div id="question-stage" class="bg-slate-50 text-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl border-4 border-teal-400/80 flex-1 flex flex-col justify-between">
+                <!-- 題型內容由 JS 渲染 -->
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ================= 結算彈窗 ================= -->
+    <div id="result-modal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-900/95 rounded-3xl w-full max-w-md p-6 sm:p-8 text-center border-2 border-teal-400/60 shadow-2xl animate-slide-up">
+            <div id="res-stamp" class="inline-block border-4 border-amber-400 text-amber-300 font-black text-sm tracking-widest uppercase px-4 py-1 rounded-xl mb-3 animate-stamp">
+                PASSPORT STAMPED
+            </div>
+            <h2 id="res-title" class="text-2xl font-extrabold text-white mb-2">Stage Complete!</h2>
+            <div id="res-stars" class="text-4xl tracking-widest my-3">⭐⭐⭐</div>
+            <p id="res-summary" class="text-sm text-slate-300 leading-relaxed mb-5"></p>
+            <div class="grid grid-cols-2 gap-3 mb-6 text-left">
+                <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3">
+                    <div class="text-[11px] text-slate-400 font-bold">本關獲得積分</div>
+                    <div id="res-score" class="text-xl font-extrabold text-teal-300">+0</div>
+                </div>
+                <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3">
+                    <div class="text-[11px] text-slate-400 font-bold">正確率</div>
+                    <div id="res-acc" class="text-xl font-extrabold text-amber-300">0%</div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="replayStage()" class="btn-express flex-1 bg-slate-700 hover:bg-slate-600 text-white font-extrabold py-3 rounded-xl text-sm">
+                    再玩一次
+                </button>
+                <button onclick="closeResultToLobby()" class="btn-express flex-1 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold py-3 rounded-xl text-sm">
+                    回關卡大廳
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ==========================================================================
+       1. 劍橋英檢專屬音效引擎 (PetSound) - 清脆馬林巴 / 車站鐘聲風格
+       ========================================================================== */
+    const PetSound = {
+        ctx: null,
+        enabled: true,
+
+        init() {
+            if (!this.ctx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (AC) this.ctx = new AC();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        },
+
+        tone(freq, type, duration, delay = 0, vol = 0.16) {
+            if (!this.enabled) return;
+            this.init();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime + delay;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(vol, now + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
+        },
+
+        tap() {
+            this.tone(880, 'sine', 0.055, 0, 0.09);
+        },
+
+        correct(combo = 1) {
+            const root = 587.33 * Math.pow(1.04, Math.min(combo - 1, 6)); // D5 起音
+            this.tone(root, 'sine', 0.14, 0, 0.16);
+            this.tone(root * 1.25, 'sine', 0.14, 0.07, 0.16);
+            this.tone(root * 1.5, 'triangle', 0.25, 0.14, 0.18);
+        },
+
+        wrong() {
+            // 柔和雙音低鳴，不刺耳
+            this.tone(220, 'triangle', 0.16, 0, 0.16);
+            this.tone(185, 'triangle', 0.24, 0.12, 0.14);
+        },
+
+        hint() {
+            this.tone(740, 'sine', 0.1, 0, 0.12);
+            this.tone(987.77, 'sine', 0.16, 0.08, 0.12);
+        },
+
+        fanfare() {
+            // 倫敦車站四音鐘聲 (Westminster Chime inspired)
+            const notes = [659.25, 587.33, 523.25, 392.00, 523.25, 659.25, 783.99];
+            notes.forEach((n, i) => {
+                this.tone(n, 'sine', i === notes.length - 1 ? 0.45 : 0.18, i * 0.1, 0.18);
+            });
+        }
+    };
+
+    /* ==========================================================================
+       2. 劍橋英檢專屬粒子特效與飄字 (PetFX)
+       ========================================================================== */
+    const PetFX = {
+        canvas: document.getElementById('pet-fx-canvas'),
+        ctx: null,
+        particles: [],
+        raf: null,
+
+        init() {
+            if (!this.ctx && this.canvas) {
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+        },
+
+        resize() {
+            if (!this.canvas) return;
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+        },
+
+        burst(x, y, count = 24, colors = ['#2dd4bf', '#fbbf24', '#38bdf8', '#f472b6']) {
+            this.init();
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+                const speed = 3 + Math.random() * 6;
+                this.particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2,
+                    size: 4 + Math.random() * 5,
+                    color: colors[i % colors.length],
+                    alpha: 1,
+                    life: 0,
+                    maxLife: 38 + Math.random() * 20
+                });
+            }
+            if (!this.raf) this.loop();
+        },
+
+        loop() {
+            if (!this.ctx) return;
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.particles = this.particles.filter(p => p.life < p.maxLife);
+            for (const p of this.particles) {
+                p.life++;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.18;
+                p.alpha = 1 - p.life / p.maxLife;
+                this.ctx.globalAlpha = p.alpha;
+                this.ctx.fillStyle = p.color;
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            this.ctx.globalAlpha = 1;
+            if (this.particles.length > 0) {
+                this.raf = requestAnimationFrame(() => this.loop());
+            } else {
+                this.raf = null;
+            }
+        },
+
+        floatText(x, y, text, color = '#2dd4bf') {
+            const el = document.createElement('div');
+            el.className = 'pet-float-text text-lg sm:text-xl';
+            el.style.left = `${Math.max(80, Math.min(window.innerWidth - 80, x))}px`;
+            el.style.top = `${Math.max(60, y)}px`;
+            el.style.color = color;
+            el.textContent = text;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1120);
+        }
+    };
+
+    /* ==========================================================================
+       3. 內建測試種子題庫 (Stages 1~5)
+       ========================================================================== */
+    const STAGES_META = [
+        {
+            id: 1,
+            code: 'STAGE 01 · READING P1-3',
+            title: '同義替換消消樂',
+            subtitle: 'Paraphrasing Match',
+            desc: '訓練 PET 最關鍵的「換句話說」語感，配對題目關鍵字與 B1 同義句！',
+            icon: '🔀',
+            accent: 'border-teal-400/60 hover:border-teal-300',
+            badgeBg: 'bg-teal-500/20 text-teal-300 border-teal-400/40'
+        },
+        {
+            id: 2,
+            code: 'STAGE 02 · READING P5',
+            title: '語境克漏字闖關',
+            subtitle: 'Phrasal Verbs & Collocations',
+            desc: '四選一實戰動詞片語與固定搭配，累積 Combo 連擊能量！',
+            icon: '🧩',
+            accent: 'border-cyan-400/60 hover:border-cyan-300',
+            badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40'
+        },
+        {
+            id: 3,
+            code: 'STAGE 03 · READING P6',
+            title: '開放式文法拼字',
+            subtitle: 'Open Cloze Spelling',
+            desc: '無選項單字填空！考驗介系詞、關代與精確拼字，附兩段式提示。',
+            icon: '⌨️',
+            accent: 'border-amber-400/60 hover:border-amber-300',
+            badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-400/40'
+        },
+        {
+            id: 4,
+            code: 'STAGE 04 · READING P4',
+            title: '段落邏輯句子還原',
+            subtitle: 'Gapped Text Cohesion',
+            desc: '找出代名詞與前後文線索，將遺失的句子放回文章正確位置！',
+            icon: '🔗',
+            accent: 'border-indigo-400/60 hover:border-indigo-300',
+            badgeBg: 'bg-indigo-500/20 text-indigo-300 border-indigo-400/40'
+        },
+        {
+            id: 5,
+            code: 'STAGE 05 · LISTENING P3',
+            title: '聽力數字與拼字快答',
+            subtitle: 'Listening Dictation',
+            desc: '過濾 actually / but 轉折干擾，精準聽寫時間、序數與價格！',
+            icon: '🎧',
+            accent: 'border-fuchsia-400/60 hover:border-fuchsia-300',
+            badgeBg: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/40'
+        },
+        {
+            id: 99,
+            code: 'CHALLENGE · ALL-IN-ONE',
+            title: '全真節奏衝刺賽',
+            subtitle: 'Master Sprint (Timed)',
+            desc: '隨機混抽全題型 6 題，模擬 PET 閱讀每題約 84 秒的作答節奏！',
+            icon: '⚡',
+            accent: 'border-rose-400/60 hover:border-rose-300',
+            badgeBg: 'bg-rose-500/20 text-rose-300 border-rose-400/40'
+        }
+    ];
+
+    const QUESTION_BANK = {
+        // Stage 1: 同義替換配對 (每題 4 組)
+        1: [
+            {
+                id: 'para_01',
+                stageId: 1,
+                type: 'paraphrase_match',
+                title: 'Round 1：日常與消費同義詞',
+                pairs: [
+                    { left: 'wants to save money', right: 'is on a tight budget', highlightLeft: 'save money', highlightRight: 'tight budget', zhLeft: '想省錢', zhRight: '預算有限／手頭較緊' },
+                    { left: 'book a ticket early', right: 'reserve a seat in advance', highlightLeft: 'book / early', highlightRight: 'reserve / in advance', zhLeft: '提早訂票', zhRight: '事先預訂座位' },
+                    { left: 'not far from the station', right: 'within walking distance of the train', highlightLeft: 'not far', highlightRight: 'walking distance', zhLeft: '離車站不遠', zhRight: '在火車站步行可達的距離內' },
+                    { left: 'free for children under 10', right: 'younger kids do not have to pay', highlightLeft: 'free', highlightRight: 'do not have to pay', zhLeft: '10 歲以下兒童免費', zhRight: '年紀較小的孩子不需要付費' }
+                ]
+            },
+            {
+                id: 'para_02',
+                stageId: 1,
+                type: 'paraphrase_match',
+                title: 'Round 2：校園與活動通知',
+                pairs: [
+                    { left: 'the match was cancelled', right: 'the game will not take place', highlightLeft: 'cancelled', highlightRight: 'not take place', zhLeft: '比賽被取消了', zhRight: '這場比賽將不會舉行' },
+                    { left: 'bring your own lunch', right: 'food is not provided', highlightLeft: 'bring your own', highlightRight: 'not provided', zhLeft: '自備午餐', zhRight: '現場不提供食物' },
+                    { left: 'suitable for beginners', right: 'no experience is necessary', highlightLeft: 'beginners', highlightRight: 'no experience', zhLeft: '適合初學者', zhRight: '不需要任何經驗' },
+                    { left: 'tell the teacher by Friday', right: 'let the staff know before the weekend', highlightLeft: 'tell / by Friday', highlightRight: 'let ... know / before the weekend', zhLeft: '週五前告訴老師', zhRight: '週末前通知工作人員' }
+                ]
+            }
+        ],
+
+        // Stage 2: Reading Part 5 語境克漏字
+        2: [
+            {
+                id: 'p5_01',
+                stageId: 2,
+                type: 'mc_cloze',
+                sentence: 'We had to ____ the school picnic until next Friday because of the heavy rain.',
+                options: ['put off', 'put on', 'take off', 'give in'],
+                answer: 0,
+                focus: 'Phrasal Verb（動詞片語）',
+                explanation: 'put off 意思是「延期（postpone）」；put on 是穿上／上演；take off 是起飛／脫下。'
+            },
+            {
+                id: 'p5_02',
+                stageId: 2,
+                type: 'mc_cloze',
+                sentence: 'Tom is really looking forward ____ his grandparents in London next month.',
+                options: ['to visit', 'visiting', 'to visiting', 'visit'],
+                answer: 2,
+                focus: 'Phrasal Verb + V-ing',
+                explanation: 'look forward to 的 to 是介系詞，後面必須接名詞或動名詞（V-ing），因此選 to visiting。'
+            },
+            {
+                id: 'p5_03',
+                stageId: 2,
+                type: 'mc_cloze',
+                sentence: 'Could you please ____ an eye on my backpack while I buy a bottle of water?',
+                options: ['make', 'keep', 'take', 'do'],
+                answer: 1,
+                focus: 'Collocation（固定搭配）',
+                explanation: 'keep an eye on 是 B1 高頻固定搭配，表示「幫忙看管／留意」。'
+            },
+            {
+                id: 'p5_04',
+                stageId: 2,
+                type: 'mc_cloze',
+                sentence: 'Although the hike was tiring, everyone ____ part in the final mountain climb.',
+                options: ['made', 'gave', 'took', 'joined'],
+                answer: 2,
+                focus: 'Collocation（固定搭配）',
+                explanation: 'take part in = join（參加），因為後面已有 part in，動詞必須搭配 took。'
+            },
+            {
+                id: 'p5_05',
+                stageId: 2,
+                type: 'mc_cloze',
+                sentence: 'My sister decided to ____ up painting because she wanted a relaxing new hobby.',
+                options: ['take', 'turn', 'look', 'get'],
+                answer: 0,
+                focus: 'Phrasal Verb（動詞片語）',
+                explanation: 'take up + 嗜好/運動，表示「開始培養（某項新興趣）」。'
+            }
+        ],
+
+        // Stage 3: Reading Part 6 開放式文法填空
+        3: [
+            {
+                id: 'p6_01',
+                stageId: 3,
+                type: 'open_cloze',
+                sentence: 'This is the science museum ____ our class visited last summer.',
+                answers: ['which', 'that'],
+                posHint: 'Relative Pronoun（關係代名詞）',
+                explanation: '先行詞是事物（the science museum），且在子句中當 visited 的受詞，可用 which 或 that。'
+            },
+            {
+                id: 'p6_02',
+                stageId: 3,
+                type: 'open_cloze',
+                sentence: 'Lucy has lived in Taipei ____ she was six years old.',
+                answers: ['since'],
+                posHint: 'Preposition / Conjunction（時間連接詞）',
+                explanation: '主要子句為現在完成式 has lived，後方接過去時間點（she was six），必須用 since（自從）。'
+            },
+            {
+                id: 'p6_03',
+                stageId: 3,
+                type: 'open_cloze',
+                sentence: 'You will miss the morning bus ____ you leave home right now.',
+                answers: ['unless'],
+                posHint: 'Conjunction（條件連接詞）',
+                explanation: 'unless = if ... not（除非），語意為「除非你現在出門，否則會錯過早班公車」。'
+            },
+            {
+                id: 'p6_04',
+                stageId: 3,
+                type: 'open_cloze',
+                sentence: 'There are not ____ chairs in the classroom, so we need to bring five more.',
+                answers: ['enough'],
+                posHint: 'Determiner（數量限定詞）',
+                explanation: 'not enough + 名詞（不夠多的……），符合後半句「需要再搬五張來」的語意。'
+            },
+            {
+                id: 'p6_05',
+                stageId: 3,
+                type: 'open_cloze',
+                sentence: 'Emma is much taller ____ her younger brother.',
+                answers: ['than'],
+                posHint: 'Preposition / Conjunction（比較級連接詞）',
+                explanation: '比較級 taller 後面固定接 than 來引出比較的對象。'
+            }
+        ],
+
+        // Stage 4: Reading Part 4 段落邏輯句子還原
+        4: [
+            {
+                id: 'p4_01',
+                stageId: 4,
+                type: 'gapped_text',
+                topic: 'A Visit to the Planetarium',
+                segments: [
+                    'Last Saturday, our class visited the new City Planetarium. ',
+                    { gapId: 1, clueText: 'the new City Planetarium' },
+                    ' Inside the main hall, we watched a 3D movie about astronauts living on Mars.'
+                ],
+                options: [
+                    { key: 'A', text: 'It is twice as large as the old science building.', clueText: 'It' },
+                    { key: 'B', text: 'They forgot to bring their umbrellas that morning.', clueText: '' },
+                    { key: 'C', text: 'However, the tickets were sold out before noon.', clueText: '' }
+                ],
+                answer: 'A',
+                explanation: '選項 A 的主詞 It 指代前一句剛提到的單數地點 the new City Planetarium，且語意順暢接續下一句「Inside the main hall...」。'
+            },
+            {
+                id: 'p4_02',
+                stageId: 4,
+                type: 'gapped_text',
+                topic: 'Learning to Bake Bread',
+                segments: [
+                    'At first, Mia thought baking bread at home would be easy. ',
+                    { gapId: 1, clueText: 'thought baking bread ... would be easy' },
+                    ' Fortunately, her grandmother showed her how to mix the flour slowly.'
+                ],
+                options: [
+                    { key: 'A', text: 'So she bought five bicycles for her friends.', clueText: '' },
+                    { key: 'B', text: 'However, her first loaf came out as hard as a rock.', clueText: 'However' },
+                    { key: 'C', text: 'Finally, they went swimming in the lake.', clueText: '' }
+                ],
+                answer: 'B',
+                explanation: '前句說「原本以為很簡單」，選項 B 用轉折詞 However 帶出「結果烤得像石頭一樣硬」，才能順接後句「幸好奶奶教她怎麼做」。'
+            },
+            {
+                id: 'p4_03',
+                stageId: 4,
+                type: 'gapped_text',
+                topic: 'School Cycling Club',
+                segments: [
+                    'Every Wednesday afternoon, twelve students meet at the school gate with their bikes. ',
+                    { gapId: 1, clueText: 'twelve students' },
+                    ' After riding for an hour, everyone stops at the park for juice.'
+                ],
+                options: [
+                    { key: 'A', text: 'This museum opens at nine o’clock.', clueText: '' },
+                    { key: 'B', text: 'Because it was raining, nobody went outside.', clueText: '' },
+                    { key: 'C', text: 'They always wear helmets before riding along the river path.', clueText: 'They' }
+                ],
+                answer: 'C',
+                explanation: '選項 C 的複數代名詞 They 呼應前句的 twelve students，且內容與腳踏車社團騎車一致。'
+            }
+        ],
+
+        // Stage 5: Listening Part 3 聽力數字與拼字快問快答
+        5: [
+            {
+                id: 'lis_01',
+                stageId: 5,
+                type: 'listening_dictation',
+                script: 'Welcome to the City Zoo! The dolphin show starts at ten fifteen... oh, sorry, it was moved to ten fifty today.',
+                audioUrl: '',
+                prompt: 'Dolphin show time: ____',
+                answers: ['10:50', '10.50'],
+                placeholder: '例如 10:30',
+                explanation: '錄音先說 10:15，接著用 sorry 修正為 10:50（ten fifty），PET 聽力常考這種自我修正干擾項！'
+            },
+            {
+                id: 'lis_02',
+                stageId: 5,
+                type: 'listening_dictation',
+                script: 'The summer art camp begins on July thirteenth. Please remember to sign up before July third.',
+                audioUrl: '',
+                prompt: 'Art camp begins on July ____ (請填數字與序數，如 5th)',
+                answers: ['13th', '13'],
+                placeholder: '例如 15th',
+                explanation: '注意分辨 thirteenth (13th) 與 thirtieth (30th)，且問題問的是「開始日期」而非截止日。'
+            },
+            {
+                id: 'lis_03',
+                stageId: 5,
+                type: 'listening_dictation',
+                script: 'Student tickets usually cost eighteen pounds, but if you book online today, you only pay twelve pounds.',
+                audioUrl: '',
+                prompt: 'Online ticket price today: £ ____',
+                answers: ['12', '12 pounds'],
+                placeholder: '請輸入數字',
+                explanation: '聽到轉折詞 but 後方才是線上優惠價 £12（twelve pounds）。'
+            },
+            {
+                id: 'lis_04',
+                stageId: 5,
+                type: 'listening_dictation',
+                script: 'Our tour guide is Mr. Parker. That is spelled P-A-R-K-E-R. Meet him near the main entrance.',
+                audioUrl: '',
+                prompt: 'Tour guide name: Mr. ____',
+                answers: ['parker'],
+                placeholder: '請拼出姓氏',
+                explanation: 'PET Listening Part 3 遇到專有名詞通常會逐字拼讀（P-A-R-K-E-R），必須完全拼對才能拿分。'
+            }
+        ]
+    };
+
+    /* ==========================================================================
+       4. 狀態管理與 localStorage 持久化 (cambridge_pet_v1)
+       ========================================================================== */
+    const STORAGE_KEY = 'cambridge_pet_v1';
+
+    let store = {
+        stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 99: 0 },
+        totalScore: 0,
+        accent: 'en-GB',
+        mistakes: [] // [{ id, stageId, streakCorrect }]
+    };
+
+    function loadStore() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                store = {
+                    stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 99: 0, ...(parsed.stars || {}) },
+                    totalScore: Number(parsed.totalScore) || 0,
+                    accent: parsed.accent || 'en-GB',
+                    mistakes: Array.isArray(parsed.mistakes) ? parsed.mistakes : []
+                };
+            }
+        } catch (_) {}
+    }
+
+    function saveStore() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        } catch (_) {}
+    }
+
+    function resetProgress() {
+        if (!confirm('確定要清除本機測試的星星、積分與錯題紀錄嗎？')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        loadStore();
+        renderLobby();
+        updateHeader();
+    }
+
+    function findQuestionById(qId) {
+        for (const sid of [1, 2, 3, 4, 5]) {
+            const found = QUESTION_BANK[sid].find(q => q.id === qId);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    function recordMistake(q) {
+        if (!q || q.type === 'paraphrase_match') return;
+        const existing = store.mistakes.find(m => m.id === q.id);
+        if (existing) {
+            existing.streakCorrect = 0;
+        } else {
+            store.mistakes.push({ id: q.id, stageId: q.stageId, streakCorrect: 0 });
+        }
+        saveStore();
+    }
+
+    function recordCorrectForMistake(q) {
+        const idx = store.mistakes.findIndex(m => m.id === q.id);
+        if (idx === -1) return false;
+        store.mistakes[idx].streakCorrect += 1;
+        let graduated = false;
+        if (store.mistakes[idx].streakCorrect >= 2) {
+            store.mistakes.splice(idx, 1);
+            graduated = true;
+        }
+        saveStore();
+        return graduated;
+    }
+
+    /* ==========================================================================
+       5. 大廳與頂部狀態列渲染
+       ========================================================================== */
+    function updateHeader() {
+        const totalStars = [1, 2, 3, 4, 5, 99].reduce((s, id) => s + (store.stars[id] || 0), 0);
+        document.getElementById('hdr-stars').textContent = totalStars;
+        document.getElementById('hdr-score').textContent = store.totalScore;
+        document.getElementById('btn-accent').textContent = store.accent === 'en-GB' ? '🇬🇧 UK' : '🇺🇸 US';
+        document.getElementById('btn-sound').textContent = PetSound.enabled ? '🔊' : '🔇';
+    }
+
+    function toggleAccent() {
+        PetSound.tap();
+        store.accent = store.accent === 'en-GB' ? 'en-US' : 'en-GB';
+        saveStore();
+        updateHeader();
+    }
+
+    function toggleSound() {
+        PetSound.enabled = !PetSound.enabled;
+        if (PetSound.enabled) PetSound.tap();
+        updateHeader();
+    }
+
+    function renderLobby() {
+        updateHeader();
+        const mCount = store.mistakes.length;
+        const pill = document.getElementById('mistake-count-pill');
+        const mBtn = document.getElementById('btn-start-mistakes');
+        if (mCount > 0) {
+            pill.textContent = `${mCount} 題待消滅`;
+            pill.className = 'text-xs bg-rose-500/20 text-rose-300 border border-rose-400/40 px-2.5 py-0.5 rounded-full font-bold';
+            mBtn.disabled = false;
+        } else {
+            pill.textContent = '0 題待消滅 ✨';
+            pill.className = 'text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-0.5 rounded-full font-bold';
+            mBtn.disabled = true;
+        }
+
+        const grid = document.getElementById('stage-grid');
+        grid.innerHTML = STAGES_META.map(st => {
+            const stars = store.stars[st.id] || 0;
+            const starIcons = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            return `
+                <button onclick="startStage(${st.id})"
+                        class="btn-express text-left glass-panel rounded-3xl p-5 border-2 ${st.accent} flex flex-col justify-between gap-4 hover:-translate-y-1 transition-all group">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-lg border ${st.badgeBg}">
+                                ${st.code}
+                            </span>
+                            <span class="text-sm tracking-widest text-amber-300" title="最高星數">${starIcons}</span>
+                        </div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                ${st.icon}
+                            </div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-extrabold text-white">${st.title}</h3>
+                                <div class="text-xs font-semibold text-slate-400">${st.subtitle}</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-300/90 leading-relaxed mt-2">${st.desc}</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-700/80 flex items-center justify-between text-xs font-extrabold text-teal-300">
+                        <span>點擊進入關卡</span>
+                        <span class="group-hover:translate-x-1 transition-transform">出發 ➔</span>
+                    </div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    /* ==========================================================================
+       6. 遊戲引擎核心狀態與切換
+       ========================================================================== */
+    let game = {
+        mode: 'stage', // 'stage' | 'sprint' | 'mistakes'
+        stageId: 1,
+        questions: [],
+        index: 0,
+        combo: 0,
+        correctCount: 0,
+        sessionScore: 0,
+        answered: false,
+        timerId: null,
+        timeLeft: 0,
+        // 題型專用暫存
+        matchState: null,
+        selectedGapOption: null,
+        hintLevel: 0
+    };
+
+    function shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function stopTimer() {
+        if (game.timerId) {
+            clearInterval(game.timerId);
+            game.timerId = null;
+        }
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function backToLobby() {
+        PetSound.tap();
+        stopTimer();
+        document.getElementById('view-game').classList.add('hidden');
+        document.getElementById('view-lobby').classList.remove('hidden');
+        renderLobby();
+    }
+
+    function startStage(stageId) {
+        PetSound.tap();
+        stopTimer();
+        let questions = [];
+        let mode = 'stage';
+        let badge = '';
+        let title = '';
+
+        if (stageId === 99) {
+            mode = 'sprint';
+            const pool = [
+                ...QUESTION_BANK[2],
+                ...QUESTION_BANK[3],
+                ...QUESTION_BANK[4],
+                ...QUESTION_BANK[5]
+            ];
+            questions = shuffle(pool).slice(0, 6);
+            badge = 'CHALLENGE · SPRINT';
+            title = '全真節奏衝刺賽';
+        } else {
+            const meta = STAGES_META.find(s => s.id === stageId);
+            questions = shuffle(QUESTION_BANK[stageId]);
+            badge = meta.code;
+            title = meta.title;
+        }
+
+        launchGame({ mode, stageId, questions, badge, title });
+    }
+
+    function startMistakeMode() {
+        if (store.mistakes.length === 0) return;
+        PetSound.tap();
+        stopTimer();
+        const questions = store.mistakes
+            .map(m => findQuestionById(m.id))
+            .filter(Boolean);
+        launchGame({
+            mode: 'mistakes',
+            stageId: 'mistakes',
+            questions: shuffle(questions),
+            badge: 'MISTAKE CLINIC',
+            title: '錯題大作戰（連對 2 次移除）'
+        });
+    }
+
+    function launchGame({ mode, stageId, questions, badge, title }) {
+        game = {
+            mode,
+            stageId,
+            questions,
+            index: 0,
+            combo: 0,
+            correctCount: 0,
+            sessionScore: 0,
+            answered: false,
+            timerId: null,
+            timeLeft: 0,
+            matchState: null,
+            selectedGapOption: null,
+            hintLevel: 0
+        };
+
+        document.getElementById('game-stage-badge').textContent = badge;
+        document.getElementById('game-stage-title').textContent = title;
+        document.getElementById('view-lobby').classList.add('hidden');
+        document.getElementById('view-game').classList.remove('hidden');
+        renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+        stopTimer();
+        const q = game.questions[game.index];
+        const total = game.questions.length;
+        game.answered = false;
+        game.hintLevel = 0;
+        game.selectedGapOption = null;
+
+        document.getElementById('game-combo-val').textContent = game.combo;
+        document.getElementById('game-progress-text').textContent = `${game.index + 1} / ${total}`;
+        document.getElementById('game-progress-bar').style.width = `${((game.index) / total) * 100}%`;
+
+        // 計時器設定（衝刺模式每題 84 秒）
+        const timerBox = document.getElementById('game-timer-box');
+        if (game.mode === 'sprint') {
+            timerBox.classList.remove('hidden');
+            game.timeLeft = 84;
+            document.getElementById('game-timer-val').textContent = game.timeLeft;
+            game.timerId = setInterval(() => {
+                game.timeLeft--;
+                document.getElementById('game-timer-val').textContent = Math.max(0, game.timeLeft);
+                if (game.timeLeft <= 0) {
+                    stopTimer();
+                    if (!game.answered) {
+                        handleWrong(q, '時間到！PET 閱讀建議每題控制在 1.4 分鐘內果斷作答。');
+                    }
+                }
+            }, 1000);
+        } else {
+            timerBox.classList.add('hidden');
+        }
+
+        const stage = document.getElementById('question-stage');
+        stage.classList.remove('animate-slide-up');
+        void stage.offsetWidth;
+        stage.classList.add('animate-slide-up');
+
+        if (q.type === 'paraphrase_match') renderParaphraseMatch(q, stage);
+        else if (q.type === 'mc_cloze') renderMcCloze(q, stage);
+        else if (q.type === 'open_cloze') renderOpenCloze(q, stage);
+        else if (q.type === 'gapped_text') renderGappedText(q, stage);
+        else if (q.type === 'listening_dictation') renderListening(q, stage);
+    }
+
+    /* ==========================================================================
+       7. 各題型渲染與互動邏輯
+       ========================================================================== */
+
+    // --- 7.1 Stage 1: 同義替換消消樂 ---
+    function renderParaphraseMatch(q, container) {
+        const leftItems = shuffle(q.pairs.map((p, idx) => ({ idx, text: p.left, pair: p })));
+        const rightItems = shuffle(q.pairs.map((p, idx) => ({ idx, text: p.right, pair: p })));
+        game.matchState = {
+            selectedLeft: null,
+            selectedRight: null,
+            matchedIds: new Set(),
+            hadError: false,
+            leftItems,
+            rightItems
+        };
+
+        const renderBoard = (errorPair = null) => {
+            const st = game.matchState;
+            const highlightWord = (full, target) => {
+                if (!target) return full;
+                const words = target.split('/').map(w => w.trim()).filter(Boolean);
+                let html = full;
+                words.forEach(w => {
+                    const reg = new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    html = html.replace(reg, '<mark class="bg-amber-300 text-slate-900 px-1 rounded font-extrabold">$1</mark>');
+                });
+                return html;
+            };
+
+            container.innerHTML = `
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <span class="text-xs font-extrabold uppercase tracking-wider bg-teal-100 text-teal-800 px-3 py-1 rounded-full">
+                            Paraphrasing Match
+                        </span>
+                        <span class="text-xs font-bold text-slate-500">
+                            點選左側「題目關鍵句」➔ 再點選右側「B1 同義替換」
+                        </span>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-800 mb-4">${q.title}</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2.5">
+                            <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">題目關鍵句 (Prompt)</div>
+                            ${st.leftItems.map(item => {
+                                const isMatched = st.matchedIds.has(item.idx);
+                                const isSel = st.selectedLeft === item.idx;
+                                const isErr = errorPair && errorPair.leftIdx === item.idx;
+                                let cls = 'bg-white border-slate-200 hover:border-teal-400 text-slate-700';
+                                if (isMatched) cls = 'bg-emerald-50 border-emerald-400 text-emerald-700 opacity-60';
+                                else if (isErr) cls = 'bg-rose-50 border-rose-500 text-rose-800 animate-shake';
+                                else if (isSel) cls = 'bg-teal-50 border-teal-500 ring-2 ring-teal-300 text-teal-900';
+                                const textHtml = isErr ? highlightWord(item.text, item.pair.highlightLeft) : item.text;
+                                return `
+                                    <button onclick="selectMatchSide('left', ${item.idx}, event)" ${isMatched ? 'disabled' : ''}
+                                            class="w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition ${cls}">
+                                        ${isMatched ? '✅ ' : ''}${textHtml}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">文章同義句 (Paraphrase)</div>
+                            ${st.rightItems.map(item => {
+                                const isMatched = st.matchedIds.has(item.idx);
+                                const isSel = st.selectedRight === item.idx;
+                                const isErr = errorPair && errorPair.rightIdx === item.idx;
+                                let cls = 'bg-white border-slate-200 hover:border-indigo-400 text-slate-700';
+                                if (isMatched) cls = 'bg-emerald-50 border-emerald-400 text-emerald-700 opacity-60';
+                                else if (isErr) cls = 'bg-rose-50 border-rose-500 text-rose-800 animate-shake';
+                                else if (isSel) cls = 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-300 text-indigo-900';
+                                const textHtml = (errorPair && errorPair.leftIdx === item.idx) ? highlightWord(item.text, item.pair.highlightRight) : item.text;
+                                return `
+                                    <button onclick="selectMatchSide('right', ${item.idx}, event)" ${isMatched ? 'disabled' : ''}
+                                            class="w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition ${cls}">
+                                        ${isMatched ? '✅ ' : ''}${textHtml}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    ${errorPair ? `
+                        <div class="mt-4 bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 text-xs sm:text-sm text-amber-900 font-bold space-y-1.5">
+                            <div>💡 <strong>同義線索提示：</strong></div>
+                            <div>• 左側「<span class="underline">${q.pairs[errorPair.leftIdx].left}</span>」（${q.pairs[errorPair.leftIdx].zhLeft}）⟷ 應配對「<span class="underline">${q.pairs[errorPair.leftIdx].right}</span>」（${q.pairs[errorPair.leftIdx].zhRight}）</div>
+                            <div class="text-rose-700">• 你剛才點的右側「<span class="underline">${q.pairs[errorPair.rightIdx].right}</span>」意思是「${q.pairs[errorPair.rightIdx].zhRight}」喔！</div>
+                        </div>
+                    ` : ''}
+                </div>
+                <div id="feedback-area" class="mt-5"></div>
+            `;
+        };
+
+        game.renderMatchBoard = renderBoard;
+        renderBoard();
+    }
+
+    function selectMatchSide(side, idx, ev) {
+        if (game.answered) return;
+        const st = game.matchState;
+        PetSound.tap();
+        if (side === 'left') st.selectedLeft = idx;
+        else st.selectedRight = idx;
+
+        if (st.selectedLeft !== null && st.selectedRight !== null) {
+            if (st.selectedLeft === st.selectedRight) {
+                st.matchedIds.add(st.selectedLeft);
+                st.selectedLeft = null;
+                st.selectedRight = null;
+                game.combo++;
+                PetSound.correct(game.combo);
+                const rect = ev.currentTarget.getBoundingClientRect();
+                PetFX.burst(rect.left + rect.width / 2, rect.top, 16);
+                PetFX.floatText(rect.left + rect.width / 2, rect.top, `Match! +25`, '#14b8a6');
+                addScore(25);
+                document.getElementById('game-combo-val').textContent = game.combo;
+                game.renderMatchBoard();
+
+                if (st.matchedIds.size === game.questions[game.index].pairs.length) {
+                    game.answered = true;
+                    if (!st.hadError) game.correctCount++;
+                    showNextButton('太棒了！本輪同義替換全數配對完成！', true);
+                }
+            } else {
+                st.hadError = true;
+                game.combo = 0;
+                document.getElementById('game-combo-val').textContent = 0;
+                PetSound.wrong();
+                const err = { leftIdx: st.selectedLeft, rightIdx: st.selectedRight };
+                st.selectedLeft = null;
+                st.selectedRight = null;
+                game.renderMatchBoard(err);
+            }
+        } else {
+            game.renderMatchBoard();
+        }
+    }
+
+    // --- 7.2 Stage 2: Reading Part 5 語境克漏字 ---
+    function renderMcCloze(q, container) {
+        const sentenceHtml = q.sentence.replace('____', '<span id="cloze-blank" class="inline-block min-w-[90px] border-b-4 border-teal-500 text-teal-700 font-extrabold text-center px-2 mx-1">____</span>');
+        container.innerHTML = `
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-4">
+                    <span class="text-xs font-extrabold uppercase tracking-wider bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full">
+                        Reading Part 5 · ${q.focus}
+                    </span>
+                </div>
+                <p class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed bg-white p-5 sm:p-6 rounded-2xl border-2 border-slate-200 shadow-sm mb-6">
+                    ${sentenceHtml}
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    ${q.options.map((opt, idx) => `
+                        <button onclick="checkMcCloze(${idx}, event)" id="mc-opt-${idx}"
+                                class="btn-express bg-white hover:bg-teal-50 border-2 border-slate-200 hover:border-teal-400 text-slate-800 font-extrabold text-base sm:text-lg p-4 rounded-2xl text-left flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-black">
+                                ${String.fromCharCode(65 + idx)}
+                            </span>
+                            <span>${opt}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+            <div id="feedback-area" class="mt-5"></div>
+        `;
+    }
+
+    function checkMcCloze(idx, ev) {
+        if (game.answered) return;
+        const q = game.questions[game.index];
+        game.answered = true;
+        stopTimer();
+
+        q.options.forEach((_, i) => {
+            const btn = document.getElementById(`mc-opt-${i}`);
+            if (btn) btn.disabled = true;
+        });
+
+        const chosenBtn = document.getElementById(`mc-opt-${idx}`);
+        const correctBtn = document.getElementById(`mc-opt-${q.answer}`);
+        const blank = document.getElementById('cloze-blank');
+        if (blank) blank.textContent = q.options[q.answer];
+
+        if (idx === q.answer) {
+            chosenBtn.className = 'bg-emerald-50 border-2 border-emerald-500 text-emerald-900 font-extrabold text-base sm:text-lg p-4 rounded-2xl text-left flex items-center gap-3';
+            handleCorrect(q, ev.currentTarget, 100);
+        } else {
+            chosenBtn.className = 'bg-rose-50 border-2 border-rose-500 text-rose-800 font-extrabold text-base sm:text-lg p-4 rounded-2xl text-left flex items-center gap-3 animate-shake';
+            correctBtn.className = 'bg-emerald-50 border-2 border-emerald-500 text-emerald-900 font-extrabold text-base sm:text-lg p-4 rounded-2xl text-left flex items-center gap-3';
+            handleWrong(q, q.explanation);
+        }
+    }
+
+    // --- 7.3 Stage 3: Reading Part 6 開放式文法拼字 ---
+    function renderOpenCloze(q, container) {
+        const sentenceHtml = q.sentence.replace('____', '<span id="open-blank" class="inline-block min-w-[90px] border-b-4 border-amber-500 text-amber-700 font-extrabold text-center px-2 mx-1">____</span>');
+        container.innerHTML = `
+            <div>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <span class="text-xs font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
+                        Reading Part 6 · Open Cloze（嚴格拼字）
+                    </span>
+                    <div class="flex gap-2">
+                        <button id="btn-hint-pos" onclick="useOpenHint(1)"
+                                class="bg-slate-200 hover:bg-amber-100 text-slate-700 font-bold text-xs px-3 py-1.5 rounded-xl transition">
+                            💡 提示詞性 (-20%)
+                        </button>
+                        <button id="btn-hint-letter" onclick="useOpenHint(2)"
+                                class="bg-slate-200 hover:bg-amber-100 text-slate-700 font-bold text-xs px-3 py-1.5 rounded-xl transition">
+                            🔤 提示首字母 (-20%)
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed bg-white p-5 sm:p-6 rounded-2xl border-2 border-slate-200 shadow-sm mb-4">
+                    ${sentenceHtml}
+                </p>
+
+                <div id="open-hint-box" class="hidden mb-4 bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold"></div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input id="open-cloze-input" type="text"
+                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                           placeholder="請輸入 1 個英文單字..."
+                           onkeydown="if(event.key==='Enter') checkOpenCloze(event)"
+                           class="pet-input flex-1 bg-white border-2 border-slate-300 focus:border-teal-500 focus:outline-none rounded-2xl px-4 py-3.5 text-lg font-extrabold text-slate-800">
+                    <button id="btn-submit-open" onclick="checkOpenCloze(event)"
+                            class="btn-express bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold px-7 py-3.5 rounded-2xl text-base">
+                        送出答案
+                    </button>
+                </div>
+            </div>
+            <div id="feedback-area" class="mt-5"></div>
+        `;
+        setTimeout(() => {
+            const inp = document.getElementById('open-cloze-input');
+            if (inp) inp.focus();
+        }, 80);
+    }
+
+    function useOpenHint(level) {
+        if (game.answered) return;
+        const q = game.questions[game.index];
+        PetSound.hint();
+        game.hintLevel = Math.max(game.hintLevel, level);
+        const box = document.getElementById('open-hint-box');
+        box.classList.remove('hidden');
+        const primary = q.answers[0];
+        const masked = primary[0] + ' ' + '_ '.repeat(primary.length - 1).trim() + `（共 ${primary.length} 字母）`;
+        if (level === 1) {
+            box.innerHTML = `💡 詞性線索：<strong>${q.posHint}</strong>`;
+            document.getElementById('btn-hint-pos').disabled = true;
+            document.getElementById('btn-hint-pos').classList.add('opacity-50');
+        } else {
+            box.innerHTML = `💡 詞性：<strong>${q.posHint}</strong> ｜ 字母提示：<code class="bg-white px-2 py-0.5 rounded font-mono text-amber-800">${masked}</code>`;
+            document.getElementById('btn-hint-letter').disabled = true;
+            document.getElementById('btn-hint-letter').classList.add('opacity-50');
+        }
+    }
+
+    function checkOpenCloze(ev) {
+        if (game.answered) return;
+        const inp = document.getElementById('open-cloze-input');
+        const val = (inp.value || '').trim().toLowerCase();
+        if (!val) return;
+
+        const q = game.questions[game.index];
+        game.answered = true;
+        stopTimer();
+        inp.disabled = true;
+        document.getElementById('btn-submit-open').disabled = true;
+
+        const isCorrect = q.answers.map(a => a.toLowerCase()).includes(val);
+        const blank = document.getElementById('open-blank');
+        if (blank) blank.textContent = isCorrect ? val : q.answers[0];
+
+        if (isCorrect) {
+            inp.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+            const pts = Math.max(60, 100 - game.hintLevel * 20);
+            handleCorrect(q, document.getElementById('btn-submit-open'), pts);
+        } else {
+            inp.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-800', 'animate-shake');
+            handleWrong(q, `正確答案：<strong>${q.answers.join(' / ')}</strong>。<br>${q.explanation}`);
+        }
+    }
+
+    // --- 7.4 Stage 4: Reading Part 4 段落邏輯句子還原 ---
+    function renderGappedText(q, container) {
+        game.selectedGapOption = null;
+        game.filledGapKey = null;
+
+        const renderPassages = (showClue = false) => {
+            const passageHtml = q.segments.map(seg => {
+                if (typeof seg === 'string') {
+                    if (showClue && q.segments[1]?.clueText && seg.includes(q.segments[1].clueText)) {
+                        return seg.replace(q.segments[1].clueText, `<mark class="bg-sky-200 text-sky-950 px-1.5 py-0.5 rounded font-extrabold underline decoration-sky-500">${q.segments[1].clueText}</mark>`);
+                    }
+                    return seg;
+                }
+                const opt = q.options.find(o => o.key === game.filledGapKey);
+                if (opt) {
+                    return `
+                        <button onclick="clearGapFill()" ${game.answered ? 'disabled' : ''}
+                                class="inline-flex items-center gap-1.5 bg-indigo-100 border-2 border-indigo-500 text-indigo-900 font-extrabold px-3 py-1 rounded-xl mx-1 my-1 text-left">
+                            <span class="bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded">${opt.key}</span>
+                            <span>${opt.text}</span>
+                        </button>
+                    `;
+                }
+                return `
+                    <button id="gap-drop-zone" onclick="placeIntoGap()"
+                            ondragover="event.preventDefault(); this.classList.add('bg-teal-100')"
+                            ondragleave="this.classList.remove('bg-teal-100')"
+                            ondrop="dropIntoGap(event)"
+                            class="inline-flex items-center justify-center min-w-[180px] border-2 border-dashed border-indigo-400 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-extrabold px-4 py-1.5 rounded-xl mx-1 my-1 transition">
+                        ${game.selectedGapOption ? '📥 點此放入選項 ' + game.selectedGapOption : '［ 點此填入句子 ］'}
+                    </button>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <span class="text-xs font-extrabold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+                            Reading Part 4 · ${q.topic}
+                        </span>
+                        <span class="text-xs font-bold text-slate-500">點選下方句子卡 ➔ 再點選文章空格（電腦也支援拖曳）</span>
+                    </div>
+
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-slate-200 shadow-sm text-base sm:text-lg leading-loose text-slate-800 mb-5">
+                        ${passageHtml}
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${q.options.map(opt => {
+                            const isSelected = game.selectedGapOption === opt.key;
+                            const isUsed = game.filledGapKey === opt.key;
+                            let textHtml = opt.text;
+                            if (showClue && opt.key === q.answer && opt.clueText) {
+                                textHtml = opt.text.replace(opt.clueText, `<mark class="bg-sky-200 text-sky-950 px-1.5 py-0.5 rounded font-extrabold underline decoration-sky-500">${opt.clueText}</mark>`);
+                            }
+                            let cls = 'bg-white border-slate-200 hover:border-indigo-400 text-slate-800';
+                            if (isUsed) cls = 'bg-slate-100 border-slate-200 text-slate-400 opacity-50';
+                            else if (isSelected) cls = 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-300 text-indigo-950';
+                            return `
+                                <button draggable="${!game.answered && !isUsed}"
+                                        ondragstart="event.dataTransfer.setData('text/plain', '${opt.key}')"
+                                        onclick="selectGapOption('${opt.key}')"
+                                        ${game.answered || isUsed ? 'disabled' : ''}
+                                        class="w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition flex items-start gap-3 ${cls}">
+                                    <span class="w-7 h-7 shrink-0 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">${opt.key}</span>
+                                    <span>${textHtml}</span>
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="mt-4 flex justify-end">
+                        <button id="btn-submit-gap" onclick="checkGappedText(event)" ${!game.filledGapKey || game.answered ? 'disabled' : ''}
+                                class="btn-express bg-teal-500 hover:bg-teal-400 disabled:bg-slate-300 disabled:text-slate-500 text-slate-950 font-extrabold px-6 py-3 rounded-2xl text-sm sm:text-base">
+                            確認送出
+                        </button>
+                    </div>
+                </div>
+                <div id="feedback-area" class="mt-4"></div>
+            `;
+        };
+
+        game.renderGapView = renderPassages;
+        renderPassages(false);
+    }
+
+    function selectGapOption(key) {
+        if (game.answered) return;
+        PetSound.tap();
+        game.selectedGapOption = (game.selectedGapOption === key) ? null : key;
+        game.renderGapView(false);
+    }
+
+    function placeIntoGap() {
+        if (game.answered || !game.selectedGapOption) return;
+        PetSound.tap();
+        game.filledGapKey = game.selectedGapOption;
+        game.selectedGapOption = null;
+        game.renderGapView(false);
+    }
+
+    function dropIntoGap(ev) {
+        ev.preventDefault();
+        if (game.answered) return;
+        const key = ev.dataTransfer.getData('text/plain');
+        if (!key) return;
+        PetSound.tap();
+        game.filledGapKey = key;
+        game.selectedGapOption = null;
+        game.renderGapView(false);
+    }
+
+    function clearGapFill() {
+        if (game.answered) return;
+        PetSound.tap();
+        game.filledGapKey = null;
+        game.renderGapView(false);
+    }
+
+    function checkGappedText(ev) {
+        if (game.answered || !game.filledGapKey) return;
+        const q = game.questions[game.index];
+        game.answered = true;
+        stopTimer();
+        const isCorrect = game.filledGapKey === q.answer;
+        game.renderGapView(true);
+
+        if (isCorrect) {
+            handleCorrect(q, document.getElementById('btn-submit-gap') || ev.currentTarget, 120);
+        } else {
+            handleWrong(q, `正確答案是 <strong>${q.answer}</strong>（已用藍底標記前後文呼應線索）。<br>${q.explanation}`);
+        }
+    }
+
+    // --- 7.5 Stage 5: Listening Part 3 聽寫與干擾過濾 ---
+    function renderListening(q, container) {
+        game.speechRate = 1.0;
+        container.innerHTML = `
+            <div>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <span class="text-xs font-extrabold uppercase tracking-wider bg-fuchsia-100 text-fuchsia-800 px-3 py-1 rounded-full">
+                        Listening Part 3 · 聽寫筆記
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-rate-085" onclick="setSpeechRate(0.85)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 text-slate-700">0.85x 慢速</button>
+                        <button id="btn-rate-100" onclick="setSpeechRate(1.0)" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-fuchsia-600 text-white">1.0x 原速</button>
+                    </div>
+                </div>
+
+                <!-- 播放器卡片 -->
+                <div class="bg-slate-900 text-white rounded-2xl p-5 mb-5 flex flex-wrap items-center justify-between gap-4 border border-slate-700">
+                    <div class="flex items-center gap-4">
+                        <button onclick="playListeningAudio()"
+                                class="btn-express w-14 h-14 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg">
+                            🔊
+                        </button>
+                        <div>
+                            <div class="text-sm font-extrabold">點擊播放聽力錄音（${store.accent === 'en-GB' ? '英式發音' : '美式發音'}）</div>
+                            <div class="text-xs text-slate-400 mt-0.5">注意聽轉折詞 sorry / but / actually 後面的正確資訊</div>
+                        </div>
+                    </div>
+                    <div id="wave-bars" class="flex items-end gap-1 h-8">
+                        <span class="sound-bar paused w-1.5 h-4 bg-fuchsia-400 rounded-full" style="animation-delay:0s"></span>
+                        <span class="sound-bar paused w-1.5 h-7 bg-teal-400 rounded-full" style="animation-delay:0.15s"></span>
+                        <span class="sound-bar paused w-1.5 h-5 bg-cyan-400 rounded-full" style="animation-delay:0.3s"></span>
+                        <span class="sound-bar paused w-1.5 h-8 bg-amber-400 rounded-full" style="animation-delay:0.1s"></span>
+                        <span class="sound-bar paused w-1.5 h-4 bg-fuchsia-400 rounded-full" style="animation-delay:0.25s"></span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border-2 border-slate-200 mb-4">
+                    <div class="text-xs font-extrabold text-slate-400 uppercase mb-1">筆記填空 (Notes)</div>
+                    <div class="text-lg sm:text-xl font-extrabold text-slate-800">${q.prompt}</div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input id="listening-input" type="text"
+                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                           placeholder="${q.placeholder || '請輸入聽到的答案...'}"
+                           onkeydown="if(event.key==='Enter') checkListening(event)"
+                           class="pet-input flex-1 bg-white border-2 border-slate-300 focus:border-fuchsia-500 focus:outline-none rounded-2xl px-4 py-3.5 text-lg font-extrabold text-slate-800">
+                    <button id="btn-submit-lis" onclick="checkListening(event)"
+                            class="btn-express bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-extrabold px-7 py-3.5 rounded-2xl text-base">
+                        確認送出
+                    </button>
+                </div>
+            </div>
+            <div id="feedback-area" class="mt-5"></div>
+        `;
+    }
+
+    function setSpeechRate(rate) {
+        PetSound.tap();
+        game.speechRate = rate;
+        document.getElementById('btn-rate-085').className = rate === 0.85
+            ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-fuchsia-600 text-white'
+            : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 text-slate-700';
+        document.getElementById('btn-rate-100').className = rate === 1.0
+            ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-fuchsia-600 text-white'
+            : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 text-slate-700';
+    }
+
+    function toggleWave(playing) {
+        document.querySelectorAll('#wave-bars .sound-bar').forEach(bar => {
+            bar.classList.toggle('paused', !playing);
+        });
+    }
+
+    function playListeningAudio() {
+        const q = game.questions[game.index];
+        if (q.audioUrl) {
+            const audio = new Audio(q.audioUrl);
+            audio.playbackRate = game.speechRate || 1.0;
+            toggleWave(true);
+            audio.onended = () => toggleWave(false);
+            audio.play().catch(() => toggleWave(false));
+            return;
+        }
+        if (!('speechSynthesis' in window)) {
+            alert('此瀏覽器不支援 Web Speech 語音，題目腳本：\n' + q.script);
+            return;
+        }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(q.script);
+        utter.lang = store.accent;
+        utter.rate = game.speechRate || 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.lang.startsWith(store.accent)) || voices.find(v => v.lang.startsWith('en'));
+        if (preferred) utter.voice = preferred;
+        toggleWave(true);
+        utter.onend = () => toggleWave(false);
+        utter.onerror = () => toggleWave(false);
+        window.speechSynthesis.speak(utter);
+    }
+
+    function checkListening(ev) {
+        if (game.answered) return;
+        const inp = document.getElementById('listening-input');
+        const val = (inp.value || '').trim().toLowerCase();
+        if (!val) return;
+
+        const q = game.questions[game.index];
+        game.answered = true;
+        stopTimer();
+        inp.disabled = true;
+        document.getElementById('btn-submit-lis').disabled = true;
+
+        const isCorrect = q.answers.map(a => a.toLowerCase()).includes(val);
+        if (isCorrect) {
+            inp.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
+            handleCorrect(q, document.getElementById('btn-submit-lis'), 120);
+        } else {
+            inp.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-800', 'animate-shake');
+            handleWrong(q, `正確答案：<strong>${q.answers[0]}</strong><br>錄音原文：「${q.script}」<br>${q.explanation}`);
+        }
+    }
+
+    /* ==========================================================================
+       8. 統一答對 / 答錯 / 結算處理
+       ========================================================================== */
+    function addScore(pts) {
+        game.sessionScore += pts;
+        store.totalScore += pts;
+        saveStore();
+        document.getElementById('hdr-score').textContent = store.totalScore;
+    }
+
+    function handleCorrect(q, anchorEl, basePts) {
+        game.combo++;
+        game.correctCount++;
+        const bonus = Math.min(game.combo - 1, 5) * 15;
+        const totalPts = basePts + bonus;
+        addScore(totalPts);
+        document.getElementById('game-combo-val').textContent = game.combo;
+
+        PetSound.correct(game.combo);
+        if (anchorEl) {
+            const rect = anchorEl.getBoundingClientRect();
+            PetFX.burst(rect.left + rect.width / 2, rect.top + rect.height / 2, 26);
+            PetFX.floatText(rect.left + rect.width / 2, rect.top, `+${totalPts}${game.combo > 1 ? ' 🔥x' + game.combo : ''}`, '#2dd4bf');
+        }
+
+        const graduated = recordCorrectForMistake(q);
+        const msg = graduated
+            ? `🎉 答對了！這題已連續答對 2 次，成功從錯題本畢業！<br><span class="text-xs font-normal">${q.explanation || ''}</span>`
+            : `✅ 答對了！${q.explanation || ''}`;
+        showNextButton(msg, true);
+    }
+
+    function handleWrong(q, detailHtml) {
+        game.combo = 0;
+        document.getElementById('game-combo-val').textContent = 0;
+        PetSound.wrong();
+        recordMistake(q);
+        showNextButton(`❌ 再接再厲！${detailHtml}`, false);
+    }
+
+    function showNextButton(html, isSuccess) {
+        const fb = document.getElementById('feedback-area');
+        if (!fb) return;
+        const isLast = game.index >= game.questions.length - 1;
+        fb.innerHTML = `
+            <div class="${isSuccess ? 'bg-emerald-50 border-emerald-400 text-emerald-900' : 'bg-rose-50 border-rose-400 text-rose-900'} border-2 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 animate-slide-up">
+                <div class="text-xs sm:text-sm font-bold leading-relaxed flex-1">${html}</div>
+                <button onclick="nextQuestion()"
+                        class="btn-express ${isSuccess ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-800 hover:bg-slate-700'} text-white font-extrabold px-5 py-2.5 rounded-xl text-sm shrink-0">
+                    ${isLast ? '查看成績 🏁' : '下一題 ➔'}
+                </button>
+            </div>
+        `;
+    }
+
+    function nextQuestion() {
+        PetSound.tap();
+        if (game.index < game.questions.length - 1) {
+            game.index++;
+            renderCurrentQuestion();
+        } else {
+            finishGame();
+        }
+    }
+
+    function finishGame() {
+        stopTimer();
+        document.getElementById('game-progress-bar').style.width = '100%';
+        const total = game.questions.length;
+        const acc = total > 0 ? Math.round((game.correctCount / total) * 100) : 0;
+        let stars = 1;
+        if (acc >= 90) stars = 3;
+        else if (acc >= 70) stars = 2;
+
+        if (typeof game.stageId === 'number') {
+            store.stars[game.stageId] = Math.max(store.stars[game.stageId] || 0, stars);
+            saveStore();
+        }
+
+        updateHeader();
+        PetSound.fanfare();
+        PetFX.burst(window.innerWidth / 2, window.innerHeight / 3, 45);
+
+        document.getElementById('res-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+        document.getElementById('res-score').textContent = `+${game.sessionScore}`;
+        document.getElementById('res-acc').textContent = `${acc}%`;
+        document.getElementById('res-title').textContent = game.mode === 'mistakes' ? '錯題特訓完成！' : 'Mission Complete!';
+        document.getElementById('res-summary').textContent = `本次共挑戰 ${total} 題，答對 ${game.correctCount} 題。${stars === 3 ? '完美表現，已獲得 3 星護照印章！' : '表現很棒，繼續保持！'}`;
+        document.getElementById('result-modal').classList.remove('hidden');
+    }
+
+    function replayStage() {
+        document.getElementById('result-modal').classList.add('hidden');
+        if (game.mode === 'mistakes') startMistakeMode();
+        else startStage(game.stageId);
+    }
+
+    function closeResultToLobby() {
+        document.getElementById('result-modal').classList.add('hidden');
+        backToLobby();
+    }
+
+    // 啟動初始化
+    window.addEventListener('DOMContentLoaded', () => {
+        loadStore();
+        renderLobby();
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
+        }
+    });
+    </script>
+</body>
+</html>
