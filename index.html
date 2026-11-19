@@ -439,9 +439,9 @@
             });
         }
 
-        function showComingSoon(title, filePath) {
+        function showComingSoon(title) {
             document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-desc').innerHTML = `此科目模組尚未上線！<br>未來建置完成後，只要在 GitHub 儲存庫建立 <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-700">${filePath}</code> 即可直接啟用。`;
+            document.getElementById('modal-desc').innerHTML = '此學習單元目前正在籌備中，尚未上線！<br>敬請期待後續開放體驗 ✨';
             document.getElementById('info-modal').classList.remove('hidden');
         }
 
