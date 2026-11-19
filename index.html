@@ -36,16 +36,13 @@
             </div>
         </div>
 
-        <!-- 年級篩選標籤 -->
+        <!-- 主區塊切換：國小學科 vs 劍橋英檢 -->
         <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-            <button onclick="filterGrade('all')" id="tab-all" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition">
-                全部科目
+            <button onclick="switchSection('school')" id="sec-tab-school" class="section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition">
+                🇹🇼 國小學科
             </button>
-            <button onclick="filterGrade('4')" id="tab-4" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                四年級專區
-            </button>
-            <button onclick="filterGrade('coming')" id="tab-coming" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                即將推出
+            <button onclick="switchSection('english')" id="sec-tab-english" class="section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
+                🇬🇧 劍橋英檢
             </button>
         </div>
     </header>
@@ -62,27 +59,44 @@
             <span class="text-[11px] font-black bg-sky-200/70 text-sky-800 px-2.5 py-0.5 rounded-full">本機自動存檔</span>
         </div>
 
-        <!-- 四科總覽進度橫幅 -->
-        <div id="overall-progress-banner" class="bg-white/90 border-2 border-indigo-200 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-            <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-indigo-900">
-                <span class="text-lg">📊</span>
-                <span>四年級上學期學習進度總覽</span>
+        <!-- ==================== 區塊一：國小學科 ==================== -->
+        <div id="section-school">
+            <!-- 年級與進度子列 -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div class="flex flex-wrap items-center gap-2 bg-white/80 p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                    <button onclick="filterGrade('all')" id="tab-all" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition">
+                        全部科目
+                    </button>
+                    <button onclick="filterGrade('4')" id="tab-4" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
+                        四年級專區
+                    </button>
+                    <button onclick="filterGrade('coming')" id="tab-coming" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
+                        即將推出
+                    </button>
+                </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
-                    ⭐ 總星星 <span id="overall-stars">0</span> / 75
-                </span>
-                <span class="bg-indigo-100 text-indigo-800 border border-indigo-300 px-3 py-1 rounded-full">
-                    🏆 總積分 <span id="overall-score">0</span>
-                </span>
-                <span id="overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
-                    ✨ 0 錯題
-                </span>
-            </div>
-        </div>
 
-        <!-- 科目卡片網格 -->
-        <div id="portal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- 四科總覽進度橫幅 -->
+            <div id="overall-progress-banner" class="bg-white/90 border-2 border-indigo-200 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-indigo-900">
+                    <span class="text-lg">📊</span>
+                    <span>四年級上學期學習進度總覽</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
+                    <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
+                        ⭐ 總星星 <span id="overall-stars">0</span> / 75
+                    </span>
+                    <span class="bg-indigo-100 text-indigo-800 border border-indigo-300 px-3 py-1 rounded-full">
+                        🏆 總積分 <span id="overall-score">0</span>
+                    </span>
+                    <span id="overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
+                        ✨ 0 錯題
+                    </span>
+                </div>
+            </div>
+
+            <!-- 科目卡片網格 -->
+            <div id="portal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
             <!-- 卡片 1：四年級上學期數學（已上線：./4a/math.html） -->
             <a href="./4a/math.html" data-grade="4" data-status="live"
@@ -263,6 +277,101 @@
             </div>
 
         </div>
+        </div>
+
+        <!-- ==================== 區塊二：劍橋英檢 ==================== -->
+        <div id="section-english" class="hidden">
+            <!-- 英檢總覽進度橫幅 -->
+            <div class="bg-slate-900/95 text-white border-2 border-teal-400/60 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-teal-300">
+                    <span class="text-lg">🇬🇧</span>
+                    <span>Cambridge English 劍橋英檢進度總覽</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
+                    <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-full">
+                        ⭐ 總星星 <span id="english-overall-stars">0</span> / 18
+                    </span>
+                    <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-3 py-1 rounded-full">
+                        🏆 總積分 <span id="english-overall-score">0</span>
+                    </span>
+                    <span id="english-overall-mistakes-badge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-full">
+                        ✨ 0 錯題
+                    </span>
+                </div>
+            </div>
+
+            <!-- 英檢卡片網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                <!-- 英檢卡片 1：Cambridge PET (B1)（已上線：./cambridge/pet.html） -->
+                <a href="./cambridge/pet.html"
+                   class="portal-card btn-3d group bg-slate-900 text-white rounded-3xl p-6 border-4 border-teal-400 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
+                        ● 已開放遊玩
+                    </div>
+                    <div>
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-indigo-600 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
+                            🚆
+                        </div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-0.5 rounded-lg">CEFR B1</span>
+                            <span class="text-xs font-bold text-slate-400">劍橋中級英檢</span>
+                        </div>
+                        <h2 class="text-xl font-black text-white mt-1">
+                            Cambridge PET Express
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-300 font-medium mt-2 leading-relaxed">
+                            專為小學生設計的 PET (B1) 互動特訓！涵蓋同義替換配對、62 個新增動詞片語、Part 6 拼字、Part 4 句子還原與聽寫挑戰。
+                        </p>
+                    </div>
+
+                    <div>
+                        <div id="progress-pet" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
+                            <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
+                            <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-2 py-0.5 rounded-full">🏆 0</span>
+                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-slate-700 flex items-center justify-between">
+                            <span class="text-xs font-mono text-slate-400">/cambridge/pet.html</span>
+                            <span class="text-sm font-black text-slate-950 bg-teal-400 group-hover:bg-teal-300 px-4 py-1.5 rounded-xl transition-colors">
+                                搭車出發 ➔
+                            </span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 英檢卡片 2：Cambridge KET (A2)（預留擴充：./cambridge/ket.html） -->
+                <div onclick="showComingSoon('Cambridge KET (A2) 基礎特訓', 'cambridge/ket.html')"
+                     class="portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-sky-200 flex flex-col justify-between relative transition">
+                    <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
+                        🛠️ 籌備建置中
+                    </div>
+                    <div>
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
+                            🛫
+                        </div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-black bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-lg">CEFR A2</span>
+                            <span class="text-xs font-bold text-slate-400">劍橋初級英檢</span>
+                        </div>
+                        <h2 class="text-xl font-black text-slate-700 mt-1">
+                            Cambridge KET 基礎冒險站
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                            預計收錄 A2 Key 核心生活字彙、基礎句型閱讀與聽力入門練習，適合作為銜接 PET 的前哨站。
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-mono text-slate-400">/cambridge/ket.html</span>
+                        <span class="text-xs font-black text-sky-600 bg-sky-50 px-3 py-1.5 rounded-xl">
+                            查看規劃說明
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </main>
 
     <!-- 頁尾免責聲明與授權 -->
@@ -286,6 +395,26 @@
     </div>
 
     <script>
+        function switchSection(section) {
+            const schoolSec = document.getElementById('section-school');
+            const englishSec = document.getElementById('section-english');
+            const btnSchool = document.getElementById('sec-tab-school');
+            const btnEnglish = document.getElementById('sec-tab-english');
+
+            if (section === 'english') {
+                schoolSec.classList.add('hidden');
+                englishSec.classList.remove('hidden');
+                btnSchool.className = 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition';
+                btnEnglish.className = 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-slate-900 text-teal-300 shadow transition';
+            } else {
+                englishSec.classList.add('hidden');
+                schoolSec.classList.remove('hidden');
+                btnEnglish.className = 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition';
+                btnSchool.className = 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition';
+            }
+            try { sessionStorage.setItem('portal_active_section', section); } catch (_) {}
+        }
+
         function filterGrade(filter) {
             // 更新頁籤樣式
             document.querySelectorAll('.grade-tab').forEach(btn => {
@@ -386,9 +515,55 @@
                     mistakesEl.className = 'bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full';
                 }
             }
+
+            // 同步渲染劍橋英檢 (PET) 進度
+            let petStars = 0, petScore = 0, petMistakes = 0;
+            try {
+                const rawPet = localStorage.getItem('cambridge_pet_v1');
+                if (rawPet) {
+                    const pData = JSON.parse(rawPet);
+                    if (pData && pData.stars) {
+                        petStars = [1, 2, 3, 4, 5, 99].reduce((sum, id) => sum + (Number(pData.stars[id]) || 0), 0);
+                    }
+                    if (pData && typeof pData.totalScore === 'number') petScore = pData.totalScore;
+                    if (pData && Array.isArray(pData.mistakes)) petMistakes = pData.mistakes.length;
+                }
+            } catch (_) {}
+
+            const petProgressEl = document.getElementById('progress-pet');
+            if (petProgressEl) {
+                const petMistakeBadge = petMistakes > 0
+                    ? `<span class="bg-rose-500/20 text-rose-300 border border-rose-400/40 px-2 py-0.5 rounded-full">📕 ${petMistakes} 題待消滅</span>`
+                    : `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
+                petProgressEl.innerHTML = `
+                    <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">⭐ ${petStars} / 18</span>
+                    <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-2 py-0.5 rounded-full">🏆 ${petScore}</span>
+                    ${petMistakeBadge}
+                `;
+            }
+            const engStarsEl = document.getElementById('english-overall-stars');
+            const engScoreEl = document.getElementById('english-overall-score');
+            const engMistakesEl = document.getElementById('english-overall-mistakes-badge');
+            if (engStarsEl) engStarsEl.textContent = petStars;
+            if (engScoreEl) engScoreEl.textContent = petScore;
+            if (engMistakesEl) {
+                if (petMistakes > 0) {
+                    engMistakesEl.textContent = `📕 ${petMistakes} 題待消滅`;
+                    engMistakesEl.className = 'bg-rose-500/20 text-rose-300 border border-rose-400/40 px-3 py-1 rounded-full';
+                } else {
+                    engMistakesEl.textContent = '✨ 0 錯題';
+                    engMistakesEl.className = 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-full';
+                }
+            }
         }
 
-        window.addEventListener('DOMContentLoaded', renderPortalProgress);
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPortalProgress();
+            try {
+                const savedSec = sessionStorage.getItem('portal_active_section');
+                if (savedSec === 'english' || savedSec === 'school') switchSection(savedSec);
+            } catch (_) {}
+        });
         window.addEventListener('pageshow', renderPortalProgress);
     </script>
 </body>

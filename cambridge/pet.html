@@ -156,7 +156,7 @@
                     </span>
                 </div>
                 <p class="text-[11px] sm:text-xs text-slate-400 font-medium">
-                    小學生劍橋中級英檢互動特訓站・本機測試版
+                    小學生劍橋 B1 中級英檢互動特訓站
                 </p>
             </div>
         </div>
@@ -221,11 +221,11 @@
                 <!-- 由 JS 動態渲染 -->
             </div>
 
-            <!-- 測試與重置提示 -->
+            <!-- 操作提示與重置紀錄 -->
             <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 px-1 pt-2">
                 <span>💡 提示：點擊「🇬🇧 UK / 🇺🇸 US」可切換聽力口音；Stage 4 支援 iPad 點擊兩段式填入與電腦拖曳。</span>
                 <button onclick="resetProgress()" class="text-slate-500 hover:text-rose-400 underline">
-                    重置本機測試進度
+                    清除學習紀錄
                 </button>
             </div>
         </section>
@@ -540,110 +540,139 @@
                     { left: 'suitable for beginners', right: 'no experience is necessary', highlightLeft: 'beginners', highlightRight: 'no experience', zhLeft: '適合初學者', zhRight: '不需要任何經驗' },
                     { left: 'tell the teacher by Friday', right: 'let the staff know before the weekend', highlightLeft: 'tell / by Friday', highlightRight: 'let ... know / before the weekend', zhLeft: '週五前告訴老師', zhRight: '週末前通知工作人員' }
                 ]
+            },
+            {
+                id: 'para_03',
+                stageId: 1,
+                type: 'paraphrase_match',
+                title: 'Round 3：B1 高頻動詞同義替換',
+                pairs: [
+                    { left: 'postpone the meeting', right: 'put off the meeting until later', highlightLeft: 'postpone', highlightRight: 'put off', zhLeft: '延後會議', zhRight: '把會議延到之後' },
+                    { left: 'refuse the invitation', right: 'turn down the offer politely', highlightLeft: 'refuse', highlightRight: 'turn down', zhLeft: '拒絕邀請', zhRight: '禮貌地婉拒提議' },
+                    { left: 'continue working hard', right: 'carry on with the project', highlightLeft: 'continue', highlightRight: 'carry on', zhLeft: '繼續努力', zhRight: '繼續進行專題' },
+                    { left: 'stop trying to solve it', right: 'give up on the puzzle', highlightLeft: 'stop trying', highlightRight: 'give up', zhLeft: '停止嘗試解決', zhRight: '放棄這個謎題' }
+                ]
+            },
+            {
+                id: 'para_04',
+                stageId: 1,
+                type: 'paraphrase_match',
+                title: 'Round 4：旅遊與交通公告',
+                pairs: [
+                    { left: 'the train was delayed', right: 'the train arrived later than planned', highlightLeft: 'delayed', highlightRight: 'later than planned', zhLeft: '火車誤點了', zhRight: '火車比預定時間晚到' },
+                    { left: 'available every day', right: 'open seven days a week', highlightLeft: 'available every day', highlightRight: 'open seven days a week', zhLeft: '每天都有開放／提供', zhRight: '一週七天皆開放' },
+                    { left: 'recommend this café', right: 'suggest trying this coffee shop', highlightLeft: 'recommend', highlightRight: 'suggest', zhLeft: '推薦這家咖啡廳', zhRight: '建議試試這家咖啡店' },
+                    { left: 'cannot afford the ticket', right: 'does not have enough money to buy it', highlightLeft: 'cannot afford', highlightRight: 'not have enough money', zhLeft: '負擔不起票價', zhRight: '沒有足夠的錢購買' }
+                ]
+            },
+            {
+                id: 'para_05',
+                stageId: 1,
+                type: 'paraphrase_match',
+                title: 'Round 5：感受與狀態形容詞',
+                pairs: [
+                    { left: 'felt completely exhausted', right: 'was extremely tired after the race', highlightLeft: 'exhausted', highlightRight: 'extremely tired', zhLeft: '感到精疲力竭', zhRight: '賽後非常疲憊' },
+                    { left: 'an enormous building', right: 'a huge and impressive hall', highlightLeft: 'enormous', highlightRight: 'huge', zhLeft: '巨大的建築物', zhRight: '龐大且壯觀的大廳' },
+                    { left: 'prevent accidents', right: 'stop dangerous things from happening', highlightLeft: 'prevent', highlightRight: 'stop ... from happening', zhLeft: '預防意外發生', zhRight: '阻止危險的事情發生' },
+                    { left: 'separate the rubbish', right: 'put paper and plastic in different bins', highlightLeft: 'separate', highlightRight: 'different', zhLeft: '將垃圾分類', zhRight: '把紙類與塑膠放進不同垃圾桶' }
+                ]
+            },
+            {
+                id: 'para_06',
+                stageId: 1,
+                type: 'paraphrase_match',
+                title: 'Round 6：生活與規則說明',
+                pairs: [
+                    { left: 'require a helmet', right: 'you must wear head protection', highlightLeft: 'require', highlightRight: 'must wear', zhLeft: '規定需要戴安全帽', zhRight: '必須配戴頭部護具' },
+                    { left: 'achieve your goal', right: 'succeed in doing what you planned', highlightLeft: 'achieve', highlightRight: 'succeed in', zhLeft: '達成目標', zhRight: '成功完成計畫的事' },
+                    { left: 'make a complaint', right: 'tell the manager you are unhappy', highlightLeft: 'complaint', highlightRight: 'unhappy', zhLeft: '提出客訴／抱怨', zhRight: '告訴經理你不滿意' },
+                    { left: 'return the book on time', right: 'give the book back before the due date', highlightLeft: 'return', highlightRight: 'give ... back', zhLeft: '準時歸還書本', zhRight: '在到期前把書還回去' }
+                ]
             }
         ],
 
-        // Stage 2: Reading Part 5 語境克漏字
+        // Stage 2: Reading Part 5 語境克漏字 (完整收錄 62 個 PET 新增動詞片語)
         2: [
-            {
-                id: 'p5_01',
-                stageId: 2,
-                type: 'mc_cloze',
-                sentence: 'We had to ____ the school picnic until next Friday because of the heavy rain.',
-                options: ['put off', 'put on', 'take off', 'give in'],
-                answer: 0,
-                focus: 'Phrasal Verb（動詞片語）',
-                explanation: 'put off 意思是「延期（postpone）」；put on 是穿上／上演；take off 是起飛／脫下。'
-            },
-            {
-                id: 'p5_02',
-                stageId: 2,
-                type: 'mc_cloze',
-                sentence: 'Tom is really looking forward ____ his grandparents in London next month.',
-                options: ['to visit', 'visiting', 'to visiting', 'visit'],
-                answer: 2,
-                focus: 'Phrasal Verb + V-ing',
-                explanation: 'look forward to 的 to 是介系詞，後面必須接名詞或動名詞（V-ing），因此選 to visiting。'
-            },
-            {
-                id: 'p5_03',
-                stageId: 2,
-                type: 'mc_cloze',
-                sentence: 'Could you please ____ an eye on my backpack while I buy a bottle of water?',
-                options: ['make', 'keep', 'take', 'do'],
-                answer: 1,
-                focus: 'Collocation（固定搭配）',
-                explanation: 'keep an eye on 是 B1 高頻固定搭配，表示「幫忙看管／留意」。'
-            },
-            {
-                id: 'p5_04',
-                stageId: 2,
-                type: 'mc_cloze',
-                sentence: 'Although the hike was tiring, everyone ____ part in the final mountain climb.',
-                options: ['made', 'gave', 'took', 'joined'],
-                answer: 2,
-                focus: 'Collocation（固定搭配）',
-                explanation: 'take part in = join（參加），因為後面已有 part in，動詞必須搭配 took。'
-            },
-            {
-                id: 'p5_05',
-                stageId: 2,
-                type: 'mc_cloze',
-                sentence: 'My sister decided to ____ up painting because she wanted a relaxing new hobby.',
-                options: ['take', 'turn', 'look', 'get'],
-                answer: 0,
-                focus: 'Phrasal Verb（動詞片語）',
-                explanation: 'take up + 嗜好/運動，表示「開始培養（某項新興趣）」。'
-            }
+            { id: 'pv_01', stageId: 2, type: 'mc_cloze', sentence: 'This exciting movie is ____ on a true story about a young explorer.', options: ['based', 'put', 'made', 'kept'], answer: 0, focus: 'Phrasal Verb: base on', explanation: 'be based on 意思是「以……為基礎／根據……改編」。' },
+            { id: 'pv_02', stageId: 2, type: 'mc_cloze', sentence: 'By the time we reached the stadium, the football match was already ____.', options: ['up', 'over', 'out', 'off'], answer: 1, focus: 'Phrasal Verb: be over', explanation: 'be over 表示「結束了」。' },
+            { id: 'pv_03', stageId: 2, type: 'mc_cloze', sentence: 'Last night, someone tried to ____ into the school office through a window.', options: ['break', 'turn', 'give', 'hand'], answer: 0, focus: 'Phrasal Verb: break in', explanation: 'break in / break into 意思是「強行闖入」。' },
+            { id: 'pv_04', stageId: 2, type: 'mc_cloze', sentence: 'School will ____ up for the summer holidays next Friday afternoon.', options: ['break', 'check', 'bring', 'split'], answer: 0, focus: 'Phrasal Verb: break up', explanation: 'break up（學校）放假／解散；也可用於團體或關係分開。' },
+            { id: 'pv_05', stageId: 2, type: 'mc_cloze', sentence: 'My grandparents helped to ____ me up when my parents worked abroad.', options: ['grow', 'bring', 'take', 'keep'], answer: 1, focus: 'Phrasal Verb: bring up', explanation: 'bring up 意思是「撫養長大；提出（話題）」。' },
+            { id: 'pv_06', stageId: 2, type: 'mc_cloze', sentence: 'Winning the science prize really ____ for a celebration with ice cream!', options: ['calls', 'looks', 'asks', 'waits'], answer: 0, focus: 'Phrasal Verb: call for', explanation: 'call for 意思是「需要；值得（慶祝等）」。' },
+            { id: 'pv_07', stageId: 2, type: 'mc_cloze', sentence: 'Could you ____ in at the library on your way home to return my book?', options: ['call', 'put', 'hand', 'ring'], answer: 0, focus: 'Phrasal Verb: call in', explanation: 'call in 表示「順道拜訪（某地或某人）」。' },
+            { id: 'pv_08', stageId: 2, type: 'mc_cloze', sentence: 'Please ____ on reading your book quietly until the bell rings.', options: ['carry', 'turn', 'give', 'set'], answer: 0, focus: 'Phrasal Verb: carry on', explanation: 'carry on (+ V-ing) 意思是「繼續做某事」。' },
+            { id: 'pv_09', stageId: 2, type: 'mc_cloze', sentence: 'The students will ____ out an interesting chemistry experiment in class.', options: ['carry', 'hang', 'show', 'wear'], answer: 0, focus: 'Phrasal Verb: carry out', explanation: 'carry out 意思是「執行、進行（實驗／計畫／調查）」。' },
+            { id: 'pv_10', stageId: 2, type: 'mc_cloze', sentence: 'Passengers must ____ in at the airport desk two hours before the flight.', options: ['check', 'get', 'ring', 'fill'], answer: 0, focus: 'Phrasal Verb: check in', explanation: 'check in 表示「辦理登機／入住手續」。' },
+            { id: 'pv_11', stageId: 2, type: 'mc_cloze', sentence: 'We have to ____ out of the hotel room before 11 a.m. tomorrow.', options: ['check', 'put', 'run', 'turn'], answer: 0, focus: 'Phrasal Verb: check out', explanation: 'check out 表示「辦理退房／結帳離開」。' },
+            { id: 'pv_12', stageId: 2, type: 'mc_cloze', sentence: 'After finishing all the exams, Leo just wants to ____ out and listen to music.', options: ['chill', 'cross', 'hold', 'cut'], answer: 0, focus: 'Phrasal Verb: chill out', explanation: 'chill out 是口語常見片語，意思是「徹底放鬆」。' },
+            { id: 'pv_13', stageId: 2, type: 'mc_cloze', sentence: '____ on, everyone! The bus is leaving in two minutes!', options: ['Come', 'Go', 'Keep', 'Turn'], answer: 0, focus: 'Phrasal Verb: come on', explanation: 'Come on! 用來催促他人「快點！」或「加油！」。' },
+            { id: 'pv_14', stageId: 2, type: 'mc_cloze', sentence: 'If you make a mistake in your notebook, just ____ it out neatly.', options: ['cross', 'throw', 'tidy', 'knock'], answer: 0, focus: 'Phrasal Verb: cross out', explanation: 'cross out 意思是「把錯字畫線刪掉」。' },
+            { id: 'pv_15', stageId: 2, type: 'mc_cloze', sentence: 'Could you help me ____ up the carrots into small pieces for the soup?', options: ['cut', 'fill', 'dial', 'set'], answer: 0, focus: 'Phrasal Verb: cut up', explanation: 'cut up 意思是「切碎、切成小塊」。' },
+            { id: 'pv_16', stageId: 2, type: 'mc_cloze', sentence: 'In the 1990s, people had to ____ up to connect to the internet by phone line.', options: ['dial', 'hang', 'ring', 'pass'], answer: 0, focus: 'Phrasal Verb: dial up', explanation: 'dial up 意思是「撥號連線／打電話接通」。' },
+            { id: 'pv_17', stageId: 2, type: 'mc_cloze', sentence: 'We missed the last train and ____ up walking three kilometres home.', options: ['ended', 'kept', 'stayed', 'wore'], answer: 0, focus: 'Phrasal Verb: end up', explanation: 'end up (+ V-ing) 表示「最後竟然／結果變成……」。' },
+            { id: 'pv_18', stageId: 2, type: 'mc_cloze', sentence: 'Please ____ up your water bottle before we start the mountain hike.', options: ['fill', 'give', 'take', 'put'], answer: 0, focus: 'Phrasal Verb: fill up', explanation: 'fill up 意思是「裝滿、加滿」。' },
+            { id: 'pv_19', stageId: 2, type: 'mc_cloze', sentence: 'Rainy weather always ____ me down, so I prefer sunny days.', options: ['gets', 'puts', 'holds', 'turns'], answer: 0, focus: 'Phrasal Verb: get down', explanation: 'get somebody down 意思是「使某人感到沮喪、心情低落」。' },
+            { id: 'pv_20', stageId: 2, type: 'mc_cloze', sentence: 'Quickly ____ in the car! It is starting to pour with rain.', options: ['get', 'go', 'come', 'step'], answer: 0, focus: 'Phrasal Verb: get in', explanation: 'get in（進入汽車／計程車等小空間）；公車火車則常用 get on。' },
+            { id: 'pv_21', stageId: 2, type: 'mc_cloze', sentence: 'It is time to ____ rid of these broken toys in the cupboard.', options: ['get', 'make', 'take', 'have'], answer: 0, focus: 'Phrasal Verb: get rid of', explanation: 'get rid of 意思是「丟掉、擺脫、去除」。' },
+            { id: 'pv_22', stageId: 2, type: 'mc_cloze', sentence: 'Remember to ____ back the library books before the end of this week.', options: ['give', 'carry', 'call', 'check'], answer: 0, focus: 'Phrasal Verb: give back', explanation: 'give back 意思是「歸還（借來的東西）」。' },
+            { id: 'pv_23', stageId: 2, type: 'mc_cloze', sentence: 'The puzzle was hard, but Mia refused to ____ in and kept trying.', options: ['give', 'hand', 'hang', 'show'], answer: 0, focus: 'Phrasal Verb: give in', explanation: 'give in 意思是「屈服、認輸、投降」。' },
+            { id: 'pv_24', stageId: 2, type: 'mc_cloze', sentence: 'The teacher asked Ben to ____ out the science worksheets to the class.', options: ['give', 'put', 'run', 'wear'], answer: 0, focus: 'Phrasal Verb: give out', explanation: 'give out 意思是「分發（考卷／傳單）；耗盡」。' },
+            { id: 'pv_25', stageId: 2, type: 'mc_cloze', sentence: 'Never ____ up on your dream of speaking English fluently!', options: ['give', 'set', 'turn', 'pass'], answer: 0, focus: 'Phrasal Verb: give up', explanation: 'give up 意思是「放棄」。' },
+            { id: 'pv_26', stageId: 2, type: 'mc_cloze', sentence: 'Which dessert would you like to ____ for—the chocolate cake or the fruit salad?', options: ['go', 'get', 'look', 'keep'], answer: 0, focus: 'Phrasal Verb: go for', explanation: 'go for 意思是「選擇；決定追求」。' },
+            { id: 'pv_27', stageId: 2, type: 'mc_cloze', sentence: 'My alarm clock did not ____ off this morning, so I woke up late.', options: ['go', 'take', 'turn', 'put'], answer: 0, focus: 'Phrasal Verb: go off', explanation: 'go off 可指「（鬧鐘／警報）響起」，也可指「（食物）壞掉」。' },
+            { id: 'pv_28', stageId: 2, type: 'mc_cloze', sentence: 'The concert will ____ on even if there is a light shower.', options: ['go', 'come', 'hang', 'split'], answer: 0, focus: 'Phrasal Verb: go on', explanation: 'go on 意思是「繼續進行；發生」。' },
+            { id: 'pv_29', stageId: 2, type: 'mc_cloze', sentence: 'All students must ____ in their homework before 9 a.m. on Monday.', options: ['hand', 'give', 'put', 'take'], answer: 0, focus: 'Phrasal Verb: hand in', explanation: 'hand in 意思是「繳交（作業／報告）」。' },
+            { id: 'pv_30', stageId: 2, type: 'mc_cloze', sentence: 'Volunteers stood at the gate to ____ out free maps of the zoo.', options: ['hand', 'cross', 'cut', 'knock'], answer: 0, focus: 'Phrasal Verb: hand out', explanation: 'hand out 意思是「發放、分送」。' },
+            { id: 'pv_31', stageId: 2, type: 'mc_cloze', sentence: 'On Saturdays, my friends and I like to ____ out at the shopping centre.', options: ['hang', 'hold', 'stay', 'ring'], answer: 0, focus: 'Phrasal Verb: hang out', explanation: 'hang out 意思是「（與朋友）閒晃、聚在一起消磨時間」。' },
+            { id: 'pv_32', stageId: 2, type: 'mc_cloze', sentence: 'Wait! Do not ____ up the phone yet—I have one more question!', options: ['hang', 'dial', 'put', 'give'], answer: 0, focus: 'Phrasal Verb: hang up', explanation: 'hang up 意思是「掛斷電話」。' },
+            { id: 'pv_33', stageId: 2, type: 'mc_cloze', sentence: 'Heavy traffic on the bridge ____ up our school bus for twenty minutes.', options: ['held', 'kept', 'set', 'turned'], answer: 0, focus: 'Phrasal Verb: hold up', explanation: 'hold up 意思是「耽擱、阻礙（交通或行程）」。' },
+            { id: 'pv_34', stageId: 2, type: 'mc_cloze', sentence: 'The teacher ____ the noisy boys in during break time to finish their work.', options: ['kept', 'held', 'brought', 'called'], answer: 0, focus: 'Phrasal Verb: keep in', explanation: 'keep somebody in 意思是「把學生留下來（不准下課）」。' },
+            { id: 'pv_35', stageId: 2, type: 'mc_cloze', sentence: 'If you ____ on practising the piano every day, you will soon improve.', options: ['keep', 'stay', 'take', 'base'], answer: 0, focus: 'Phrasal Verb: keep on', explanation: 'keep on + V-ing 意思是「持續不斷地做某事」。' },
+            { id: 'pv_36', stageId: 2, type: 'mc_cloze', sentence: 'Sam walked so fast that his little sister could hardly ____ up with him.', options: ['keep', 'catch', 'go', 'turn'], answer: 0, focus: 'Phrasal Verb: keep up', explanation: 'keep up (with) 意思是「跟上（進度／速度）」。' },
+            { id: 'pv_37', stageId: 2, type: 'mc_cloze', sentence: 'The city plans to ____ down the old factory and build a green park.', options: ['knock', 'break', 'cut', 'put'], answer: 0, focus: 'Phrasal Verb: knock down', explanation: 'knock down 意思是「拆除（建築物）；撞倒」。' },
+            { id: 'pv_38', stageId: 2, type: 'mc_cloze', sentence: 'Tom is really looking ____ to visiting his grandparents in London next month.', options: ['forward', 'up', 'out', 'after'], answer: 0, focus: 'Phrasal Verb: look forward to', explanation: 'look forward to + V-ing/名詞，意思是「非常期待……」。' },
+            { id: 'pv_39', stageId: 2, type: 'mc_cloze', sentence: 'When you do not know a new word, ____ it up in a dictionary.', options: ['look', 'find', 'check', 'read'], answer: 0, focus: 'Phrasal Verb: look up', explanation: 'look up 意思是「查閱（單字／資料）」。' },
+            { id: 'pv_40', stageId: 2, type: 'mc_cloze', sentence: 'Could you please ____ on this message to Mr. Brown when he returns?', options: ['pass', 'give', 'hand', 'put'], answer: 0, focus: 'Phrasal Verb: pass on', explanation: 'pass on 意思是「轉達（訊息）；傳遞」。' },
+            { id: 'pv_41', stageId: 2, type: 'mc_cloze', sentence: 'After dinner, please ____ away your toys before watching television.', options: ['put', 'take', 'throw', 'tidy'], answer: 0, focus: 'Phrasal Verb: put away', explanation: 'put away 意思是「把東西收好放回原位」。' },
+            { id: 'pv_42', stageId: 2, type: 'mc_cloze', sentence: 'Please ____ down your heavy bag on the bench and take a rest.', options: ['put', 'get', 'bring', 'turn'], answer: 0, focus: 'Phrasal Verb: put down', explanation: 'put down 意思是「放下；寫下」。' },
+            { id: 'pv_43', stageId: 2, type: 'mc_cloze', sentence: 'We had to ____ off the school picnic until next Friday because of the rain.', options: ['put', 'take', 'call', 'give'], answer: 0, focus: 'Phrasal Verb: put off', explanation: 'put off 意思是「延期（postpone）」。' },
+            { id: 'pv_44', stageId: 2, type: 'mc_cloze', sentence: 'Firefighters arrived quickly and ____ out the forest fire.', options: ['put', 'took', 'blew', 'turned'], answer: 0, focus: 'Phrasal Verb: put out', explanation: 'put out 意思是「撲滅（火／燈）」。' },
+            { id: 'pv_45', stageId: 2, type: 'mc_cloze', sentence: 'Hold the line, please. I will ____ you through to the school office.', options: ['put', 'pass', 'ring', 'dial'], answer: 0, focus: 'Phrasal Verb: put through', explanation: 'put somebody through 意思是「（電話）幫某人轉接」。' },
+            { id: 'pv_46', stageId: 2, type: 'mc_cloze', sentence: 'Can you help me ____ up this poster on the classroom wall?', options: ['put', 'hang', 'set', 'make'], answer: 0, focus: 'Phrasal Verb: put up', explanation: 'put up 意思是「張貼（海報）；搭建（帳篷）；舉起（手）」。' },
+            { id: 'pv_47', stageId: 2, type: 'mc_cloze', sentence: 'I am busy right now, so I will ____ you back in ten minutes.', options: ['ring', 'turn', 'give', 'talk'], answer: 0, focus: 'Phrasal Verb: ring back', explanation: 'ring back（英式常見）意思是「回電話」。' },
+            { id: 'pv_48', stageId: 2, type: 'mc_cloze', sentence: 'You should ____ up the museum first to check if it is open today.', options: ['ring', 'dial', 'hang', 'put'], answer: 0, focus: 'Phrasal Verb: ring up', explanation: 'ring up（英式常見）意思是「打電話給某人／某機構」。' },
+            { id: 'pv_49', stageId: 2, type: 'mc_cloze', sentence: 'Oh no! We have ____ out of milk, so we cannot make pancakes.', options: ['run', 'gone', 'used', 'left'], answer: 0, focus: 'Phrasal Verb: run out', explanation: 'run out (of) 意思是「用完、耗盡」。' },
+            { id: 'pv_50', stageId: 2, type: 'mc_cloze', sentence: 'We will ____ off early at 6 a.m. to avoid the weekend traffic.', options: ['set', 'put', 'turn', 'take'], answer: 0, focus: 'Phrasal Verb: set off', explanation: 'set off 意思是「出發、啟程」。' },
+            { id: 'pv_51', stageId: 2, type: 'mc_cloze', sentence: 'The explorers ____ out on a dangerous journey across the desert.', options: ['set', 'went', 'got', 'came'], answer: 0, focus: 'Phrasal Verb: set out', explanation: 'set out 意思是「動身踏上旅程；著手進行」。' },
+            { id: 'pv_52', stageId: 2, type: 'mc_cloze', sentence: 'Our school wants to ____ up a new robotics club for Grade 5 students.', options: ['set', 'build', 'make', 'open'], answer: 0, focus: 'Phrasal Verb: set up', explanation: 'set up 意思是「成立、建立、架設」。' },
+            { id: 'pv_53', stageId: 2, type: 'mc_cloze', sentence: 'We waited for twenty minutes, but Alex never ____ up at the café.', options: ['showed', 'came', 'got', 'went'], answer: 0, focus: 'Phrasal Verb: show up', explanation: 'show up 意思是「露面、出現」。' },
+            { id: 'pv_54', stageId: 2, type: 'mc_cloze', sentence: 'The class ____ up into four small teams to play the quiz game.', options: ['split', 'broke', 'cut', 'shared'], answer: 0, focus: 'Phrasal Verb: split up', explanation: 'split up 意思是「分組、分開」。' },
+            { id: 'pv_55', stageId: 2, type: 'mc_cloze', sentence: 'Three students volunteered to ____ behind after class to clean the board.', options: ['stay', 'keep', 'wait', 'stand'], answer: 0, focus: 'Phrasal Verb: stay behind', explanation: 'stay behind 意思是「留下來（等別人離開後仍留在原地）」。' },
+            { id: 'pv_56', stageId: 2, type: 'mc_cloze', sentence: 'My sister decided to ____ up painting because she wanted a relaxing hobby.', options: ['take', 'turn', 'look', 'get'], answer: 0, focus: 'Phrasal Verb: take up', explanation: 'take up + 嗜好/運動，表示「開始培養某項新興趣」。' },
+            { id: 'pv_57', stageId: 2, type: 'mc_cloze', sentence: 'Do not ____ away those glass bottles—we can recycle them!', options: ['throw', 'give', 'put', 'pass'], answer: 0, focus: 'Phrasal Verb: throw away', explanation: 'throw away 意思是「丟棄、扔掉」。' },
+            { id: 'pv_58', stageId: 2, type: 'mc_cloze', sentence: 'Your bedroom is messy. Please ____ it up before your cousins arrive.', options: ['tidy', 'put', 'make', 'clear'], answer: 0, focus: 'Phrasal Verb: tidy up', explanation: 'tidy up 意思是「整理、收拾整齊」。' },
+            { id: 'pv_59', stageId: 2, type: 'mc_cloze', sentence: 'Please ____ down the music a little bit; I am trying to study.', options: ['turn', 'put', 'cut', 'bring'], answer: 0, focus: 'Phrasal Verb: turn down', explanation: 'turn down 有兩個高頻意思：「調低（音量）」與「拒絕（邀請/提議）」。' },
+            { id: 'pv_60', stageId: 2, type: 'mc_cloze', sentence: 'In the story, the magic frog ____ into a friendly prince.', options: ['turned', 'changed', 'became', 'grew'], answer: 0, focus: 'Phrasal Verb: turn into', explanation: 'turn into 意思是「變成……」。' },
+            { id: 'pv_61', stageId: 2, type: 'mc_cloze', sentence: 'I lost my keys yesterday, but they finally ____ up under the sofa!', options: ['turned', 'found', 'showed', 'got'], answer: 0, focus: 'Phrasal Verb: turn up', explanation: 'turn up 意思是「意外出現、被找到；調高（音量）」。' },
+            { id: 'pv_62', stageId: 2, type: 'mc_cloze', sentence: 'Walking around the museum all day completely ____ us out!', options: ['wore', 'took', 'ran', 'put'], answer: 0, focus: 'Phrasal Verb: wear out', explanation: 'wear somebody out 意思是「使某人精疲力竭」；wear out 也可指「穿破、磨損」。' }
         ],
 
-        // Stage 3: Reading Part 6 開放式文法填空
+        // Stage 3: Reading Part 6 開放式文法填空 (B1 新增功能字與連接詞)
         3: [
-            {
-                id: 'p6_01',
-                stageId: 3,
-                type: 'open_cloze',
-                sentence: 'This is the science museum ____ our class visited last summer.',
-                answers: ['which', 'that'],
-                posHint: 'Relative Pronoun（關係代名詞）',
-                explanation: '先行詞是事物（the science museum），且在子句中當 visited 的受詞，可用 which 或 that。'
-            },
-            {
-                id: 'p6_02',
-                stageId: 3,
-                type: 'open_cloze',
-                sentence: 'Lucy has lived in Taipei ____ she was six years old.',
-                answers: ['since'],
-                posHint: 'Preposition / Conjunction（時間連接詞）',
-                explanation: '主要子句為現在完成式 has lived，後方接過去時間點（she was six），必須用 since（自從）。'
-            },
-            {
-                id: 'p6_03',
-                stageId: 3,
-                type: 'open_cloze',
-                sentence: 'You will miss the morning bus ____ you leave home right now.',
-                answers: ['unless'],
-                posHint: 'Conjunction（條件連接詞）',
-                explanation: 'unless = if ... not（除非），語意為「除非你現在出門，否則會錯過早班公車」。'
-            },
-            {
-                id: 'p6_04',
-                stageId: 3,
-                type: 'open_cloze',
-                sentence: 'There are not ____ chairs in the classroom, so we need to bring five more.',
-                answers: ['enough'],
-                posHint: 'Determiner（數量限定詞）',
-                explanation: 'not enough + 名詞（不夠多的……），符合後半句「需要再搬五張來」的語意。'
-            },
-            {
-                id: 'p6_05',
-                stageId: 3,
-                type: 'open_cloze',
-                sentence: 'Emma is much taller ____ her younger brother.',
-                answers: ['than'],
-                posHint: 'Preposition / Conjunction（比較級連接詞）',
-                explanation: '比較級 taller 後面固定接 than 來引出比較的對象。'
-            }
+            { id: 'p6_01', stageId: 3, type: 'open_cloze', sentence: 'This is the science museum ____ our class visited last summer.', answers: ['which', 'that'], posHint: 'Relative Pronoun（關係代名詞）', explanation: '先行詞是事物（the science museum），且在子句中當 visited 的受詞，可用 which 或 that。' },
+            { id: 'p6_02', stageId: 3, type: 'open_cloze', sentence: 'Lucy has lived in Taipei ____ she was six years old.', answers: ['since'], posHint: 'Conjunction（時間連接詞）', explanation: '主要子句為現在完成式 has lived，後方接過去時間點，必須用 since（自從）。' },
+            { id: 'p6_03', stageId: 3, type: 'open_cloze', sentence: 'You will miss the morning bus ____ you leave home right now.', answers: ['unless'], posHint: 'Conjunction（條件連接詞）', explanation: 'unless = if ... not（除非），語意為「除非你現在出門，否則會錯過早班公車」。' },
+            { id: 'p6_04', stageId: 3, type: 'open_cloze', sentence: 'There are not ____ chairs in the classroom, so we need to bring five more.', answers: ['enough'], posHint: 'Determiner（數量限定詞）', explanation: 'not enough + 名詞（不夠多的……），符合「需要再搬五張來」的語意。' },
+            { id: 'p6_05', stageId: 3, type: 'open_cloze', sentence: 'Emma is much taller ____ her younger brother.', answers: ['than'], posHint: 'Preposition / Conjunction（比較級連接詞）', explanation: '比較級 taller 後面固定接 than 來引出比較的對象。' },
+            { id: 'p6_06', stageId: 3, type: 'open_cloze', sentence: '____ it was raining heavily, the football players finished the match.', answers: ['although', 'though'], posHint: 'Conjunction（讓步連接詞）', explanation: '前後語意相反（下大雨 vs. 仍完成比賽），句首用 Although / Though（雖然）。' },
+            { id: 'p6_07', stageId: 3, type: 'open_cloze', sentence: '____ the cold weather, many people went swimming in the sea.', answers: ['despite'], posHint: 'Preposition（讓步介系詞）', explanation: 'despite（儘管）後面直接接名詞片語（the cold weather），不可接完整子句。' },
+            { id: 'p6_08', stageId: 3, type: 'open_cloze', sentence: 'The boy ____ bike was stolen yesterday is my classmate.', answers: ['whose'], posHint: 'Relative Pronoun（所有格關係代名詞）', explanation: 'whose + 名詞（誰的……）用來表示「那位腳踏車被偷的男孩」。' },
+            { id: 'p6_09', stageId: 3, type: 'open_cloze', sentence: 'I am not sure ____ the library is open on Sunday afternoons.', answers: ['whether', 'if'], posHint: 'Conjunction（名詞子句連接詞）', explanation: 'whether / if 表示「是否」，用於表達不確定的疑問。' },
+            { id: 'p6_10', stageId: 3, type: 'open_cloze', sentence: '____ Ben nor his sister likes eating spicy food.', answers: ['neither'], posHint: 'Determiner / Conjunction（否定對等連接詞）', explanation: 'neither ... nor ... 是固定搭配，意思是「既不……也不……」。' },
+            { id: 'p6_11', stageId: 3, type: 'open_cloze', sentence: 'Do not worry! We still have ____ of time before the train arrives.', answers: ['plenty'], posHint: 'Quantifier（數量詞片語）', explanation: 'plenty of + 不可數／複數名詞，表示「充足的、大量的」。' },
+            { id: 'p6_12', stageId: 3, type: 'open_cloze', sentence: 'Please wait here ____ the teacher comes back from the office.', answers: ['until', 'till'], posHint: 'Conjunction（時間連接詞）', explanation: 'until / till 表示「直到……為止」。' },
+            { id: 'p6_13', stageId: 3, type: 'open_cloze', sentence: 'Someone took a photo ____ the concert, even though cameras were not allowed.', answers: ['during'], posHint: 'Preposition（時間介系詞）', explanation: 'during + 名詞（在……期間），如 during the concert。' },
+            { id: 'p6_14', stageId: 3, type: 'open_cloze', sentence: 'Leo left the house ____ saying goodbye because he was in a hurry.', answers: ['without'], posHint: 'Preposition（介系詞）', explanation: 'without + V-ing 表示「沒有做某事就……」。' }
         ],
 
         // Stage 4: Reading Part 4 段落邏輯句子還原
@@ -701,6 +730,60 @@
                 ],
                 answer: 'C',
                 explanation: '選項 C 的複數代名詞 They 呼應前句的 twelve students，且內容與腳踏車社團騎車一致。'
+            },
+            {
+                id: 'p4_04',
+                stageId: 4,
+                type: 'gapped_text',
+                topic: 'Saving Plastic Bottles',
+                segments: [
+                    'Our school has placed blue recycling bins in every corridor this term. ',
+                    { gapId: 1, clueText: 'blue recycling bins' },
+                    ' As a result, the playground looks much cleaner than before.'
+                ],
+                options: [
+                    { key: 'A', text: 'These containers make it easy for students to separate plastic and paper.', clueText: 'These containers' },
+                    { key: 'B', text: 'He decided to take the train to Edinburgh.', clueText: '' },
+                    { key: 'C', text: 'The maths test was postponed until Tuesday.', clueText: '' }
+                ],
+                answer: 'A',
+                explanation: 'These containers（這些容器）同義指代前句的 blue recycling bins，並自然導出後句 As a result 的結果。'
+            },
+            {
+                id: 'p4_05',
+                stageId: 4,
+                type: 'gapped_text',
+                topic: 'A Famous Young Violinist',
+                segments: [
+                    'David started playing the violin when he was only four years old. ',
+                    { gapId: 1, clueText: 'when he was only four years old' },
+                    ' Today, he performs with youth orchestras around Europe.'
+                ],
+                options: [
+                    { key: 'A', text: 'The restaurant serves delicious pasta at lunchtime.', clueText: '' },
+                    { key: 'B', text: 'At that age, his fingers were barely long enough to hold the bow.', clueText: 'At that age' },
+                    { key: 'C', text: 'Instead, they chose to stay at home and play chess.', clueText: '' }
+                ],
+                answer: 'B',
+                explanation: 'At that age（在那個年紀）緊扣前一句提到的 four years old，時間線索非常明確。'
+            },
+            {
+                id: 'p4_06',
+                stageId: 4,
+                type: 'gapped_text',
+                topic: 'Rainy Day Plans',
+                segments: [
+                    'We originally planned to have a barbecue in the garden on Sunday. ',
+                    { gapId: 1, clueText: 'barbecue in the garden' },
+                    ' Everyone still had a wonderful time playing board games indoors.'
+                ],
+                options: [
+                    { key: 'A', text: 'Therefore, we cancelled the outdoor party and cooked soup inside.', clueText: 'Therefore' },
+                    { key: 'B', text: 'She loves collecting colourful stamps from Japan.', clueText: '' },
+                    { key: 'C', text: 'The mountain peak was covered in thick snow.', clueText: '' }
+                ],
+                answer: 'A',
+                explanation: '選項 A 說明取消戶外烤肉改在室內煮湯，才能接續後句「大家在室內玩桌遊依然很開心」。'
             }
         ],
 
@@ -749,7 +832,13 @@
                 answers: ['parker'],
                 placeholder: '請拼出姓氏',
                 explanation: 'PET Listening Part 3 遇到專有名詞通常會逐字拼讀（P-A-R-K-E-R），必須完全拼對才能拿分。'
-            }
+            },
+            { id: 'lis_05', stageId: 5, type: 'listening_dictation', script: 'To reach the science museum, take bus number forty. Do not get on bus number fourteen by mistake!', audioUrl: '', prompt: 'Bus number to museum: ____', answers: ['40'], placeholder: '請輸入公車號碼', explanation: '重點分辨 forty (40) 與 fourteen (14)，且錄音明確提醒「不要搭錯 14 號」。' },
+            { id: 'lis_06', stageId: 5, type: 'listening_dictation', script: 'The new swimming pool is on Green Street. Wait, actually, the entrance is on Bridge Street around the corner.', audioUrl: '', prompt: 'Pool entrance is on ____ Street', answers: ['bridge'], placeholder: '請輸入街名（1 個字）', explanation: '聽到 Wait, actually 後方才是正確的入口街名 Bridge Street。' },
+            { id: 'lis_07', stageId: 5, type: 'listening_dictation', script: 'Please bring a warm jacket for the boat trip, and do not forget to pack a towel. Cameras are optional.', audioUrl: '', prompt: 'Remember to pack a warm jacket and a ____', answers: ['towel'], placeholder: '請輸入物品英文', explanation: '題目提示了 jacket，空格需填入另一個必帶物品 towel（毛巾）。' },
+            { id: 'lis_08', stageId: 5, type: 'listening_dictation', script: 'The school photography competition closes on August thirtieth. Winners will be announced in September.', audioUrl: '', prompt: 'Competition closes on August ____ (如 5th)', answers: ['30th', '30'], placeholder: '例如 20th', explanation: 'thirtieth 對應 30th，注意字尾發音與 13th (thirteenth) 區別。' },
+            { id: 'lis_09', stageId: 5, type: 'listening_dictation', script: 'For more information, email our club leader Miss Dawson. That is D-A-W-S-O-N.', audioUrl: '', prompt: 'Club leader: Miss ____', answers: ['dawson'], placeholder: '請拼出姓氏', explanation: '聽到逐字拼讀 D-A-W-S-O-N，注意不要漏掉或拼反字母。' },
+            { id: 'lis_10', stageId: 5, type: 'listening_dictation', script: 'The train from Oxford arrives at Platform seven, oh, listen to the announcement—it has changed to Platform nine.', audioUrl: '', prompt: 'Train arrives at Platform ____', answers: ['9', 'nine'], placeholder: '請輸入月台號碼', explanation: '月台從 7 號臨時改為 9 號（changed to Platform nine）。' }
         ]
     };
 
@@ -787,7 +876,7 @@
     }
 
     function resetProgress() {
-        if (!confirm('確定要清除本機測試的星星、積分與錯題紀錄嗎？')) return;
+        if (!confirm('確定要清除目前的星星、積分與錯題紀錄嗎？')) return;
         localStorage.removeItem(STORAGE_KEY);
         loadStore();
         renderLobby();
@@ -962,12 +1051,13 @@
                 ...QUESTION_BANK[4],
                 ...QUESTION_BANK[5]
             ];
-            questions = shuffle(pool).slice(0, 6);
+            questions = shuffle(pool).slice(0, 8);
             badge = 'CHALLENGE · SPRINT';
             title = '全真節奏衝刺賽';
         } else {
             const meta = STAGES_META.find(s => s.id === stageId);
-            questions = shuffle(QUESTION_BANK[stageId]);
+            const roundSize = { 1: 3, 2: 8, 3: 6, 4: 4, 5: 6 }[stageId] || QUESTION_BANK[stageId].length;
+            questions = shuffle(QUESTION_BANK[stageId]).slice(0, roundSize);
             badge = meta.code;
             title = meta.title;
         }
@@ -1202,6 +1292,8 @@
 
     // --- 7.2 Stage 2: Reading Part 5 語境克漏字 ---
     function renderMcCloze(q, container) {
+        const indexed = q.options.map((text, origIdx) => ({ text, isCorrect: origIdx === q.answer }));
+        game.mcShuffled = shuffle(indexed);
         const sentenceHtml = q.sentence.replace('____', '<span id="cloze-blank" class="inline-block min-w-[90px] border-b-4 border-teal-500 text-teal-700 font-extrabold text-center px-2 mx-1">____</span>');
         container.innerHTML = `
             <div>
@@ -1214,13 +1306,13 @@
                     ${sentenceHtml}
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    ${q.options.map((opt, idx) => `
+                    ${game.mcShuffled.map((opt, idx) => `
                         <button onclick="checkMcCloze(${idx}, event)" id="mc-opt-${idx}"
                                 class="btn-express bg-white hover:bg-teal-50 border-2 border-slate-200 hover:border-teal-400 text-slate-800 font-extrabold text-base sm:text-lg p-4 rounded-2xl text-left flex items-center gap-3">
                             <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-black">
                                 ${String.fromCharCode(65 + idx)}
                             </span>
-                            <span>${opt}</span>
+                            <span>${opt.text}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -1232,20 +1324,22 @@
     function checkMcCloze(idx, ev) {
         if (game.answered) return;
         const q = game.questions[game.index];
+        const opts = game.mcShuffled || q.options.map((text, i) => ({ text, isCorrect: i === q.answer }));
+        const correctIdx = opts.findIndex(o => o.isCorrect);
         game.answered = true;
         stopTimer();
 
-        q.options.forEach((_, i) => {
+        opts.forEach((_, i) => {
             const btn = document.getElementById(`mc-opt-${i}`);
             if (btn) btn.disabled = true;
         });
 
         const chosenBtn = document.getElementById(`mc-opt-${idx}`);
-        const correctBtn = document.getElementById(`mc-opt-${q.answer}`);
+        const correctBtn = document.getElementById(`mc-opt-${correctIdx}`);
         const blank = document.getElementById('cloze-blank');
-        if (blank) blank.textContent = q.options[q.answer];
+        if (blank) blank.textContent = opts[correctIdx].text;
 
-        if (idx === q.answer) {
+        if (idx === correctIdx) {
             chosenBtn.className = 'bg-emerald-50 border-2 border-emerald-500 text-emerald-900 font-extrabold text-base sm:text-lg p-4 rounded-2xl text-left flex items-center gap-3';
             handleCorrect(q, ev.currentTarget, 100);
         } else {
