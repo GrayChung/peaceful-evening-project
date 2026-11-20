@@ -334,6 +334,29 @@
                     <circle cx="106" cy="48" r="3" fill="#fde047"/>
                     <circle cx="106" cy="72" r="3" fill="#fde047"/>
                     <text x="160" y="108" text-anchor="middle" font-size="11" font-weight="800" fill="#0369a1">Tiny Pill-Sized Camera with Lights (p.116)</text>
+                </svg>`,
+            threeCards: () => `
+                <svg viewBox="0 0 380 155" class="w-full max-w-md h-auto">
+                    <rect x="0" y="0" width="380" height="155" rx="14" fill="#f8fafc"/>
+                    <text x="190" y="20" text-anchor="middle" font-size="11" font-weight="800" fill="#0369a1">Activity 7A: Three Cardboard Cards (Middle Card Shifted)</text>
+                    <!-- Torch -->
+                    <rect x="20" y="68" width="38" height="20" rx="4" fill="#dc2626"/>
+                    <polygon points="58,72 78,66 78,90 58,84" fill="#fde047" opacity="0.85"/>
+                    <!-- Card 1 (aligned hole) -->
+                    <rect x="95" y="42" width="10" height="68" rx="2" fill="#d97706"/>
+                    <circle cx="100" cy="78" r="4" fill="#fff"/>
+                    <!-- Card 2 (shifted up/left -> blocks light!) -->
+                    <rect x="165" y="28" width="10" height="68" rx="2" fill="#b45309"/>
+                    <circle cx="170" cy="56" r="4" fill="#fff"/>
+                    <!-- Card 3 (aligned hole) -->
+                    <rect x="235" y="42" width="10" height="68" rx="2" fill="#d97706"/>
+                    <circle cx="240" cy="78" r="4" fill="#fff"/>
+                    <!-- Black paper -->
+                    <rect x="310" y="38" width="16" height="78" rx="3" fill="#0f172a"/>
+                    <text x="318" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">Black paper</text>
+                    <!-- Light ray blocked at Card 2 -->
+                    <line x1="78" y1="78" x2="165" y2="78" stroke="#facc15" stroke-width="3.5" class="ray-flow"/>
+                    <text x="170" y="126" text-anchor="middle" font-size="10" font-weight="800" fill="#be123c">Blocked!</text>
                 </svg>`
         };
 
@@ -416,6 +439,55 @@
                     answerText: 'direction',
                     explanation: 'Correct spelling: d-i-r-e-c-t-i-o-n (direction). Arrows on a ray diagram show the direction of light.',
                     zhExp: '正確拼字為 direction（方向）。'
+                },
+                {
+                    id: '71-7',
+                    type: 'mcq',
+                    badge: 'Activity 7A (p.63)',
+                    prompt: 'In Activity 7A (Three Cardboard Cards), why do you insert a stick through all the holes before shining the torch?',
+                    zhHint: '在習作 7A 三張打洞厚紙板實驗中，為什麼要用竹籤穿過三個洞？',
+                    options: [
+                        'To make sure the holes are in a straight line.',
+                        'To make the holes bigger for the light.',
+                        'To stick the black paper onto the torch.',
+                        'To bend the light around the cards.'
+                    ],
+                    answer: 0,
+                    explanation: 'Inserting the stick through all three holes adjusts the cards so that all the holes are in a straight line.',
+                    zhExp: '用竹籤穿過三個洞，是為了調整紙板位置，確保三個洞口排成一直線（in a straight line）。'
+                },
+                {
+                    id: '71-8',
+                    type: 'mcq',
+                    badge: 'Activity 7A (p.64)',
+                    visual: 'threeCards',
+                    prompt: 'In Activity 7A, you move the middle card slightly so the holes are not aligned. Why is there NO light on the black paper?',
+                    zhHint: '把中間的厚紙板稍微移開後，為什麼後面的黑紙上就看不到光點了？',
+                    options: [
+                        'The middle card blocks the light because light cannot bend around the card.',
+                        'The black paper absorbs all the light before it reaches the first card.',
+                        'The torch battery runs out as soon as the card moves.',
+                        'Light travels faster than the eye can see.'
+                    ],
+                    answer: 0,
+                    explanation: 'The middle card blocks the light. Light travels in straight lines and cannot bend around the card.',
+                    zhExp: '中間的紙板擋住了光線（blocks the light），因為光沿直線前進，無法繞過紙板轉彎。'
+                },
+                {
+                    id: '71-9',
+                    type: 'mcq',
+                    badge: 'Activity 7A (p.65)',
+                    prompt: 'How can you improve the three-cardboard-cards investigation to make the results clearer and more reliable?',
+                    zhHint: '習作第 65 頁：我們可以怎麼改進這個實驗，讓觀察更清楚、結果更可靠？',
+                    options: [
+                        'Repeat the investigation more times in a dark room.',
+                        'Use a bent rubber tube instead of a torch.',
+                        'Do the investigation only once in bright sunlight.',
+                        'Remove the holes from all three cardboard cards.'
+                    ],
+                    answer: 0,
+                    explanation: 'You can improve the investigation by repeating it more times (for reliable results) in a dark room (so the light spot is easier to see).',
+                    zhExp: '標準改進方法：在暗室中（in a dark room）多重複幾次實驗（repeat more times），讓結果更明顯且更可靠。'
                 }
             ],
             72: [
@@ -778,7 +850,7 @@
                 const isMistakeStage = st.id === 99;
                 const extraText = isMistakeStage
                     ? `<span class="text-xs font-black ${state.mistakes.length ? 'text-rose-600' : 'text-emerald-600'}">${state.mistakes.length} questions waiting</span>`
-                    : `<span class="text-xs font-black text-slate-400">6 Questions</span>`;
+                    : `<span class="text-xs font-black text-slate-400">${(QUESTION_BANK[st.id] || []).length} Questions</span>`;
 
                 return `
                     <button onclick="startStage(${st.id})" class="btn-3d text-left bg-white rounded-3xl p-5 border-4 ${st.color} hover:-translate-y-1 flex flex-col justify-between gap-4">
