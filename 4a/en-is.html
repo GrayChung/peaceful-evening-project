@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grade 4 IS Lab｜Integrated Science 雙語互動實驗室</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans + Fredoka + Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../Styles/common.css">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 48%, #fefce8 100%);
+        }
+
+        @keyframes rayDash {
+            from { stroke-dashoffset: 28; }
+            to { stroke-dashoffset: 0; }
+        }
+        .ray-flow {
+            stroke-dasharray: 8, 6;
+            animation: rayDash 0.8s linear infinite;
+        }
+        .word-chip {
+            transition: transform 0.12s ease, background-color 0.12s ease;
+        }
+        .word-chip:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
+
+    <!-- 全螢幕過關彩帶畫布 -->
+    <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
+
+    <!-- 頂部狀態列 -->
+    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-cyan-300 px-4 py-3 sm:px-6 sm:py-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 font-black px-3 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                <span>⬅</span>
+                <span class="hidden sm:inline">回大廳</span>
+            </a>
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-sm border-2 border-white">
+                🔦
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-base sm:text-xl font-black text-slate-800">Grade 4 IS Science Lab</h1>
+                    <span class="hidden md:inline-block text-[11px] font-black bg-cyan-100 text-cyan-800 px-2.5 py-0.5 rounded-full">Ch.7 Properties of Light</span>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-500 font-bold">雙語自然科學實驗室・全英文出題／可切換中文提示與朗讀</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- 中文提示全局開關 -->
+            <button id="zh-toggle" onclick="toggleZhHint()" class="btn-3d bg-slate-100 hover:bg-amber-50 text-slate-700 border border-slate-200 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
+                <span>🌐</span>
+                <span id="zh-toggle-label">中文提示: OFF</span>
+            </button>
+
+            <!-- 音效開關 -->
+            <button id="sound-toggle" onclick="toggleSound()" data-active-bg="bg-emerald-500" class="btn-3d bg-emerald-500 text-white font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                <span id="sound-icon">🔊</span>
+            </button>
+
+            <!-- 分數與連勝 -->
+            <div class="bg-amber-100 border-2 border-amber-300 text-amber-800 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                <span>🏆</span>
+                <span id="total-score">0</span>
+            </div>
+            <div class="bg-rose-100 border-2 border-rose-300 text-rose-700 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                <span>🔥</span>
+                <span id="streak-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="w-full max-w-5xl flex-1 my-5">
+
+        <!-- ==================== 關卡選擇大廳 ==================== -->
+        <section id="lobby-view" class="space-y-5 animate-pop">
+            <!-- 章節切換預留列 -->
+            <div class="bg-white/90 rounded-2xl border-2 border-cyan-200 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-black text-slate-500 px-2">SELECT CHAPTER:</span>
+                    <button class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-cyan-600 text-white shadow">
+                        Ch.7 Properties of Light
+                    </button>
+                    <button onclick="alert('Ch.8 Electric Circuits 等後續章節將於課堂進度推進後開放！')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 hover:bg-slate-200 transition">
+                        Ch.8 (Coming Soon)
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-black">
+                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-full">
+                        ⭐ <span id="lobby-stars">0</span> / 18
+                    </span>
+                    <span id="lobby-mistakes-badge" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">
+                        ✨ 0 Mistakes
+                    </span>
+                </div>
+            </div>
+
+            <!-- 關卡卡片網格 -->
+            <div id="stages-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- ==================== 測驗進行畫面 ==================== -->
+        <section id="quiz-view" class="hidden space-y-4">
+            <!-- 進度條與返回 -->
+            <div class="bg-white/95 rounded-2xl border-2 border-cyan-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <button onclick="returnToLobby()" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm">
+                        ⬅ Stages
+                    </button>
+                    <div>
+                        <div id="quiz-stage-title" class="text-sm sm:text-base font-black text-slate-800">Stage Title</div>
+                        <div id="quiz-progress-text" class="text-xs font-bold text-slate-500">Question 1 / 6</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="openSketchpad()" class="btn-3d bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                        <span>✏️</span>
+                        <span>Ray Sketchpad</span>
+                    </button>
+                    <button onclick="speakCurrentQuestion()" class="btn-3d bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                        <span>🔊</span>
+                        <span>Read Aloud</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 進度條 -->
+            <div class="w-full bg-slate-200/80 h-3 rounded-full overflow-hidden border border-white shadow-inner">
+                <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- 題目卡片 -->
+            <div id="question-card" class="bg-white rounded-3xl border-4 border-cyan-200 p-5 sm:p-7 shadow-xl space-y-5">
+                <!-- 題型標籤 + 單題中文提示鈕 -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span id="q-type-badge" class="text-xs font-black bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full">Multiple Choice</span>
+                    <button id="single-zh-btn" onclick="toggleSingleZh()" class="text-xs font-black bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1 rounded-full transition">
+                        💡 顯示中文提示
+                    </button>
+                </div>
+
+                <!-- 閱讀短文區（若有） -->
+                <div id="q-passage-box" class="hidden bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-black text-sky-800 uppercase tracking-wider">📖 Science Reading</span>
+                        <button onclick="speakPassage()" class="text-xs font-black bg-white text-sky-700 border border-sky-200 px-2.5 py-1 rounded-lg hover:bg-sky-100">🔊 Listen</button>
+                    </div>
+                    <h3 id="q-passage-title" class="text-base sm:text-lg font-black text-slate-800"></h3>
+                    <p id="q-passage-text" class="text-sm sm:text-base text-slate-700 leading-relaxed font-medium"></p>
+                </div>
+
+                <!-- 題幹 -->
+                <div class="space-y-2">
+                    <h2 id="q-prompt" class="text-lg sm:text-2xl font-black text-slate-800 leading-snug"></h2>
+                    <p id="q-zh-hint" class="hidden text-sm font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2"></p>
+                </div>
+
+                <!-- SVG 圖解區（若有） -->
+                <div id="q-visual-box" class="hidden bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 sm:p-4 flex flex-col items-center justify-center"></div>
+
+                <!-- 互動答題區（依題型動態渲染） -->
+                <div id="q-interaction-area" class="space-y-3"></div>
+
+                <!-- 回饋與解析區 -->
+                <div id="q-feedback-box" class="hidden rounded-2xl p-4 border-2 space-y-2 animate-pop">
+                    <div id="q-feedback-title" class="text-base sm:text-lg font-black"></div>
+                    <p id="q-feedback-exp" class="text-sm font-medium leading-relaxed"></p>
+                    <p id="q-feedback-zh" class="text-xs sm:text-sm font-bold opacity-90"></p>
+                    <div class="pt-2 flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-6 py-2.5 rounded-xl text-sm sm:text-base">
+                            Next Question ➔
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 過關結算畫面 ==================== -->
+        <section id="result-view" class="hidden bg-white rounded-3xl border-4 border-amber-300 p-6 sm:p-8 text-center shadow-2xl space-y-5 animate-pop max-w-2xl mx-auto">
+            <div id="result-emoji" class="text-6xl sm:text-7xl animate-float">🏆</div>
+            <h2 id="result-title" class="text-2xl sm:text-3xl font-black text-slate-800">Stage Complete!</h2>
+            <div id="result-stars" class="text-4xl sm:text-5xl tracking-widest">⭐⭐⭐</div>
+            <p id="result-summary" class="text-sm sm:text-base font-bold text-slate-600"></p>
+            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button onclick="returnToLobby()" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 font-black px-5 py-2.5 rounded-xl text-sm sm:text-base">
+                    ⬅ Back to Stages
+                </button>
+                <button onclick="retryCurrentStage()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-5 py-2.5 rounded-xl text-sm sm:text-base">
+                    🔄 Play Again
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- iPad 光線草稿畫板 Modal -->
+    <div id="sketchpad-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-white rounded-3xl w-full max-w-2xl p-4 sm:p-6 shadow-2xl border-4 border-indigo-300 space-y-3 animate-pop">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-black text-slate-800">✏️ Ray Diagram Sketchpad</h3>
+                    <p class="text-xs font-bold text-slate-500">練習畫出直線與箭頭方向（Light Source ➔ Object ➔ Eyes）</p>
+                </div>
+                <button onclick="closeSketchpad()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-black px-3 py-1.5 rounded-xl text-sm">✕ Close</button>
+            </div>
+            <div class="relative bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden touch-none">
+                <canvas id="sketch-canvas" class="w-full h-64 sm:h-80 cursor-crosshair block"></canvas>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <button onclick="setSketchColor('#0284c7')" class="w-7 h-7 rounded-full bg-sky-600 border-2 border-white shadow"></button>
+                    <button onclick="setSketchColor('#e11d48')" class="w-7 h-7 rounded-full bg-rose-600 border-2 border-white shadow"></button>
+                    <button onclick="setSketchColor('#f59e0b')" class="w-7 h-7 rounded-full bg-amber-500 border-2 border-white shadow"></button>
+                    <button onclick="setSketchColor('#1e293b')" class="w-7 h-7 rounded-full bg-slate-800 border-2 border-white shadow"></button>
+                </div>
+                <button onclick="clearSketchpad()" class="btn-3d bg-rose-50 hover:bg-rose-100 text-rose-700 font-black px-4 py-1.5 rounded-xl text-xs sm:text-sm">
+                    🗑️ Clear Canvas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-5xl text-center text-xs text-slate-400 font-bold py-2">
+        Grade 4 Bilingual Integrated Science Lab｜Aligned with Ch.7 Properties of Light
+    </footer>
+
+    <script src="../Scripts/sound-engine.js"></script>
+    <script src="../Scripts/game-effects.js"></script>
+    <script>
+        const STORAGE_KEY = 'bilingual_is_4a_v1';
+
+        const state = {
+            stars: {},
+            totalScore: 0,
+            mistakes: [],
+            streak: 0,
+            zhHintEnabled: false,
+            singleZhOverride: false,
+            currentStageId: null,
+            questions: [],
+            qIndex: 0,
+            correctCount: 0,
+            answered: false,
+            sentenceTokens: [],
+            selectedRayIds: []
+        };
+
+        // ==================== SVG 圖解工廠 ====================
+        const SVGs = {
+            rubberTube: () => `
+                <svg viewBox="0 0 380 150" class="w-full max-w-md h-auto">
+                    <rect x="0" y="0" width="380" height="150" rx="14" fill="#f8fafc"/>
+                    <!-- Straight tube -->
+                    <text x="95" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#0f766e">Test A: Straight Tube</text>
+                    <rect x="20" y="45" width="36" height="18" rx="4" fill="#dc2626"/>
+                    <polygon points="56,48 76,42 76,66 56,60" fill="#fde047" opacity="0.8"/>
+                    <rect x="78" y="46" width="74" height="16" rx="4" fill="#334155"/>
+                    <line x1="78" y1="54" x2="152" y2="54" stroke="#facc15" stroke-width="3" class="ray-flow"/>
+                    <circle cx="168" cy="54" r="10" fill="#fef3c7" stroke="#475569" stroke-width="2"/>
+                    <circle cx="168" cy="54" r="4" fill="#0f172a"/>
+                    <!-- Bent tube -->
+                    <text x="285" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#be123c">Test B: Bent Tube</text>
+                    <rect x="205" y="45" width="36" height="18" rx="4" fill="#dc2626"/>
+                    <polygon points="241,48 261,42 261,66 241,60" fill="#fde047" opacity="0.8"/>
+                    <path d="M262 54 Q282 28 302 54 T342 54" fill="none" stroke="#334155" stroke-width="16" stroke-linecap="round"/>
+                    <circle cx="358" cy="54" r="10" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+                    <circle cx="358" cy="54" r="4" fill="#0f172a"/>
+                    <text x="190" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Torch + Rubber Tube Experiment (p.109)</text>
+                </svg>`,
+            bulbArrows: () => `
+                <svg viewBox="0 0 360 170" class="w-full max-w-md h-auto">
+                    <rect x="0" y="0" width="360" height="170" rx="14" fill="#fffbeb"/>
+                    <!-- Center Bulb -->
+                    <circle cx="180" cy="85" r="24" fill="#fde047" stroke="#ca8a04" stroke-width="3"/>
+                    <rect x="171" y="108" width="18" height="12" rx="3" fill="#94a3b8"/>
+                    <!-- A: Straight arrow -->
+                    <text x="275" y="34" font-size="13" font-weight="900" fill="#0284c7">A</text>
+                    <line x1="212" y1="68" x2="262" y2="38" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+                    <polygon points="266,35 254,36 260,46" fill="#0284c7"/>
+                    <!-- B: Wavy arrow -->
+                    <text x="65" y="34" font-size="13" font-weight="900" fill="#7c3aed">B</text>
+                    <path d="M148 68 Q125 45 108 65 T76 46" fill="none" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+                    <polygon points="72,44 82,42 78,52" fill="#7c3aed"/>
+                    <!-- C: Curved arrow -->
+                    <text x="65" y="142" font-size="13" font-weight="900" fill="#db2777">C</text>
+                    <path d="M148 100 Q95 95 95 138" fill="none" stroke="#db2777" stroke-width="3.5" stroke-linecap="round"/>
+                    <polygon points="95,144 89,134 101,134" fill="#db2777"/>
+                    <!-- D: Right-angle bent arrow -->
+                    <text x="295" y="142" font-size="13" font-weight="900" fill="#ea580c">D</text>
+                    <polyline points="212,92 260,92 260,136 288,136" fill="none" stroke="#ea580c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polygon points="294,136 284,130 284,142" fill="#ea580c"/>
+                </svg>`,
+            reflectionSurfaces: () => `
+                <svg viewBox="0 0 380 140" class="w-full max-w-md h-auto">
+                    <rect x="0" y="0" width="380" height="140" rx="14" fill="#f8fafc"/>
+                    <!-- Smooth Surface -->
+                    <text x="95" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#0284c7">Smooth &amp; Shiny Surface</text>
+                    <line x1="25" y1="110" x2="165" y2="110" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+                    <line x1="40" y1="40" x2="80" y2="108" stroke="#f59e0b" stroke-width="2.5"/>
+                    <line x1="65" y1="40" x2="105" y2="108" stroke="#f59e0b" stroke-width="2.5"/>
+                    <line x1="80" y1="108" x2="120" y2="40" stroke="#10b981" stroke-width="2.5"/>
+                    <line x1="105" y1="108" x2="145" y2="40" stroke="#10b981" stroke-width="2.5"/>
+                    <text x="95" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#0369a1">Reflected rays: same direction</text>
+                    <!-- Rough Surface -->
+                    <text x="285" y="22" text-anchor="middle" font-size="12" font-weight="800" fill="#b45309">Rough / Dull Surface</text>
+                    <polyline points="215,110 227,104 239,112 251,103 263,111 275,104 287,112 299,104 311,111 323,103 335,110 355,108" fill="none" stroke="#92400e" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="245" y1="40" x2="275" y2="104" stroke="#f59e0b" stroke-width="2.5"/>
+                    <line x1="275" y1="104" x2="225" y2="55" stroke="#ef4444" stroke-width="2.5"/>
+                    <line x1="275" y1="104" x2="290" y2="42" stroke="#ef4444" stroke-width="2.5"/>
+                    <line x1="275" y1="104" x2="340" y2="62" stroke="#ef4444" stroke-width="2.5"/>
+                    <text x="285" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">Reflected rays: all directions</text>
+                </svg>`,
+            capsuleCam: () => `
+                <svg viewBox="0 0 320 120" class="w-full max-w-sm h-auto">
+                    <rect x="0" y="0" width="320" height="120" rx="14" fill="#f0f9ff"/>
+                    <rect x="95" y="34" width="130" height="52" rx="26" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+                    <path d="M160 34 H199 A26 26 0 0 1 199 86 H160 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+                    <circle cx="122" cy="60" r="14" fill="#0f172a"/>
+                    <circle cx="122" cy="60" r="6" fill="#38bdf8"/>
+                    <circle cx="106" cy="48" r="3" fill="#fde047"/>
+                    <circle cx="106" cy="72" r="3" fill="#fde047"/>
+                    <text x="160" y="108" text-anchor="middle" font-size="11" font-weight="800" fill="#0369a1">Tiny Pill-Sized Camera with Lights (p.116)</text>
+                </svg>`
+        };
+
+        // ==================== 關卡定義 ====================
+        const STAGES = [
+            { id: 71, title: 'Stage 1: Light Travels', subtitle: 'Straight lines, torch & tube test, reliable results', icon: '🔦', color: 'border-cyan-300', badgeBg: 'bg-cyan-100 text-cyan-800' },
+            { id: 72, title: 'Stage 2: Ray Diagrams', subtitle: 'Arrows, direction & interactive ray building', icon: '📐', color: 'border-sky-300', badgeBg: 'bg-sky-100 text-sky-800' },
+            { id: 73, title: 'Stage 3: Reflection & Surfaces', subtitle: 'Smooth vs. rough surfaces & Science spelling', icon: '🪞', color: 'border-teal-300', badgeBg: 'bg-teal-100 text-teal-800' },
+            { id: 74, title: 'Stage 4: Seeing & Science at Work', subtitle: 'Dark room safety, endoscopy & optical engineers', icon: '🔬', color: 'border-emerald-300', badgeBg: 'bg-emerald-100 text-emerald-800' },
+            { id: 75, title: 'Stage 5: Ch.7 Master Quiz', subtitle: 'Reading comprehension, full sentences & worksheet', icon: '🏆', color: 'border-amber-300', badgeBg: 'bg-amber-100 text-amber-800' },
+            { id: 99, title: 'Stage 99: Mistake Buster', subtitle: 'Review and defeat your missed questions!', icon: '👾', color: 'border-rose-300', badgeBg: 'bg-rose-100 text-rose-800' }
+        ];
+
+        // ==================== CH7 題庫 ====================
+        const QUESTION_BANK = {
+            71: [
+                {
+                    id: '71-1',
+                    type: 'mcq',
+                    badge: 'Core Concept',
+                    prompt: 'How does light travel from a light source?',
+                    zhHint: '光線從光源發出後，是怎麼前進的？',
+                    options: ['In straight lines', 'In wavy lines', 'In circles', 'Only around corners'],
+                    answer: 0,
+                    explanation: 'Light always travels in straight lines away from a light source.',
+                    zhExp: '光永遠會沿著直線（straight lines）前進。'
+                },
+                {
+                    id: '71-2',
+                    type: 'mcq',
+                    badge: 'Experiment Prediction',
+                    visual: 'rubberTube',
+                    prompt: 'In the torch and rubber tube experiment, when you bend the tube, can you see the light?',
+                    zhHint: '在手電筒與水管實驗中，把橡膠管彎曲後，還能看到光嗎？',
+                    options: ['No, because light travels in straight lines.', 'Yes, because light bends inside the tube.', 'Yes, because the tube makes its own light.', 'No, because the torch turns off automatically.'],
+                    answer: 0,
+                    explanation: 'You cannot see the light through the bent tube because light travels in straight lines and cannot bend around the curve.',
+                    zhExp: '因為光沿直線前進，無法跟著彎曲的水管轉彎，所以看不到光。'
+                },
+                {
+                    id: '71-3',
+                    type: 'mcq',
+                    badge: 'Vocabulary Match',
+                    prompt: 'Match the definition: "gives the same result when the experiment is repeated"',
+                    zhHint: '配對科學字彙：「重複實驗後仍得到相同結果」是指哪個詞？',
+                    options: ['reliable', 'reflection', 'predict', 'ray diagram'],
+                    answer: 0,
+                    explanation: 'Results are "reliable" when repeating the activity gives the same results.',
+                    zhExp: 'reliable（可靠的）：重複進行實驗時得到相同結果。'
+                },
+                {
+                    id: '71-4',
+                    type: 'spell',
+                    badge: 'Word Spelling (-1 pt rule!)',
+                    prompt: 'Spell the Science Word that means: "to guess what might happen in an experiment before testing it" (7 letters, starts with p)',
+                    zhHint: '拼出這個科學單字：在實驗前「預測」可能發生的結果（7 個字母，p 開頭）。',
+                    clue: 'p _ _ _ _ _ _',
+                    answerText: 'predict',
+                    explanation: 'Correct spelling: p-r-e-d-i-c-t (predict).',
+                    zhExp: '正確拼字為 predict（預測）。'
+                },
+                {
+                    id: '71-5',
+                    type: 'mcq',
+                    badge: 'True or False',
+                    prompt: 'True or False: If your repeated experiment gives very different results each time, your results are reliable.',
+                    zhHint: '是非題：如果重複實驗每次結果都差很多，代表結果是可靠的嗎？',
+                    options: ['False', 'True'],
+                    answer: 0,
+                    explanation: 'False! If results are very different each time, they are NOT reliable.',
+                    zhExp: '錯（False）！每次結果差異很大代表不可靠（not reliable），需要檢查實驗步驟。'
+                },
+                {
+                    id: '71-6',
+                    type: 'spell',
+                    badge: 'Word Spelling',
+                    prompt: 'Spell the Word Boost term for: "the path or way in which light moves" (9 letters, starts with d)',
+                    zhHint: '拼出這個單字：表示光前進的「方向」（9 個字母，d 開頭）。',
+                    clue: 'd _ _ _ _ _ _ _ _',
+                    answerText: 'direction',
+                    explanation: 'Correct spelling: d-i-r-e-c-t-i-o-n (direction). Arrows on a ray diagram show the direction of light.',
+                    zhExp: '正確拼字為 direction（方向）。'
+                }
+            ],
+            72: [
+                {
+                    id: '72-1',
+                    type: 'mcq',
+                    badge: 'Visual Choice (p.118)',
+                    visual: 'bulbArrows',
+                    prompt: 'Look at the light bulb. Which arrow correctly shows how light travels?',
+                    zhHint: '觀察圖中的燈泡，哪一個箭頭（A、B、C、D）正確表示光前進的方式？',
+                    options: ['Arrow A (straight line)', 'Arrow B (wavy line)', 'Arrow C (curved line)', 'Arrow D (right-angle turn)'],
+                    answer: 0,
+                    explanation: 'Arrow A is a straight line pointing away from the bulb. Light travels in straight lines!',
+                    zhExp: '只有箭頭 A 是筆直向外的直線，符合光沿直線前進的原理。'
+                },
+                {
+                    id: '72-2',
+                    type: 'mcq',
+                    badge: 'True or False (p.118)',
+                    prompt: 'True or False: A ray diagram shows how light travels from our eyes to an object.',
+                    zhHint: '是非題：光線圖顯示的是光從「我們的眼睛」射向「物體」嗎？',
+                    options: ['False', 'True'],
+                    answer: 0,
+                    explanation: 'False! Light travels from a light source (or reflects off an object) INTO our eyes, never out of our eyes.',
+                    zhExp: '錯（False）！光線是從光源（或經物體反射）進入我們的眼睛，不是從眼睛射出！'
+                },
+                {
+                    id: '72-3',
+                    type: 'ray_build',
+                    badge: 'Interactive Ray Diagram',
+                    prompt: 'Click the arrows in the right order to show how the boy sees the bag under the lamp! (2 steps: Source ➔ Object ➔ Eyes)',
+                    zhHint: '請依正確順序點擊光線路徑，完成「男孩看見書包」的光線圖（提示：先從檯燈到書包，再反射到眼睛）。',
+                    scene: 'lampBagBoy',
+                    correctPaths: ['lamp-to-bag', 'bag-to-eyes'],
+                    explanation: 'Light travels from the lamp to the bag, and then reflects off the bag into the boy\'s eyes.',
+                    zhExp: '光先從燈（lamp）照到書包（bag），再從書包反射進入男孩的眼睛（eyes）。'
+                },
+                {
+                    id: '72-4',
+                    type: 'mcq',
+                    badge: 'Scientific Models (p.111)',
+                    prompt: 'A ray diagram is a model. Why does a ray diagram NOT fully represent how light travels in real life?',
+                    zhHint: '光線圖是一種科學模型，為什麼它無法完全代表真實世界的光？',
+                    options: [
+                        'In real life, light spreads out in many directions, not just a few single lines.',
+                        'In real life, light travels in zigzags.',
+                        'In real life, light only travels at night.',
+                        'In real life, light is invisible when it hits a mirror.'
+                    ],
+                    answer: 0,
+                    explanation: 'A ray diagram only draws a few straight lines to make it easy to understand, whereas real light spreads out in all directions.',
+                    zhExp: '真實的光會向四面八方擴散，光線圖只是為了方便理解而畫出幾條代表性直線。'
+                },
+                {
+                    id: '72-5',
+                    type: 'spell',
+                    badge: 'Word Spelling',
+                    prompt: 'Spell the two-word Science term: "a drawing that shows how light travels" (3 + 7 letters)',
+                    zhHint: '拼出這個雙字科學名詞：「用來表示光線前進路徑的圖」（提示：r _ _  d _ _ _ _ _ _）。',
+                    clue: 'r _ _   d _ _ _ _ _ _',
+                    answerText: 'ray diagram',
+                    explanation: 'Correct spelling: ray diagram.',
+                    zhExp: '正確拼字為 ray diagram（光線圖）。'
+                },
+                {
+                    id: '72-6',
+                    type: 'mcq',
+                    badge: 'Word Boost',
+                    prompt: 'In a ray diagram, what do the arrows on the straight lines show?',
+                    zhHint: '在光線圖中，直線上的「箭頭」代表什麼意義？',
+                    options: ['The direction in which light travels', 'The temperature of the light', 'The colour of the object', 'The speed of sound'],
+                    answer: 0,
+                    explanation: 'Arrows on a ray diagram show the direction in which light travels.',
+                    zhExp: '箭頭（arrows）用來表示光線前進的方向（direction）。'
+                }
+            ],
+            73: [
+                {
+                    id: '73-1',
+                    type: 'mcq',
+                    badge: 'True or False (p.118)',
+                    prompt: 'True or False: When light reaches a surface, the light disappears.',
+                    zhHint: '是非題：當光線照到物體表面時，光會消失嗎？',
+                    options: ['False', 'True'],
+                    answer: 0,
+                    explanation: 'False! When light reaches a surface, it bounces off (reflects) in a new direction.',
+                    zhExp: '錯（False）！光不會消失，而是會從表面反彈（反射）往新方向前進。'
+                },
+                {
+                    id: '73-2',
+                    type: 'mcq',
+                    badge: 'Surface Reflection',
+                    visual: 'reflectionSurfaces',
+                    prompt: 'Which object has a SMOOTH and SHINY surface that reflects light rays in the same direction?',
+                    zhHint: '哪一種物品擁有「平滑且閃亮」的表面，能把光線往同一個方向好好反射？',
+                    options: ['A shiny metal spoon', 'A cotton T-shirt', 'A rough wooden board', 'A paper towel'],
+                    answer: 0,
+                    explanation: 'Smooth surfaces like shiny spoons, metal trays, and aluminium foil reflect light well in the same direction.',
+                    zhExp: '平滑閃亮的表面（如金屬湯匙、金屬托盤、鋁箔紙）能整齊反射光線；衣服和木板屬於粗糙表面。'
+                },
+                {
+                    id: '73-3',
+                    type: 'mcq',
+                    badge: 'Surface Reflection',
+                    prompt: 'How do rough or dull surfaces (like clothing or wooden boards) reflect light?',
+                    zhHint: '粗糙或暗淡的表面（例如衣服或木板）會怎麼反射光線？',
+                    options: ['They reflect light in all directions.', 'They reflect light in only one straight direction.', 'They do not reflect any light at all.', 'They turn light into sound.'],
+                    answer: 0,
+                    explanation: 'Rough or dull surfaces reflect light in all directions (scattered).',
+                    zhExp: '粗糙（rough）或暗淡（dull）的表面會把光線向四面八方（all directions）散射出去。'
+                },
+                {
+                    id: '73-4',
+                    type: 'spell',
+                    badge: 'Word Spelling',
+                    prompt: 'Spell the Science Word for: "the bouncing of light from a surface" (10 letters, starts with r)',
+                    zhHint: '拼出這個核心單字：光線從表面反彈的現象，稱為「反射」（10 個字母，r 開頭）。',
+                    clue: 'r _ _ _ _ _ _ _ _ _',
+                    answerText: 'reflection',
+                    explanation: 'Correct spelling: r-e-f-l-e-c-t-i-o-n (reflection).',
+                    zhExp: '正確拼字為 reflection（反射）。'
+                },
+                {
+                    id: '73-5',
+                    type: 'spell',
+                    badge: 'Word Spelling',
+                    prompt: 'Complete the sentence with the correct Word Boost verb: "When light hits a mirror, it _______ off the surface." (7 letters, starts with b)',
+                    zhHint: '拼出動詞：光線照到鏡子時會從表面「彈開」（7 個字母，b 開頭）。',
+                    clue: 'b _ _ _ _ _ _',
+                    answerText: 'bounces',
+                    explanation: 'Correct spelling: b-o-u-n-c-e-s (bounces). "Reflects" means "bounces off".',
+                    zhExp: '正確拼字為 bounces（反彈），課本定義 reflects = bounces off。'
+                },
+                {
+                    id: '73-6',
+                    type: 'mcq',
+                    badge: 'Problem Solving (p.117)',
+                    prompt: 'There is a power failure at night and you only have one torch. Which material from your home will reflect the torch light best to brighten the room?',
+                    zhHint: '晚上停電只有一支手電筒，家裡哪一種材料最能反射光線、照亮更大範圍？',
+                    options: ['Aluminium foil or a metal tray', 'A dark woollen cloth', 'A piece of cardboard', 'A black rubber mat'],
+                    answer: 0,
+                    explanation: 'Aluminium foil and metal trays have smooth, shiny surfaces that reflect light well to brighten a larger area.',
+                    zhExp: '鋁箔紙（aluminium foil）與金屬托盤（metal tray）表面光滑閃亮，反射效果最好。'
+                }
+            ],
+            74: [
+                {
+                    id: '74-1',
+                    type: 'mcq',
+                    badge: 'Seeing Objects (p.118)',
+                    prompt: 'True or False: We can see objects that are NOT light sources (such as books and tables) when light is present.',
+                    zhHint: '是非題：在有光的環境下，我們能看見「本身不會發光」的物體（如書本、桌子）嗎？',
+                    options: ['True', 'False'],
+                    answer: 0,
+                    explanation: 'True! Light from a light source reflects off non-light sources and reaches our eyes, so we can see them.',
+                    zhExp: '對（True）！光源的光反射到書本上再進入眼睛，我們就能看見非發光體。'
+                },
+                {
+                    id: '74-2',
+                    type: 'mcq',
+                    badge: 'Seeing Objects (p.118)',
+                    prompt: 'True or False: We can see objects clearly in a completely dark room even if light is not present.',
+                    zhHint: '是非題：在完全沒有光的暗室裡，我們依然能清楚看見物體嗎？',
+                    options: ['False', 'True'],
+                    answer: 0,
+                    explanation: 'False! We need light to see. In a completely dark room, no light reaches our eyes.',
+                    zhExp: '錯（False）！沒有光進入眼睛，我們就什麼也看不見。'
+                },
+                {
+                    id: '74-3',
+                    type: 'mcq',
+                    badge: 'Lab Safety (p.112-113)',
+                    prompt: 'Which safety rule MUST you follow when doing the torch experiment in a dark classroom?',
+                    zhHint: '在暗室做手電筒實驗時，必須遵守哪一項安全守則？',
+                    options: [
+                        'Never shine the torch directly into a classmate\'s eyes.',
+                        'Run quickly around the dark room.',
+                        'Leave bags and chairs in the walkway.',
+                        'Look directly into a bright laser beam.'
+                    ],
+                    answer: 0,
+                    explanation: 'Bright light shone directly into eyes can hurt them. Also walk carefully and keep walkways clear in a dark room!',
+                    zhExp: '絕對不可將手電筒光線直射同學的眼睛，且在暗室中不可奔跑或堆放雜物以免跌倒。'
+                },
+                {
+                    id: '74-4',
+                    type: 'mcq',
+                    badge: 'Tech Talk! (p.116)',
+                    visual: 'capsuleCam',
+                    prompt: 'Why does a capsule endoscopy camera have built-in lights on it?',
+                    zhHint: '醫生使用的「膠囊內視鏡相機」為什麼要自帶燈光？',
+                    options: [
+                        'To light up the dark inside of the body so pictures are bright and clear.',
+                        'To heat up food inside the stomach.',
+                        'To make the capsule taste better.',
+                        'To bend light around corners.'
+                    ],
+                    answer: 0,
+                    explanation: 'It is completely dark inside the body. The camera needs lights so that light reflects off the inside of the body into the lens to take bright, clear pictures.',
+                    zhExp: '人體內部是黑暗的，需要自帶光源照亮器官並反射光線，才能拍出清晰照片。'
+                },
+                {
+                    id: '74-5',
+                    type: 'mcq',
+                    badge: 'Science at Work (p.116)',
+                    prompt: 'Who designs and tests devices that make use of light, such as telescopes, lasers, microscopes, and cameras?',
+                    zhHint: '專門設計與測試望遠鏡、雷射、顯微鏡與相機等光學儀器的科學家稱為？',
+                    options: ['Optical engineers', 'Marine biologists', 'Geologists', 'Chefs'],
+                    answer: 0,
+                    explanation: 'Optical engineers study light and design devices such as telescopes, lasers, microscopes, and cameras.',
+                    zhExp: 'Optical engineers（光學工程師）專門研究光並設計各種光學儀器。'
+                },
+                {
+                    id: '74-6',
+                    type: 'spell',
+                    badge: 'Word Spelling',
+                    prompt: 'Spell the Word Boost noun for the pill-sized medical camera: "_______ endoscopy" (7 letters, starts with c)',
+                    zhHint: '拼出這個醫療科技單字：藥丸大小的「膠囊」內視鏡（7 個字母，c 開頭）。',
+                    clue: 'c _ _ _ _ _ _',
+                    answerText: 'capsule',
+                    explanation: 'Correct spelling: c-a-p-s-u-l-e (capsule endoscopy).',
+                    zhExp: '正確拼字為 capsule（膠囊）。'
+                }
+            ],
+            75: [
+                {
+                    id: '75-1',
+                    type: 'sentence',
+                    badge: 'Reading & Full Sentence (-1 convention!)',
+                    passageTitle: 'Suri Reading at Night (p.119)',
+                    passageText: 'Suri is sitting at her desk at night. She turns on her desk lamp so she can read her science book. The book is not a light source, yet Suri can see every word clearly.',
+                    prompt: 'Answer in a FULL sentence: How can Suri see the book?',
+                    zhHint: '閱讀短文後，請將英文詞塊排成「完整正確的英文句子」（注意開頭大寫與句尾標點！）：Suri 如何看見書本？',
+                    tokens: ['Light from the lamp', 'reflects off', 'the book', 'into Suri\'s eyes.'],
+                    answerOrder: ['Light from the lamp', 'reflects off', 'the book', 'into Suri\'s eyes.'],
+                    explanation: 'Model Full Sentence: "Light from the lamp reflects off the book into Suri\'s eyes." (Remember capital letter at the start and period at the end!)',
+                    zhExp: '標準完整句：Light from the lamp reflects off the book into Suri\'s eyes.（燈光從書本反射進入 Suri 的眼睛。）'
+                },
+                {
+                    id: '75-2',
+                    type: 'ray_build',
+                    badge: 'Interactive Ray Diagram (p.119)',
+                    prompt: 'Draw Suri\'s ray diagram! Click the two correct ray paths to show how light from the desk lamp lets Suri see the book.',
+                    zhHint: '請依序點擊正確光線路徑，完成 Suri 讀書的光線圖（檯燈 ➔ 書本 ➔ 眼睛）。',
+                    scene: 'suriBook',
+                    correctPaths: ['lamp-to-book', 'book-to-suri'],
+                    explanation: 'Light travels in a straight line from the lamp to the book, then reflects off the book in a straight line into Suri\'s eyes.',
+                    zhExp: '光線從檯燈直線照到書本，再直線反射進入 Suri 的眼睛。'
+                },
+                {
+                    id: '75-3',
+                    type: 'sentence',
+                    badge: 'Reading & Full Sentence',
+                    passageTitle: 'Power Failure at Home (p.117)',
+                    passageText: 'During a power failure at night, Leo has only one small torch to do his homework. He finds a shiny metal tray and a dark cotton cloth on the table.',
+                    prompt: 'Answer in a FULL sentence: Why should Leo use the metal tray instead of the cloth?',
+                    zhHint: '閱讀短文後，組出完整英文回答：為什麼 Leo 應該用金屬托盤而不是布？',
+                    tokens: ['The smooth metal tray', 'reflects light well', 'in the same direction', 'to brighten the room.'],
+                    answerOrder: ['The smooth metal tray', 'reflects light well', 'in the same direction', 'to brighten the room.'],
+                    explanation: 'Model Full Sentence: "The smooth metal tray reflects light well in the same direction to brighten the room."',
+                    zhExp: '標準完整句：光滑的金屬托盤能往同方向好好反射光線，讓房間更亮。'
+                },
+                {
+                    id: '75-4',
+                    type: 'mcq',
+                    badge: 'Writing Conventions Check',
+                    prompt: 'Which answer follows ALL school writing conventions (capital letter, full sentence, period) for: "Why does light not pass through a bent tube?"',
+                    zhHint: '考卷規定「Answer in full sentences (-1 for writing conventions)」，哪一個回答格式與科學觀念都滿分？',
+                    options: [
+                        'Light cannot pass through a bent tube because light travels in straight lines.',
+                        'because light travels in straight lines',
+                        'Straight lines.',
+                        'light travels in straight lines'
+                    ],
+                    answer: 0,
+                    explanation: 'A full-credit answer starts with a capital letter, forms a complete sentence (subject + verb), and ends with a period (.).',
+                    zhExp: '滿分完整句必須：開頭大寫、主詞動詞完整、句尾加句點（.），不可只寫片段片語。'
+                },
+                {
+                    id: '75-5',
+                    type: 'mcq',
+                    badge: 'Critical Thinking',
+                    prompt: 'A student repeats the torch-and-tube experiment 3 times and gets the exact same result every time. What can the student conclude?',
+                    zhHint: '一位學生重複做手電筒水管實驗 3 次都得到完全相同的結果，他可以得出什麼結論？',
+                    options: [
+                        'The results are reliable.',
+                        'The torch battery is broken.',
+                        'Light bends inside straight tubes.',
+                        'The experiment must be wrong.'
+                    ],
+                    answer: 0,
+                    explanation: 'Getting the same result when repeating an experiment proves that the results are reliable.',
+                    zhExp: '重複實驗得到相同結果，證明實驗結果是可靠的（reliable）。'
+                },
+                {
+                    id: '75-6',
+                    type: 'mcq',
+                    badge: 'True or False',
+                    prompt: 'True or False: When light reflects off a smooth surface, the reflected light still travels in straight lines, just in a new direction.',
+                    zhHint: '是非題：光線從平滑表面反射後，依然沿著直線前進，只是換了新方向嗎？',
+                    options: ['True', 'False'],
+                    answer: 0,
+                    explanation: 'True! Reflected light still travels in straight lines, but in a new direction.',
+                    zhExp: '對（True）！反射後的光線依然走直線，只是改變了前進方向。'
+                }
+            ]
+        };
+
+        // ==================== 初始化與儲存 ====================
+        function loadProgress() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    if (data.stars) state.stars = data.stars;
+                    if (typeof data.totalScore === 'number') state.totalScore = data.totalScore;
+                    if (Array.isArray(data.mistakes)) state.mistakes = data.mistakes;
+                }
+            } catch (_) {}
+            updateHeaderStats();
+        }
+
+        function saveProgress() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    stars: state.stars,
+                    totalScore: state.totalScore,
+                    mistakes: state.mistakes
+                }));
+            } catch (_) {}
+            updateHeaderStats();
+        }
+
+        function updateHeaderStats() {
+            animateScoreTo(state.totalScore, 'total-score');
+            const streakEl = document.getElementById('streak-count');
+            if (streakEl) streakEl.textContent = state.streak;
+
+            const totalStars = [71, 72, 73, 74, 75, 99].reduce((sum, id) => sum + (Number(state.stars[id]) || 0), 0);
+            const lobbyStars = document.getElementById('lobby-stars');
+            if (lobbyStars) lobbyStars.textContent = totalStars;
+
+            const badge = document.getElementById('lobby-mistakes-badge');
+            if (badge) {
+                if (state.mistakes.length > 0) {
+                    badge.textContent = `📕 ${state.mistakes.length} Mistakes to Fix`;
+                    badge.className = 'bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1 rounded-full';
+                } else {
+                    badge.textContent = '✨ 0 Mistakes';
+                    badge.className = 'bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full';
+                }
+            }
+        }
+
+        function renderLobby() {
+            const grid = document.getElementById('stages-grid');
+            grid.innerHTML = STAGES.map(st => {
+                const starCount = Number(state.stars[st.id]) || 0;
+                const starStr = '⭐'.repeat(starCount) + '☆'.repeat(3 - starCount);
+                const isMistakeStage = st.id === 99;
+                const extraText = isMistakeStage
+                    ? `<span class="text-xs font-black ${state.mistakes.length ? 'text-rose-600' : 'text-emerald-600'}">${state.mistakes.length} questions waiting</span>`
+                    : `<span class="text-xs font-black text-slate-400">6 Questions</span>`;
+
+                return `
+                    <button onclick="startStage(${st.id})" class="btn-3d text-left bg-white rounded-3xl p-5 border-4 ${st.color} hover:-translate-y-1 flex flex-col justify-between gap-4">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl shadow-sm">${st.icon}</div>
+                                <span class="text-sm tracking-widest">${starStr}</span>
+                            </div>
+                            <span class="text-[11px] font-black ${st.badgeBg} px-2.5 py-0.5 rounded-full">Ch.7 Properties of Light</span>
+                            <h3 class="text-lg font-black text-slate-800 mt-2">${st.title}</h3>
+                            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">${st.subtitle}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            ${extraText}
+                            <span class="text-xs font-black text-cyan-700 bg-cyan-50 px-3 py-1.5 rounded-xl">Start ➔</span>
+                        </div>
+                    </button>`;
+            }).join('');
+        }
+
+        // ==================== 語音與雙語提示 ====================
+        function speakText(text) {
+            if (!('speechSynthesis' in window) || !text) return;
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'en-US';
+            utter.rate = 0.92;
+            window.speechSynthesis.speak(utter);
+        }
+
+        function speakCurrentQuestion() {
+            const q = state.questions[state.qIndex];
+            if (!q) return;
+            speakText(q.prompt);
+        }
+
+        function speakPassage() {
+            const q = state.questions[state.qIndex];
+            if (!q || !q.passageText) return;
+            speakText(q.passageText);
+        }
+
+        function toggleZhHint() {
+            state.zhHintEnabled = !state.zhHintEnabled;
+            const label = document.getElementById('zh-toggle-label');
+            const btn = document.getElementById('zh-toggle');
+            if (state.zhHintEnabled) {
+                label.textContent = '中文提示: ON';
+                btn.classList.replace('bg-slate-100', 'bg-amber-100');
+            } else {
+                label.textContent = '中文提示: OFF';
+                btn.classList.replace('bg-amber-100', 'bg-slate-100');
+            }
+            applyZhVisibility();
+        }
+
+        function toggleSingleZh() {
+            state.singleZhOverride = !state.singleZhOverride;
+            applyZhVisibility();
+        }
+
+        function applyZhVisibility() {
+            const hintEl = document.getElementById('q-zh-hint');
+            const btnEl = document.getElementById('single-zh-btn');
+            if (!hintEl) return;
+            const show = state.zhHintEnabled || state.singleZhOverride;
+            hintEl.classList.toggle('hidden', !show);
+            if (btnEl) {
+                btnEl.textContent = show ? '💡 隱藏中文提示' : '💡 顯示中文提示';
+            }
+        }
+
+        // ==================== 測驗流程 ====================
+        function findQuestionById(qId) {
+            for (const list of Object.values(QUESTION_BANK)) {
+                const found = list.find(q => q.id === qId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function startStage(stageId) {
+            SoundEngine.click();
+            let qList = [];
+            if (stageId === 99) {
+                qList = state.mistakes.map(findQuestionById).filter(Boolean);
+                if (qList.length === 0) {
+                    alert('Awesome! You have 0 mistakes right now! ✨');
+                    return;
+                }
+            } else {
+                qList = [...(QUESTION_BANK[stageId] || [])];
+            }
+
+            state.currentStageId = stageId;
+            state.questions = qList;
+            state.qIndex = 0;
+            state.correctCount = 0;
+
+            const stageInfo = STAGES.find(s => s.id === stageId);
+            document.getElementById('quiz-stage-title').textContent = stageInfo ? stageInfo.title : 'Practice';
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function returnToLobby() {
+            window.speechSynthesis && window.speechSynthesis.cancel();
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+            document.getElementById('lobby-view').classList.remove('hidden');
+            renderLobby();
+        }
+
+        function retryCurrentStage() {
+            if (state.currentStageId) startStage(state.currentStageId);
+        }
+
+        function renderQuestion() {
+            const q = state.questions[state.qIndex];
+            state.answered = false;
+            state.singleZhOverride = false;
+            state.sentenceTokens = [];
+            state.selectedRayIds = [];
+
+            const total = state.questions.length;
+            document.getElementById('quiz-progress-text').textContent = `Question ${state.qIndex + 1} / ${total}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((state.qIndex) / total) * 100}%`;
+            document.getElementById('q-type-badge').textContent = q.badge || 'Question';
+            document.getElementById('q-prompt').textContent = q.prompt;
+            document.getElementById('q-zh-hint').textContent = q.zhHint || '';
+            applyZhVisibility();
+
+            // Passage
+            const pBox = document.getElementById('q-passage-box');
+            if (q.passageText) {
+                document.getElementById('q-passage-title').textContent = q.passageTitle || '';
+                document.getElementById('q-passage-text').textContent = q.passageText;
+                pBox.classList.remove('hidden');
+            } else {
+                pBox.classList.add('hidden');
+            }
+
+            // Visual SVG
+            const vBox = document.getElementById('q-visual-box');
+            if (q.visual && SVGs[q.visual]) {
+                vBox.innerHTML = SVGs[q.visual]();
+                vBox.classList.remove('hidden');
+            } else {
+                vBox.innerHTML = '';
+                vBox.classList.add('hidden');
+            }
+
+            // Feedback reset
+            document.getElementById('q-feedback-box').classList.add('hidden');
+
+            // Render interaction by type
+            const area = document.getElementById('q-interaction-area');
+            if (q.type === 'mcq') {
+                area.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    ${q.options.map((opt, idx) => `
+                        <button onclick="submitMcq(${idx})" id="opt-btn-${idx}" class="btn-3d text-left bg-slate-50 hover:bg-cyan-50 border-2 border-slate-200 hover:border-cyan-400 rounded-2xl p-4 font-bold text-slate-800 text-sm sm:text-base flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-black text-cyan-700 shrink-0">${String.fromCharCode(65 + idx)}</span>
+                            <span>${opt}</span>
+                        </button>
+                    `).join('')}
+                </div>`;
+            } else if (q.type === 'spell') {
+                area.innerHTML = `
+                    <div class="bg-amber-50/70 border-2 border-amber-200 rounded-2xl p-4 space-y-3">
+                        <div class="text-sm font-black text-amber-900 tracking-widest">Hint: ${q.clue}</div>
+                        <div class="flex flex-wrap gap-2">
+                            <input id="spell-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                   placeholder="Type your spelling here..."
+                                   onkeydown="if(event.key==='Enter') submitSpell()"
+                                   class="flex-1 min-w-[200px] bg-white border-2 border-cyan-300 focus:border-cyan-500 outline-none rounded-xl px-4 py-2.5 font-black text-base text-slate-800">
+                            <button onclick="submitSpell()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-5 py-2.5 rounded-xl text-sm sm:text-base">
+                                Check Spelling ✓
+                            </button>
+                        </div>
+                    </div>`;
+                setTimeout(() => { const inp = document.getElementById('spell-input'); if (inp) inp.focus(); }, 60);
+            } else if (q.type === 'sentence') {
+                const shuffled = [...q.tokens].sort(() => Math.random() - 0.5);
+                area.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="min-h-[60px] bg-slate-50 border-2 border-dashed border-cyan-300 rounded-2xl p-3 flex flex-wrap gap-2 items-center" id="sentence-dropzone">
+                            <span class="text-xs font-bold text-slate-400">Tap the word blocks below in order to build a full sentence...</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2" id="sentence-pool">
+                            ${shuffled.map((tok, i) => `
+                                <button onclick="pickSentenceToken(this, ${JSON.stringify(tok).replace(/"/g, '&quot;')})" data-idx="${i}"
+                                        class="word-chip btn-3d bg-white hover:bg-cyan-50 border-2 border-slate-200 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-sm sm:text-base">
+                                    ${tok}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <button onclick="resetSentence()" class="text-xs font-black text-slate-500 hover:text-rose-600 px-3 py-1.5">↺ Reset</button>
+                            <button onclick="submitSentence()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-5 py-2 rounded-xl text-sm">Check Sentence ✓</button>
+                        </div>
+                    </div>`;
+            } else if (q.type === 'ray_build') {
+                area.innerHTML = renderInteractiveRaySvg(q.scene);
+            }
+        }
+
+        // ==================== 互動光線圖 SVG ====================
+        function renderInteractiveRaySvg(scene) {
+            if (scene === 'lampBagBoy') {
+                return `
+                    <div class="bg-slate-50 border-2 border-cyan-200 rounded-2xl p-4 space-y-3 flex flex-col items-center">
+                        <svg viewBox="0 0 380 210" class="w-full max-w-md h-auto select-none">
+                            <rect x="0" y="0" width="380" height="210" rx="14" fill="#f8fafc"/>
+                            <!-- Lamp -->
+                            <polygon points="165,20 215,20 230,45 150,45" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+                            <text x="190" y="15" text-anchor="middle" font-size="11" font-weight="900" fill="#854d0e">Lamp (Light Source)</text>
+                            <!-- Boy -->
+                            <circle cx="70" cy="115" r="22" fill="#fed7aa" stroke="#9a3412" stroke-width="2"/>
+                            <circle cx="82" cy="112" r="3.5" fill="#0f172a"/>
+                            <text x="70" y="155" text-anchor="middle" font-size="11" font-weight="900" fill="#1e293b">Boy's Eyes</text>
+                            <!-- Bag -->
+                            <rect x="275" y="120" width="52" height="58" rx="10" fill="#38bdf8" stroke="#0369a1" stroke-width="2.5"/>
+                            <text x="301" y="194" text-anchor="middle" font-size="11" font-weight="900" fill="#0369a1">Bag</text>
+                            <!-- Clickable Ray Paths -->
+                            <g onclick="toggleRayPath('lamp-to-bag')" class="cursor-pointer">
+                                <line id="ray-lamp-to-bag" x1="205" y1="48" x2="290" y2="118" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+                                <text x="262" y="78" font-size="10" font-weight="900" fill="#0284c7">Path 1</text>
+                            </g>
+                            <g onclick="toggleRayPath('bag-to-eyes')" class="cursor-pointer">
+                                <line id="ray-bag-to-eyes" x1="274" y1="138" x2="96" y2="115" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+                                <text x="185" y="142" font-size="10" font-weight="900" fill="#0284c7">Path 2</text>
+                            </g>
+                            <g onclick="toggleRayPath('eyes-to-bag')" class="cursor-pointer">
+                                <line id="ray-eyes-to-bag" x1="92" y1="100" x2="274" y2="122" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="5,5" stroke-linecap="round"/>
+                                <text x="185" y="96" font-size="10" font-weight="800" fill="#64748b">Path 3 (Eyes ➔ Bag?)</text>
+                            </g>
+                        </svg>
+                        <div class="flex items-center justify-between w-full max-w-md">
+                            <span id="ray-status" class="text-xs font-bold text-slate-500">Tap the correct ray paths on the diagram!</span>
+                            <button onclick="submitRayBuild()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-5 py-2 rounded-xl text-sm">Check Ray Diagram ✓</button>
+                        </div>
+                    </div>`;
+            }
+            return `
+                <div class="bg-slate-50 border-2 border-cyan-200 rounded-2xl p-4 space-y-3 flex flex-col items-center">
+                    <svg viewBox="0 0 380 210" class="w-full max-w-md h-auto select-none">
+                        <rect x="0" y="0" width="380" height="210" rx="14" fill="#f8fafc"/>
+                        <!-- Desk Lamp -->
+                        <polygon points="270,30 315,30 330,55 255,55" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+                        <text x="292" y="22" text-anchor="middle" font-size="11" font-weight="900" fill="#854d0e">Desk Lamp</text>
+                        <!-- Suri -->
+                        <circle cx="85" cy="95" r="22" fill="#fed7aa" stroke="#9a3412" stroke-width="2"/>
+                        <circle cx="96" cy="93" r="3.5" fill="#0f172a"/>
+                        <text x="85" y="132" text-anchor="middle" font-size="11" font-weight="900" fill="#1e293b">Suri's Eyes</text>
+                        <!-- Book -->
+                        <rect x="165" y="150" width="76" height="26" rx="4" fill="#fff" stroke="#0284c7" stroke-width="2.5"/>
+                        <text x="203" y="192" text-anchor="middle" font-size="11" font-weight="900" fill="#0369a1">Science Book</text>
+                        <!-- Paths -->
+                        <g onclick="toggleRayPath('lamp-to-book')" class="cursor-pointer">
+                            <line id="ray-lamp-to-book" x1="280" y1="58" x2="215" y2="148" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+                            <text x="262" y="110" font-size="10" font-weight="900" fill="#0284c7">Path A</text>
+                        </g>
+                        <g onclick="toggleRayPath('book-to-suri')" class="cursor-pointer">
+                            <line id="ray-book-to-suri" x1="185" y1="148" x2="105" y2="102" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+                            <text x="128" y="142" font-size="10" font-weight="900" fill="#0284c7">Path B</text>
+                        </g>
+                        <g onclick="toggleRayPath('lamp-to-suri')" class="cursor-pointer">
+                            <line id="ray-lamp-to-suri" x1="255" y1="52" x2="108" y2="90" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="5,5" stroke-linecap="round"/>
+                            <text x="180" y="62" font-size="10" font-weight="800" fill="#64748b">Path C (Skip book?)</text>
+                        </g>
+                    </svg>
+                    <div class="flex items-center justify-between w-full max-w-md">
+                        <span id="ray-status" class="text-xs font-bold text-slate-500">Tap the 2 paths that show how Suri sees the book!</span>
+                        <button onclick="submitRayBuild()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-5 py-2 rounded-xl text-sm">Check Ray Diagram ✓</button>
+                    </div>
+                </div>`;
+        }
+
+        function toggleRayPath(pathId) {
+            if (state.answered) return;
+            SoundEngine.click();
+            const line = document.getElementById(`ray-${pathId}`);
+            const idx = state.selectedRayIds.indexOf(pathId);
+            if (idx === -1) {
+                state.selectedRayIds.push(pathId);
+                if (line) line.setAttribute('stroke', '#f59e0b');
+            } else {
+                state.selectedRayIds.splice(idx, 1);
+                if (line) line.setAttribute('stroke', '#cbd5e1');
+            }
+            const status = document.getElementById('ray-status');
+            if (status) status.textContent = `Selected: ${state.selectedRayIds.length} path(s)`;
+        }
+
+        function submitRayBuild() {
+            if (state.answered) return;
+            const q = state.questions[state.qIndex];
+            const isCorrect = q.correctPaths.length === state.selectedRayIds.length &&
+                q.correctPaths.every(p => state.selectedRayIds.includes(p));
+            q.correctPaths.forEach(p => {
+                const line = document.getElementById(`ray-${p}`);
+                if (line) line.setAttribute('stroke', '#10b981');
+            });
+            handleAnswer(isCorrect);
+        }
+
+        // ==================== 句型重組互動 ====================
+        function pickSentenceToken(btn, token) {
+            if (state.answered) return;
+            SoundEngine.click();
+            btn.disabled = true;
+            btn.classList.add('opacity-30');
+            state.sentenceTokens.push(token);
+            renderSentenceDropzone();
+        }
+
+        function renderSentenceDropzone() {
+            const dz = document.getElementById('sentence-dropzone');
+            if (!dz) return;
+            if (state.sentenceTokens.length === 0) {
+                dz.innerHTML = '<span class="text-xs font-bold text-slate-400">Tap the word blocks below in order to build a full sentence...</span>';
+                return;
+            }
+            dz.innerHTML = state.sentenceTokens.map((t, idx) => `
+                <span class="bg-cyan-600 text-white font-bold px-3 py-1.5 rounded-xl text-sm shadow-sm">${idx + 1}. ${t}</span>
+            `).join('');
+        }
+
+        function resetSentence() {
+            if (state.answered) return;
+            state.sentenceTokens = [];
+            document.querySelectorAll('#sentence-pool button').forEach(b => {
+                b.disabled = false;
+                b.classList.remove('opacity-30');
+            });
+            renderSentenceDropzone();
+        }
+
+        function submitSentence() {
+            if (state.answered) return;
+            const q = state.questions[state.qIndex];
+            if (state.sentenceTokens.length !== q.answerOrder.length) {
+                alert('Please place all word blocks into the sentence box first!');
+                return;
+            }
+            const isCorrect = q.answerOrder.every((t, i) => t === state.sentenceTokens[i]);
+            handleAnswer(isCorrect);
+        }
+
+        // ==================== 選擇與拼字檢查 ====================
+        function submitMcq(idx) {
+            if (state.answered) return;
+            const q = state.questions[state.qIndex];
+            const isCorrect = idx === q.answer;
+            const chosenBtn = document.getElementById(`opt-btn-${idx}`);
+            const rightBtn = document.getElementById(`opt-btn-${q.answer}`);
+            if (rightBtn) rightBtn.classList.add('border-emerald-500', 'bg-emerald-50');
+            if (!isCorrect && chosenBtn) chosenBtn.classList.add('border-rose-500', 'bg-rose-50', 'animate-shake');
+            handleAnswer(isCorrect);
+        }
+
+        function submitSpell() {
+            if (state.answered) return;
+            const inp = document.getElementById('spell-input');
+            if (!inp) return;
+            const val = inp.value.trim().toLowerCase().replace(/\s+/g, ' ');
+            if (!val) return;
+            const q = state.questions[state.qIndex];
+            const isCorrect = val === q.answerText.toLowerCase();
+            inp.disabled = true;
+            handleAnswer(isCorrect);
+        }
+
+        // ==================== 統一判題與錯題記錄 ====================
+        function handleAnswer(isCorrect) {
+            state.answered = true;
+            const q = state.questions[state.qIndex];
+            const fbBox = document.getElementById('q-feedback-box');
+            const fbTitle = document.getElementById('q-feedback-title');
+            const fbExp = document.getElementById('q-feedback-exp');
+            const fbZh = document.getElementById('q-feedback-zh');
+
+            fbBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+
+            if (isCorrect) {
+                state.correctCount++;
+                state.streak++;
+                const pts = 20 + Math.min(state.streak - 1, 5) * 5;
+                state.totalScore += pts;
+                SoundEngine.correct(state.streak);
+                spawnFloatingText(window.innerWidth / 2, window.innerHeight * 0.35, `+${pts} ✨`, 'text-emerald-600');
+
+                // 若在錯題本答對，移除錯題
+                if (state.currentStageId === 99) {
+                    state.mistakes = state.mistakes.filter(id => id !== q.id);
+                }
+
+                fbBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                fbTitle.textContent = '🎉 Awesome! Correct!';
+            } else {
+                state.streak = 0;
+                SoundEngine.wrong();
+                if (!state.mistakes.includes(q.id)) {
+                    state.mistakes.push(q.id);
+                }
+                fbBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+                fbTitle.textContent = '💡 Good try! Let\'s review:';
+            }
+
+            fbExp.textContent = q.explanation;
+            fbZh.textContent = q.zhExp || '';
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.textContent = state.qIndex + 1 >= state.questions.length ? 'Finish Stage 🏆' : 'Next Question ➔';
+            saveProgress();
+        }
+
+        function nextQuestion() {
+            SoundEngine.click();
+            state.qIndex++;
+            if (state.qIndex >= state.questions.length) {
+                finishStage();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function finishStage() {
+            const total = state.questions.length;
+            const ratio = total > 0 ? state.correctCount / total : 1;
+            const earnedStars = ratio >= 0.9 ? 3 : ratio >= 0.65 ? 2 : 1;
+
+            if ((state.stars[state.currentStageId] || 0) < earnedStars) {
+                state.stars[state.currentStageId] = earnedStars;
+            }
+            saveProgress();
+
+            SoundEngine.victory();
+            if (typeof ConfettiEngine !== 'undefined') {
+                ConfettiEngine.spawnBurst({ x: window.innerWidth / 2, y: window.innerHeight * 0.45, count: 75 });
+            }
+
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            document.getElementById('result-stars').textContent = '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars);
+            document.getElementById('result-summary').textContent = `You answered ${state.correctCount} out of ${total} questions correctly! Total Score: ${state.totalScore}`;
+        }
+
+        // ==================== iPad 手寫草稿畫板 ====================
+        let sketchCtx = null;
+        let drawing = false;
+        let sketchColor = '#0284c7';
+
+        function openSketchpad() {
+            document.getElementById('sketchpad-modal').classList.remove('hidden');
+            const canvas = document.getElementById('sketch-canvas');
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            sketchCtx = canvas.getContext('2d');
+            sketchCtx.lineCap = 'round';
+            sketchCtx.lineJoin = 'round';
+            sketchCtx.lineWidth = 4;
+            sketchCtx.strokeStyle = sketchColor;
+
+            const getPos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                const t = e.touches ? e.touches[0] : e;
+                return { x: t.clientX - r.left, y: t.clientY - r.top };
+            };
+            canvas.onpointerdown = (e) => { drawing = true; const p = getPos(e); sketchCtx.beginPath(); sketchCtx.moveTo(p.x, p.y); };
+            canvas.onpointermove = (e) => { if (!drawing) return; const p = getPos(e); sketchCtx.lineTo(p.x, p.y); sketchCtx.stroke(); };
+            window.onpointerup = () => { drawing = false; };
+        }
+
+        function closeSketchpad() {
+            document.getElementById('sketchpad-modal').classList.add('hidden');
+        }
+
+        function setSketchColor(c) {
+            sketchColor = c;
+            if (sketchCtx) sketchCtx.strokeStyle = c;
+        }
+
+        function clearSketchpad() {
+            const canvas = document.getElementById('sketch-canvas');
+            if (canvas && sketchCtx) sketchCtx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof ConfettiEngine !== 'undefined') ConfettiEngine.init();
+            loadProgress();
+            renderLobby();
+        });
+    </script>
+</body>
+</html>
