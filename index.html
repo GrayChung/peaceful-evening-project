@@ -302,7 +302,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
                     <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
-                        ⭐ 總星星 <span id="bilingual-overall-stars">0</span> / 18
+                        ⭐ 總星星 <span id="bilingual-overall-stars">0</span> / 36
                     </span>
                     <span class="bg-cyan-100 text-cyan-800 border border-cyan-300 px-3 py-1 rounded-full">
                         🏆 總積分 <span id="bilingual-overall-score">0</span>
@@ -352,34 +352,41 @@
                     </div>
                 </a>
 
-                <!-- 雙語卡片 2：四年級上學期 Reading Street (RS)（預留擴充：./4a/en-rs.html） -->
-                <div data-grade="4" data-status="coming" onclick="showComingSoon('Grade 4 Reading Section / Reading Street (RS)', '4a/en-rs.html')"
-                     class="bilingual-card portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-emerald-200 flex flex-col justify-between relative transition">
-                    <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
-                        🛠️ 籌備建置中
+                <!-- 雙語卡片 2：四年級上學期 Reading Street (RS) -->
+                <a href="./4a/en-rs.html" data-grade="4" data-status="live"
+                   class="bilingual-card portal-card group bg-white rounded-3xl p-6 border-4 border-emerald-200 hover:border-emerald-400 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-xs font-black px-3 py-1 rounded-full">
+                        ✅ 已上線
                     </div>
                     <div>
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-300 to-teal-400 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
                             📚
                         </div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-black bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-lg">Grade 4</span>
+                            <span class="text-xs font-black bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-lg">4上 / Grade 4</span>
                             <span class="text-xs font-bold text-slate-400">Reading Street (RS)</span>
                         </div>
-                        <h2 class="text-xl font-black text-slate-700 mt-1">
-                            RS 英語閱讀與詞彙特訓
+                        <h2 class="text-xl font-black text-slate-800 group-hover:text-emerald-700 transition-colors mt-1">
+                            RS · The Game of Silence & Grammar
                         </h2>
                         <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                            預留給英語閱讀理解、核心詞彙與寫作表達練習（後續將陸續加入 DE 與 MA）。
+                            全英文閱讀、短長音 u 聽寫、修辭感官與形容詞/副詞文法（含中文提示與英語朗讀）。
                         </p>
                     </div>
 
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-xs font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl">
-                            查看規劃說明
-                        </span>
+                    <div>
+                        <div id="progress-rs" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
+                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">🏆 0</span>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
+                            <span class="text-sm font-black text-emerald-700 bg-emerald-50 group-hover:bg-emerald-600 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
+                                Enter Lab ➔
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </a>
 
             </div>
         </div>
@@ -625,7 +632,7 @@
                 }
             }
 
-            // 同步渲染雙語英文學科 (IS) 進度
+            // 同步渲染雙語英文學科 (IS + RS) 進度
             let isStars = 0, isScore = 0, isMistakes = 0;
             try {
                 const rawIs = localStorage.getItem('bilingual_is_4a_v1');
@@ -636,6 +643,19 @@
                     }
                     if (isData && typeof isData.totalScore === 'number') isScore = isData.totalScore;
                     if (isData && Array.isArray(isData.mistakes)) isMistakes = isData.mistakes.length;
+                }
+            } catch (_) {}
+
+            let rsStars = 0, rsScore = 0, rsMistakes = 0;
+            try {
+                const rawRs = localStorage.getItem('bilingual_rs_4a_v1');
+                if (rawRs) {
+                    const rsData = JSON.parse(rawRs);
+                    if (rsData && rsData.stars) {
+                        rsStars = [1, 2, 3, 4, 5, 99].reduce((sum, id) => sum + (Number(rsData.stars[id]) || 0), 0);
+                    }
+                    if (rsData && typeof rsData.totalScore === 'number') rsScore = rsData.totalScore;
+                    if (rsData && Array.isArray(rsData.mistakes)) rsMistakes = rsData.mistakes.length;
                 }
             } catch (_) {}
 
@@ -650,14 +670,31 @@
                     ${isMistakeBadge}
                 `;
             }
+
+            const rsProgressEl = document.getElementById('progress-rs');
+            if (rsProgressEl) {
+                const rsMistakeBadge = rsMistakes > 0
+                    ? `<span class="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">📕 ${rsMistakes} 題待消滅</span>`
+                    : `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
+                rsProgressEl.innerHTML = `
+                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${rsStars} / 18</span>
+                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">🏆 ${rsScore}</span>
+                    ${rsMistakeBadge}
+                `;
+            }
+
+            const biTotalStars = isStars + rsStars;
+            const biTotalScore = isScore + rsScore;
+            const biTotalMistakes = isMistakes + rsMistakes;
+
             const biStarsEl = document.getElementById('bilingual-overall-stars');
             const biScoreEl = document.getElementById('bilingual-overall-score');
             const biMistakesEl = document.getElementById('bilingual-overall-mistakes-badge');
-            if (biStarsEl) biStarsEl.textContent = isStars;
-            if (biScoreEl) biScoreEl.textContent = isScore;
+            if (biStarsEl) biStarsEl.textContent = biTotalStars;
+            if (biScoreEl) biScoreEl.textContent = biTotalScore;
             if (biMistakesEl) {
-                if (isMistakes > 0) {
-                    biMistakesEl.textContent = `📕 ${isMistakes} 題待消滅`;
+                if (biTotalMistakes > 0) {
+                    biMistakesEl.textContent = `📕 ${biTotalMistakes} 題待消滅`;
                     biMistakesEl.className = 'bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1 rounded-full';
                 } else {
                     biMistakesEl.textContent = '✨ 0 錯題';

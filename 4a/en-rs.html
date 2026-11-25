@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade 4 RS — Reading Street: The Game of Silence & Grammar Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../Styles/common.css">
+    <style>
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 55%, #fefce8 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .font-display { font-family: 'Fredoka', 'Noto Sans TC', sans-serif; }
+        .lab-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 3px solid #a7f3d0;
+            box-shadow: 0 12px 30px -8px rgba(5, 150, 105, 0.14);
+        }
+        .word-chip {
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+        }
+        .word-chip:active {
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12 select-none">
+
+    <!-- Top Navigation Bar -->
+    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-emerald-200 px-4 py-3 shadow-sm">
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="../index.html" onclick="if(window.SoundEngine) SoundEngine.click();"
+                   class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-slate-200 transition">
+                    <span>🏠</span>
+                    <span>Portal</span>
+                </a>
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📚</span>
+                    <div>
+                        <div class="font-display font-bold text-base sm:text-lg text-emerald-900 leading-tight">Grade 4 RS Lab</div>
+                        <div class="text-[11px] font-extrabold text-emerald-600 leading-none">The Game of Silence & Grammar</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Toggle Traditional Chinese Hint -->
+                <button id="hint-toggle" onclick="toggleChineseHint()"
+                        class="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-amber-300 transition cursor-pointer"
+                        title="Toggle Traditional Chinese Hints">
+                    <span>💡</span>
+                    <span id="hint-toggle-label">中文提示: OFF</span>
+                </button>
+
+                <!-- Sound Toggle -->
+                <button id="sound-toggle" onclick="toggleSound()" data-active-bg="bg-emerald-500"
+                        class="bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-sm transition cursor-pointer"
+                        title="Toggle Sound Effects">
+                    <span id="sound-icon">🔊</span>
+                </button>
+
+                <!-- Total Score Pill -->
+                <div class="bg-amber-100 border border-amber-300 text-amber-800 font-black text-xs sm:text-sm px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">
+                    <span>🏆</span>
+                    <span id="total-score">0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 pt-6 sm:pt-8">
+
+        <!-- ==================== LOBBY VIEW ==================== -->
+        <section id="lobby-view" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="lab-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 text-8xl opacity-10 pointer-events-none">🪶</div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 text-xs font-black px-3 py-1 rounded-full mb-2">
+                            <span>📖 Reading Street · Unit 4</span>
+                            <span>•</span>
+                            <span>ELA4 & Grammar 4.1 / 4.2 / 4.4</span>
+                        </div>
+                        <h1 class="font-display text-2xl sm:text-3xl font-bold text-slate-800">
+                            The Game of Silence & Grammar Studio
+                        </h1>
+                        <p class="text-sm sm:text-base text-slate-600 font-semibold mt-1.5">
+                            Master critical vocabulary, short/long <span class="text-emerald-700 font-black">u</span> spelling, story comprehension, figurative language, adjectives, adverbs, and comparatives!
+                        </p>
+                    </div>
+                    <div class="flex flex-col items-start md:items-end gap-2 shrink-0">
+                        <div class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-black px-4 py-2 rounded-2xl shadow-md flex items-center gap-2">
+                            <span class="text-xl">⭐</span>
+                            <span id="lobby-stars" class="text-lg">0 / 18</span>
+                        </div>
+                        <button onclick="resetProgress()" class="text-xs font-bold text-slate-400 hover:text-rose-500 underline cursor-pointer">
+                            Reset Progress
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Study Reference Strip -->
+                <div class="mt-5 pt-4 border-t border-emerald-100 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                    <div class="bg-emerald-50/90 border border-emerald-200 rounded-2xl p-3">
+                        <div class="font-black text-emerald-800">🔤 Short & Long u</div>
+                        <div class="text-slate-600 font-bold mt-0.5">bunch / juice / stew / rescue</div>
+                    </div>
+                    <div class="bg-teal-50/90 border border-teal-200 rounded-2xl p-3">
+                        <div class="font-black text-teal-800">🪶 Historical Fiction</div>
+                        <div class="text-slate-600 font-bold mt-0.5">Omakayas, Pinch & Nokomis (1850)</div>
+                    </div>
+                    <div class="bg-amber-50/90 border border-amber-200 rounded-2xl p-3">
+                        <div class="font-black text-amber-800">✨ Figurative Lang.</div>
+                        <div class="text-slate-600 font-bold mt-0.5">Simile, Metaphor & Sensory</div>
+                    </div>
+                    <div class="bg-sky-50/90 border border-sky-200 rounded-2xl p-3">
+                        <div class="font-black text-sky-800">🧩 Grammar 4.1–4.4</div>
+                        <div class="text-slate-600 font-bold mt-0.5">Adj Order, Adverbs, -er/-est</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage Grid -->
+            <div id="stage-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+        </section>
+
+        <!-- ==================== QUIZ VIEW ==================== -->
+        <section id="quiz-view" class="hidden space-y-5">
+            <!-- Quiz Header Bar -->
+            <div class="lab-card rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                <button onclick="backToLobby()"
+                        class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl transition cursor-pointer">
+                    <span>←</span>
+                    <span>Stages</span>
+                </button>
+
+                <div class="flex-1 min-w-[160px] max-w-md">
+                    <div class="flex justify-between text-xs font-black text-emerald-800 mb-1">
+                        <span id="quiz-stage-title">Stage 1</span>
+                        <span id="quiz-progress-text">1 / 10</span>
+                    </div>
+                    <div class="w-full h-3 bg-emerald-100 rounded-full overflow-hidden border border-emerald-200">
+                        <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div id="streak-badge" class="hidden bg-orange-100 border border-orange-300 text-orange-700 font-black text-xs px-2.5 py-1 rounded-full">
+                        🔥 <span id="streak-count">0</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 font-black text-xs px-2.5 py-1 rounded-full">
+                        +<span id="session-score">0</span> pts
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div id="question-card" class="lab-card rounded-3xl p-6 sm:p-8 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span id="q-type-badge" class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-black px-3 py-1 rounded-full">
+                        Multiple Choice
+                    </span>
+                    <button id="tts-btn" onclick="speakCurrentQuestion()"
+                            class="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-extrabold text-xs px-3 py-1.5 rounded-xl transition cursor-pointer">
+                        <span>🗣️</span>
+                        <span>Read Aloud</span>
+                    </button>
+                </div>
+
+                <!-- Prompt -->
+                <div>
+                    <h2 id="q-prompt" class="text-lg sm:text-2xl font-black text-slate-800 leading-snug"></h2>
+                    <div id="q-zh-hint" class="hidden mt-2 text-sm font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2"></div>
+                </div>
+
+                <!-- Dynamic Answer Area -->
+                <div id="answer-area" class="space-y-3"></div>
+
+                <!-- Feedback Banner -->
+                <div id="feedback-box" class="hidden rounded-2xl p-4 border-2 space-y-2">
+                    <div class="flex items-center gap-2 font-black text-base" id="feedback-title"></div>
+                    <p id="feedback-explain" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
+                    <p id="feedback-explain-zh" class="hidden text-xs font-bold text-amber-800 bg-white/70 rounded-xl px-3 py-1.5 border border-amber-200"></p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-2 flex justify-end gap-3">
+                    <button id="check-btn" onclick="checkCurrentAnswer()"
+                            class="hidden btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm sm:text-base px-6 py-3 rounded-2xl border-b-4 border-emerald-700 cursor-pointer">
+                        Check Answer ✓
+                    </button>
+                    <button id="next-btn" onclick="nextQuestion()"
+                            class="hidden btn-3d bg-teal-500 hover:bg-teal-600 text-white font-black text-sm sm:text-base px-6 py-3 rounded-2xl border-b-4 border-teal-700 cursor-pointer">
+                        Next Question ➔
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== RESULT VIEW ==================== -->
+        <section id="result-view" class="hidden">
+            <div class="lab-card rounded-3xl p-8 text-center space-y-5 max-w-xl mx-auto">
+                <div id="result-emoji" class="text-6xl">🎉</div>
+                <h2 id="result-title" class="font-display text-3xl font-bold text-slate-800">Stage Complete!</h2>
+                <div id="result-stars" class="text-4xl tracking-widest">⭐⭐⭐</div>
+                <p id="result-summary" class="text-base font-bold text-slate-600"></p>
+
+                <div class="grid grid-cols-3 gap-3 pt-2">
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3">
+                        <div class="text-xs font-black text-emerald-700">Accuracy</div>
+                        <div id="res-acc" class="text-2xl font-black text-emerald-900 mt-0.5">100%</div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3">
+                        <div class="text-xs font-black text-amber-700">Points</div>
+                        <div id="res-pts" class="text-2xl font-black text-amber-900 mt-0.5">+100</div>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 rounded-2xl p-3">
+                        <div class="text-xs font-black text-rose-700">Missed</div>
+                        <div id="res-miss" class="text-2xl font-black text-rose-900 mt-0.5">0</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-3 pt-4">
+                    <button onclick="retryStage()"
+                            class="btn-3d bg-amber-400 hover:bg-amber-500 text-amber-950 font-black px-5 py-3 rounded-2xl border-b-4 border-amber-600 cursor-pointer">
+                        🔄 Play Again
+                    </button>
+                    <button onclick="backToLobby()"
+                            class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3 rounded-2xl border-b-4 border-emerald-700 cursor-pointer">
+                        🏠 Back to Stages
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="../Scripts/sound-engine.js"></script>
+    <script src="../Scripts/game-effects.js"></script>
+    <script>
+        const STORAGE_KEY = 'bilingual_rs_4a_v1';
+
+        const STAGES = [
+            {
+                id: 1,
+                icon: '🔤',
+                title: 'Word Work & Short/Long u',
+                subtitle: 'Critical Vocabulary, Phonics & Spelling',
+                zhSub: '核心單字、短長音 u 分辨與拼字聽寫',
+                badge: 'ELA4 pp.30–32',
+                color: 'from-emerald-400 to-teal-500',
+                border: 'border-emerald-300'
+            },
+            {
+                id: 2,
+                icon: '🪶',
+                title: 'The Game of Silence',
+                subtitle: 'Historical Fiction & Story Comprehension',
+                zhSub: '歷史小說人物、情節與真偽判斷',
+                badge: 'Story pp.140–152',
+                color: 'from-teal-400 to-cyan-500',
+                border: 'border-teal-300'
+            },
+            {
+                id: 3,
+                icon: '✨',
+                title: 'Figurative & Sensory',
+                subtitle: 'Simile, Metaphor & Five Senses',
+                zhSub: '明喻、暗喻與感官語言判斷',
+                badge: 'ELA4 pp.33–34',
+                color: 'from-amber-400 to-orange-500',
+                border: 'border-amber-300'
+            },
+            {
+                id: 4,
+                icon: '🧩',
+                title: 'Grammar 4.1 & 4.2',
+                subtitle: 'Adjective Order & Adverbs',
+                zhSub: '形容詞順序、副詞類型與句中位置',
+                badge: 'Grammar 4.1–4.2',
+                color: 'from-sky-400 to-indigo-500',
+                border: 'border-sky-300'
+            },
+            {
+                id: 5,
+                icon: '🏆',
+                title: 'Grammar 4.4 & Unit Review',
+                subtitle: 'Comparatives, Superlatives & Writing',
+                zhSub: '比較級、最高級、寫作修訂與模擬考',
+                badge: 'Grammar 4.4 + Test',
+                color: 'from-violet-400 to-purple-500',
+                border: 'border-violet-300'
+            }
+        ];
+
+        const QUESTION_BANK = {
+            // ==================== STAGE 1: WORD WORK, VOCABULARY & SHORT/LONG U ====================
+            1: [
+                {
+                    id: 'rs_1_1',
+                    type: 'mcq',
+                    prompt: 'Choose the correct meaning of "absurd":',
+                    zhHint: '選出單字 absurd 的正確英文解釋。',
+                    options: [
+                        'Silly or ridiculous',
+                        'Very fierce, mean, and violent',
+                        'Quiet and thoughtful',
+                        'Wanted very much'
+                    ],
+                    answer: 0,
+                    explain: '"Absurd" means silly or ridiculous (like the funny faces Pinch made).',
+                    zhExplain: 'absurd 意思是「荒謬的、可笑的」。'
+                },
+                {
+                    id: 'rs_1_2',
+                    type: 'mcq',
+                    prompt: 'Choose the word that matches: "lose something because you have broken a rule."',
+                    zhHint: '選出符合「因違反規則而喪失資格／物品」的單字。',
+                    options: ['coveted', 'forfeit', 'despised', 'taunt'],
+                    answer: 1,
+                    explain: '"Forfeit" means to lose something or give up a game because you broke a rule.',
+                    zhExplain: 'forfeit 意思是「（因違規而）喪失、放棄」。'
+                },
+                {
+                    id: 'rs_1_3',
+                    type: 'mcq',
+                    prompt: 'Omakayas _______ tanning hides; she strongly disliked that chore.',
+                    zhHint: '填入「強烈厭惡」的單字。',
+                    options: ['elaborately', 'coveted', 'despised', 'rescued'],
+                    answer: 2,
+                    explain: '"Despised" means felt a strong dislike for something.',
+                    zhExplain: 'despised 是 despise（痛恨、厭惡）的過去式。'
+                },
+                {
+                    id: 'rs_1_4',
+                    type: 'mcq',
+                    prompt: 'Old Tallow had _______ dogs that stood guard outside, looking fierce and mean.',
+                    zhHint: '填入形容看門狗「兇猛的」單字。',
+                    options: ['absurd', 'ferocious', 'elaborately', 'rude'],
+                    answer: 1,
+                    explain: '"Ferocious" means very fierce, mean, and violent.',
+                    zhExplain: 'ferocious 意思是「兇猛的、殘暴的」。'
+                },
+                {
+                    id: 'rs_1_5',
+                    type: 'mcq',
+                    prompt: 'Pinch _______ the sharp knife and wanted it very much.',
+                    zhHint: '填入表示「非常渴望得到」的單字。',
+                    options: ['coveted', 'forfeited', 'taunted', 'amused'],
+                    answer: 0,
+                    explain: '"Coveted" means wanted something very much (often something belonging to someone else or a prize).',
+                    zhExplain: 'coveted 意思是「覬覦、非常渴望得到」。'
+                },
+                {
+                    id: 'rs_1_6',
+                    type: 'mcq',
+                    prompt: 'Little Bee wanted the doll that was _______ dressed in tiny britches and a leather coat.',
+                    zhHint: '填入表示「精緻繁複地」裝飾的副詞。',
+                    options: ['ferociously', 'absurdly', 'elaborately', 'rudely'],
+                    answer: 2,
+                    explain: '"Elaborately" means decorated or made with many complex artistic details.',
+                    zhExplain: 'elaborately 意思是「精巧地、複雜細緻地」。'
+                },
+                {
+                    id: 'rs_1_7',
+                    type: 'mcq',
+                    prompt: 'Pinch mouthed a _______ ("Eah, eah, eah") to anger and upset his sister.',
+                    zhHint: '填入「嘲弄、激怒他人的話」。',
+                    options: ['clue', 'taunt', 'tune', 'crumb'],
+                    answer: 1,
+                    explain: 'A "taunt" is something someone says to anger or upset someone else.',
+                    zhExplain: 'taunt 是「嘲弄、諷刺的話」。'
+                },
+                {
+                    id: 'rs_1_8',
+                    type: 'mcq',
+                    prompt: 'Phonics Check: Which word has the SHORT u sound (like in "up")?',
+                    zhHint: '自然發音：哪一個字有短母音 u（像 up 的發音）？',
+                    options: ['juice', 'trunk', 'tune', 'rude'],
+                    answer: 1,
+                    explain: '"Trunk" has the short u sound (/ʌ/). "Juice", "tune", and "rude" all have the long u sound.',
+                    zhExplain: 'trunk 發短母音 u；juice、tune、rude 都是長母音 u。'
+                },
+                {
+                    id: 'rs_1_9',
+                    type: 'mcq',
+                    prompt: 'Phonics Check: Which word has the LONG u sound (like in "rule" or "cube")?',
+                    zhHint: '自然發音：哪一個字有長母音 u？',
+                    options: ['bunch', 'under', 'rescue', 'crumb'],
+                    answer: 2,
+                    explain: '"Rescue" has the long u sound (/juː/). "Bunch", "under", and "crumb" have the short u sound.',
+                    zhExplain: 'rescue 的 ue 發長母音 u；bunch、under、crumb 都是短母音 u。'
+                },
+                {
+                    id: 'rs_1_10',
+                    type: 'mcq',
+                    prompt: 'Phonics Check: Which group contains ONLY short u spelling words?',
+                    zhHint: '哪一組全部都是短母音 u 的單字？',
+                    options: [
+                        'brush, bunch, crumb, under',
+                        'dew, stew, clue, truth',
+                        'argue, refuse, amuse, juice',
+                        'trunk, tune, rude, rescue'
+                    ],
+                    answer: 0,
+                    explain: 'Brush, bunch, crumb, under (and trunk) are the 5 short u spelling words in Unit 4.',
+                    zhExplain: 'brush、bunch、crumb、under 全部發短母音 u。'
+                },
+                {
+                    id: 'rs_1_11',
+                    type: 'mcq',
+                    prompt: 'Word Bank Fill-in: Look for a _______ in the mystery story to solve the puzzle.',
+                    zhHint: '從字庫選詞：在推理故事中尋找「線索」來解謎。',
+                    options: ['dew', 'clue', 'stew', 'crumb'],
+                    answer: 1,
+                    explain: 'A "clue" is a piece of information that helps solve a mystery or puzzle.',
+                    zhExplain: 'clue 意思是「線索」。'
+                },
+                {
+                    id: 'rs_1_12',
+                    type: 'mcq',
+                    prompt: 'Word Bank Fill-in: Always tell the _______, even when it is hard.',
+                    zhHint: '填入「真相、實話」。',
+                    options: ['truth', 'tune', 'juice', 'brush'],
+                    answer: 0,
+                    explain: '"Truth" means what is true and honest.',
+                    zhExplain: 'truth 意思是「實話、真相」。'
+                },
+                {
+                    id: 'rs_1_13',
+                    type: 'spell',
+                    prompt: 'Dictation & Spelling: Listen or read the clue — to save someone from danger (6 letters, starts with r).',
+                    speakText: 'rescue',
+                    zhHint: '聽音拼字：救援、拯救（6 個字母，r 開頭）。',
+                    answer: 'rescue',
+                    explain: 'Spelling: r-e-s-c-u-e (rescue). It has a long u sound at the end.',
+                    zhExplain: '拼法為 rescue（救援）。'
+                },
+                {
+                    id: 'rs_1_14',
+                    type: 'spell',
+                    prompt: 'Dictation & Spelling: A thick soup of meat and vegetables cooked slowly (4 letters, starts with s).',
+                    speakText: 'stew',
+                    zhHint: '聽音拼字：燉菜（4 個字母，s 開頭）。',
+                    answer: 'stew',
+                    explain: 'Spelling: s-t-e-w (stew). The "ew" spells the long u sound.',
+                    zhExplain: '拼法為 stew（燉菜／燉肉）。'
+                },
+                {
+                    id: 'rs_1_15',
+                    type: 'spell',
+                    prompt: 'Dictation & Spelling: To say no, or not agree to do something (6 letters, starts with r).',
+                    speakText: 'refuse',
+                    zhHint: '聽音拼字：拒絕（6 個字母，r 開頭）。',
+                    answer: 'refuse',
+                    explain: 'Spelling: r-e-f-u-s-e (refuse).',
+                    zhExplain: '拼法為 refuse（拒絕）。'
+                }
+            ],
+
+            // ==================== STAGE 2: THE GAME OF SILENCE COMPREHENSION ====================
+            2: [
+                {
+                    id: 'rs_2_1',
+                    type: 'mcq',
+                    prompt: 'What is the GENRE of "The Game of Silence"?',
+                    zhHint: '《沉默遊戲》這篇文章屬於哪一種文類？',
+                    options: [
+                        'Historical fiction',
+                        'Science fiction',
+                        'Biography',
+                        'Poetry'
+                    ],
+                    answer: 0,
+                    explain: 'It is historical fiction: set in a real time and place in the past (1850 on Lake Superior) with characters who act like real people from the past.',
+                    zhExplain: '文類是 Historical fiction（歷史小說），背景設定在 1850 年的蘇必略湖。'
+                },
+                {
+                    id: 'rs_2_2',
+                    type: 'mcq',
+                    prompt: 'Why did the neighboring tribe ("the raggedy ones") arrive at Omakayas\'s village?',
+                    zhHint: '為什麼鄰近部落的訪客會來到 Omakayas 的村莊？',
+                    options: [
+                        'They came for a summer fishing festival.',
+                        'They had been forced from their land and traveled a long way.',
+                        'They wanted to trade maple sugar for canoes.',
+                        'They were lost in a snowstorm.'
+                    ],
+                    answer: 1,
+                    explain: 'In 1850, members of a neighboring tribe arrived tired, hungry, and "raggedy" after being forced from their land.',
+                    zhExplain: '他們是被迫離開原本土地的鄰近部落族人。'
+                },
+                {
+                    id: 'rs_2_3',
+                    type: 'mcq',
+                    prompt: 'Why do the adults have the children play the game of silence that night?',
+                    zhHint: '大人們為什麼要孩子玩沉默遊戲？',
+                    options: [
+                        'Because it was Omakayas\'s birthday party.',
+                        'So the grown-ups could hold a serious council meeting without shushing children.',
+                        'Because Pinch had a sore throat.',
+                        'So everyone could go to sleep early.'
+                    ],
+                    answer: 1,
+                    explain: 'The grown-ups needed to council, think, and absorb serious news without having to shush small children.',
+                    zhExplain: '大人需要安靜地開會商討重大消息，不想一直叫小孩安靜。'
+                },
+                {
+                    id: 'rs_2_4',
+                    type: 'mcq',
+                    prompt: 'What prize did Omakayas choose to win from the pile of gifts?',
+                    zhHint: 'Omakayas 最想贏得禮物堆裡的哪一樣東西？',
+                    options: [
+                        'The sharp knife',
+                        'The bow and arrows',
+                        'The pair of beaded makazinan (moccasins)',
+                        'The elaborately dressed doll'
+                    ],
+                    answer: 2,
+                    explain: 'Omakayas settled on the narrow makazinan (moccasins) with velvet ankle cuffs because she had watched Nokomis make them so carefully.',
+                    zhExplain: 'Omakayas 選了外婆 Nokomis 親手縫製串珠的鹿皮軟鞋（makazinan）。'
+                },
+                {
+                    id: 'rs_2_5',
+                    type: 'mcq',
+                    prompt: 'How did Pinch try to make Omakayas cry out and lose the game?',
+                    zhHint: '弟弟 Pinch 用什麼壞主意想讓 Omakayas 尖叫輸掉遊戲？',
+                    options: [
+                        'He poured cold rain water over her head.',
+                        'He laid a burning twig from the fire right next to her ankle.',
+                        'He hid her makazinan outside in the mud.',
+                        'He shouted in her ear.'
+                    ],
+                    answer: 1,
+                    explain: 'Pinch drew a burning twig from the fire and laid it innocently next to her ankle so it would scorch her if she moved.',
+                    zhExplain: 'Pinch 把燃燒的小樹枝放在她腳踝旁，害她差點燙傷叫出來。'
+                },
+                {
+                    id: 'rs_2_6',
+                    type: 'mcq',
+                    prompt: 'Which character wanted the small bow and arrows tipped with brass points?',
+                    zhHint: '哪個角色最想要弓箭組？',
+                    options: ['Little Bee', 'Twilight', 'Two Strike Girl', 'Pinch'],
+                    answer: 2,
+                    explain: 'Little Bee wanted the doll, Pinch coveted the knife, and Two Strike Girl wanted the bow and arrows.',
+                    zhExplain: 'Two Strike Girl 個性像男孩一樣強悍，想要弓箭。'
+                },
+                {
+                    id: 'rs_2_7',
+                    type: 'mcq',
+                    prompt: 'True or False: Omakayas saved her doll from Pinch by pretending to shut her eyes and snatching it back silently.',
+                    zhHint: '是非題：Omakayas 假裝閉上眼睛，再默默把洋娃娃搶回來。',
+                    options: ['True', 'False'],
+                    answer: 0,
+                    explain: 'True! She pretended to fall asleep, then grabbed the doll in a flash and tucked it down the neck of her dress without making a sound.',
+                    zhExplain: '正確（True）！她假裝睡著後迅速把娃娃搶回來塞進衣服裡，沒有發出一點聲音。'
+                },
+                {
+                    id: 'rs_2_8',
+                    type: 'mcq',
+                    prompt: 'True or False: Omakayas smashed Pinch with the tin soup ladle before the visitors arrived, so she lost the game.',
+                    zhHint: '是非題：Omakayas 在訪客抵達前就用湯勺打 Pinch 而輸掉遊戲。',
+                    options: ['True', 'False'],
+                    answer: 1,
+                    explain: 'False! Just at the second she decided to forfeit, the visitors arrived and Nokomis said they could quit until after eating.',
+                    zhExplain: '錯誤（False）！就在她正要放棄的時候，訪客剛好到了，外婆說吃完飯再繼續玩。'
+                },
+                {
+                    id: 'rs_2_9',
+                    type: 'mcq',
+                    prompt: 'Why did NOBODY lose the game of silence at the end of that night?',
+                    zhHint: '那天晚上最後為什麼「沒有人」輸掉沉默遊戲？',
+                    options: [
+                        'Nokomis forgot to sing the song.',
+                        'The children all fell asleep during the meeting.',
+                        'They overheard the serious talk and feared losing their home.',
+                        'Pinch left the lodge early.'
+                    ],
+                    answer: 2,
+                    explain: 'As they listened to the grown-ups, the children realized the threat of a much bigger loss—their home—so they stayed completely silent.',
+                    zhExplain: '孩子們偷聽到大人嚴肅的談話，意識到可能失去「家園」的威脅，所以大家都屏氣凝神沒有出聲。'
+                },
+                {
+                    id: 'rs_2_10',
+                    type: 'mcq',
+                    prompt: 'Who is the author of "The Game of Silence"?',
+                    zhHint: '《沉默遊戲》的作者是誰？',
+                    options: ['Louise Erdrich', 'Paolo Domeniconi', 'Two Strike', 'Old Tallow'],
+                    answer: 0,
+                    explain: 'Louise Erdrich (member of the Anishinaabe Nation) wrote the story; Paolo Domeniconi illustrated it.',
+                    zhExplain: '作者是 Louise Erdrich；Paolo Domeniconi 是繪者。'
+                }
+            ],
+
+            // ==================== STAGE 3: FIGURATIVE & SENSORY LANGUAGE ====================
+            3: [
+                {
+                    id: 'rs_3_1',
+                    type: 'mcq',
+                    prompt: 'Identify the figurative language: "Words buzzing in her throat like caught bees."',
+                    zhHint: '判斷修辭：「喉嚨裡嗡嗡作響的話語就像被困住的蜜蜂。」',
+                    options: ['Simile', 'Metaphor', 'Personification', 'Alliteration'],
+                    answer: 0,
+                    explain: 'It is a SIMILE because it compares words buzzing in her throat to caught bees using the word "like".',
+                    zhExplain: '句子用了 "like" 來比喻兩件不同的事物，所以是明喻（Simile）。'
+                },
+                {
+                    id: 'rs_3_2',
+                    type: 'mcq',
+                    prompt: 'Identify the figurative language: "She would be a stone."',
+                    zhHint: '判斷修辭：「她要成為一塊石頭。」',
+                    options: ['Simile', 'Metaphor', 'Onomatopoeia', 'Idiom'],
+                    answer: 1,
+                    explain: 'It is a METAPHOR because it directly says she would be a stone (without using "like" or "as") to show how still and silent she would stay.',
+                    zhExplain: '沒有使用 like 或 as，直接把人比喻成石頭，是暗喻（Metaphor）。'
+                },
+                {
+                    id: 'rs_3_3',
+                    type: 'mcq',
+                    prompt: 'Identify the figurative language: "Nokomis\'s old bones ached, and she creaked like a tree every time she moved."',
+                    zhHint: '判斷修辭：「Nokomis 每次移動時，骨頭就像樹一樣發出嘎吱聲。」',
+                    options: ['Simile', 'Metaphor', 'Hyperbole', 'Rhyme'],
+                    answer: 0,
+                    explain: 'It uses "like" to compare Nokomis\'s creaking movement to a tree, making it a SIMILE.',
+                    zhExplain: '使用 "like" 比較，屬於明喻（Simile）。'
+                },
+                {
+                    id: 'rs_3_4',
+                    type: 'mcq',
+                    prompt: 'Identify the figurative language: "He was making it teeter on the cliff of his knees."',
+                    zhHint: '判斷修辭：「他讓娃娃在他膝蓋的懸崖邊搖搖欲墜。」',
+                    options: ['Simile', 'Metaphor', 'Rhyme', 'Adverb'],
+                    answer: 1,
+                    explain: '"The cliff of his knees" compares his knees to a cliff without using "like" or "as"—that is a METAPHOR.',
+                    zhExplain: '把膝蓋直接比喻成懸崖（cliff），沒用 like/as，屬於暗喻（Metaphor）。'
+                },
+                {
+                    id: 'rs_3_5',
+                    type: 'mcq',
+                    prompt: 'Which sentence is a SIMILE?',
+                    zhHint: '選出屬於「明喻（Simile）」的句子。',
+                    options: [
+                        'The classroom was a zoo during recess.',
+                        'The runner was as fast as lightning.',
+                        'Time is a thief.',
+                        'Droplets hissed into the fire.'
+                    ],
+                    answer: 1,
+                    explain: 'A simile compares two unlike things using "like" or "as" ("as fast as lightning").',
+                    zhExplain: '"as fast as lightning" 使用了 as...as，是明喻（Simile）。'
+                },
+                {
+                    id: 'rs_3_6',
+                    type: 'mcq',
+                    prompt: 'Sensory Language: "Droplets hissed through the roof vent into the fire, driving stinging smoke into her eyes." Which TWO senses are strongest here?',
+                    zhHint: '感官語言：「水滴嘶嘶落入火中，刺痛的煙霧飄進她的眼睛。」這句最強烈地描寫了哪兩種感官？',
+                    options: [
+                        'Taste and smell',
+                        'Sound (hissed) and sight/touch (stinging smoke in eyes)',
+                        'Taste and touch',
+                        'Smell and taste'
+                    ],
+                    answer: 1,
+                    explain: '"Hissed" appeals to hearing (sound), and "stinging smoke into her eyes" appeals to touch/feeling and sight.',
+                    zhExplain: 'hissed（嘶嘶聲）屬於聽覺，stinging smoke into her eyes（刺痛眼睛的煙）屬於觸覺／視覺。'
+                },
+                {
+                    id: 'rs_3_7',
+                    type: 'mcq',
+                    prompt: 'Which sensory image appeals to TASTE and TOUCH?',
+                    zhHint: '哪一句感官描寫訴諸「味覺」與「觸覺」？',
+                    options: [
+                        'The bright red ribbons fluttered in the wind.',
+                        'Warm, salty, buttery popcorn melted in my mouth.',
+                        'The rain drummed loudly on the birchbark roof.',
+                        'Old Tallow smelled of pine and wolf.'
+                    ],
+                    answer: 1,
+                    explain: '"Warm" and "melted" appeal to touch; "salty" and "buttery" appeal to taste.',
+                    zhExplain: 'warm（溫暖）是觸覺，salty/buttery（鹹香奶油味）是味覺。'
+                },
+                {
+                    id: 'rs_3_8',
+                    type: 'mcq',
+                    prompt: 'Why do authors use sensory language and figurative language in historical fiction?',
+                    zhHint: '作者為什麼要在歷史小說中使用感官與修辭語言？',
+                    options: [
+                        'To make the story longer without adding details',
+                        'To help readers see, hear, feel, and picture the setting and characters clearly',
+                        'To replace all adjectives with verbs',
+                        'To avoid telling the plot'
+                    ],
+                    answer: 1,
+                    explain: 'Figurative and sensory language create vivid mental images so readers can experience the setting and emotions.',
+                    zhExplain: '讓讀者彷彿身歷其境，更鮮明地感受場景與角色情緒。'
+                }
+            ],
+
+            // ==================== STAGE 4: GRAMMAR 4.1 & 4.2 (ADJECTIVES & ADVERBS) ====================
+            4: [
+                {
+                    id: 'rs_4_1',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.1: In "The chilly, windy day was gloomy," what is the adjective AFTER the linking verb "was"?',
+                    zhHint: '選出在 be 動詞 was 後面修飾主詞 day 的形容詞。',
+                    options: ['chilly', 'windy', 'day', 'gloomy'],
+                    answer: 3,
+                    explain: '"Gloomy" follows the linking verb "was" and describes the subject "day".',
+                    zhExplain: 'gloomy 放在 be 動詞 was 後面，用來形容主詞 day。'
+                },
+                {
+                    id: 'rs_4_2',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.1 (Order of Adjectives): Choose the sentence with the CORRECT adjective order.',
+                    zhHint: '形容詞順序：數量 → 觀點 → 大小 → 形狀 → 年齡 → 顏色 → 材質 → 用途。',
+                    options: [
+                        'She saw porcelain two small white cups.',
+                        'She saw two pretty small round white porcelain cups.',
+                        'She saw white round two small pretty cups.',
+                        'She saw small two porcelain white cups.'
+                    ],
+                    answer: 1,
+                    explain: 'Correct order: number (two) → opinion (pretty) → size (small) → shape (round) → color (white) → material (porcelain).',
+                    zhExplain: '正確順序：數量 two → 觀點 pretty → 大小 small → 形狀 round → 顏色 white → 材質 porcelain。'
+                },
+                {
+                    id: 'rs_4_3',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.1 (Order of Adjectives): Choose the correct phrase to complete the sentence: "Old Tallow brought _______ bow."',
+                    zhHint: '選出正確的形容詞順序：數量 → 大小 → 材質。',
+                    options: [
+                        'a wooden small one',
+                        'one wooden small',
+                        'one small wooden',
+                        'small one wooden'
+                    ],
+                    answer: 2,
+                    explain: 'Number (one) comes before size (small), which comes before material (wooden).',
+                    zhExplain: '順序為：數量 one → 大小 small → 材質 wooden。'
+                },
+                {
+                    id: 'rs_4_4',
+                    type: 'sentence',
+                    prompt: 'Order the words to build a sentence with the CORRECT adjective order:',
+                    zhHint: '排列字卡，注意「數量 → 觀點 → 大小 → 顏色」的形容詞順序。',
+                    tokens: ['She', 'found', 'two', 'pretty', 'small', 'red', 'ribbons.'],
+                    answer: 'She found two pretty small red ribbons.',
+                    explain: 'Number (two) → opinion (pretty) → size (small) → color (red) + noun (ribbons).',
+                    zhExplain: '順序為：two（數量）→ pretty（觀點）→ small（大小）→ red（顏色）ribbons。'
+                },
+                {
+                    id: 'rs_4_5',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.2 (Adverbs): In "Omakayas waited quietly inside the lodge," what does the adverb "quietly" tell?',
+                    zhHint: '副詞 quietly 在句中說明了動作的哪一方面？',
+                    options: [
+                        'How she waited',
+                        'When she waited',
+                        'Where she waited',
+                        'How many times she waited'
+                    ],
+                    answer: 0,
+                    explain: 'Adverbs ending in -ly like "quietly" usually tell HOW an action happens.',
+                    zhExplain: 'quietly（安靜地）說明動作「如何（How）」發生。'
+                },
+                {
+                    id: 'rs_4_6',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.2 (Frequency & Intensity): Which word in "Pinch almost always talks loudly" tells HOW OFTEN?',
+                    zhHint: '選出表示「頻率（多常發生）」的副詞。',
+                    options: ['almost', 'always', 'talks', 'loudly'],
+                    answer: 1,
+                    explain: '"Always" is an adverb of frequency (how often). "Almost" tells how much (intensity), and "loudly" tells how.',
+                    zhExplain: 'always 是頻率副詞（how often）；almost 是程度副詞；loudly 是情態副詞。'
+                },
+                {
+                    id: 'rs_4_7',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.2 (Adverbs): Which sentence uses a PRECISE adverb instead of "very" + adverb?',
+                    zhHint: '哪一句使用了「更精確的單一副詞」，取代了籠統的 very + 副詞？',
+                    options: [
+                        'The rain fell very hard.',
+                        'The runner sprinted very fast.',
+                        'The dog barked ferociously at the gate.',
+                        'She spoke very quietly.'
+                    ],
+                    answer: 2,
+                    explain: '"Ferociously" is a vivid, precise adverb that is stronger than "very loudly" or "very angrily".',
+                    zhExplain: 'ferociously（兇猛地）是精確生動的副詞，比 very + 副詞更有畫面感。'
+                },
+                {
+                    id: 'rs_4_8',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.2 (Adverb Position): Where can an adverb like "soon" or "carefully" be placed in a sentence?',
+                    zhHint: '副詞在句子裡可以放在哪些位置？',
+                    options: [
+                        'Only at the very end of a sentence',
+                        'Only between a noun and an adjective',
+                        'At the beginning, middle (near the verb), or end of a sentence',
+                        'Nowhere; adverbs cannot move'
+                    ],
+                    answer: 2,
+                    explain: 'Many adverbs can appear at the beginning ("Soon, everyone listened."), middle ("They carefully watched."), or end ("They watched carefully.").',
+                    zhExplain: '副詞很靈活，常可放在句首、句中（動詞旁）或句尾。'
+                },
+                {
+                    id: 'rs_4_9',
+                    type: 'sentence',
+                    prompt: 'Arrange the words into a correct sentence with an adverb of time at the beginning:',
+                    zhHint: '排列字卡：把時間副詞 Soon 放在句首。',
+                    tokens: ['Soon,', 'everybody', 'listened', 'very', 'carefully.'],
+                    answer: 'Soon, everybody listened very carefully.',
+                    explain: '"Soon," tells when; "very" tells how much (intensity); "carefully" tells how.',
+                    zhExplain: 'Soon 放句首表時間，very 修飾 carefully 表程度與方式。'
+                }
+            ],
+
+            // ==================== STAGE 5: GRAMMAR 4.4 COMPARATIVES, SUPERLATIVES & UNIT REVIEW ====================
+            5: [
+                {
+                    id: 'rs_5_1',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.4: Compare TWO things: "Twilight was _______ than Two Strike Girl."',
+                    zhHint: '兩者比較使用比較級（-er 或 more）。',
+                    options: ['quiet', 'quieter', 'quietest', 'more quietest'],
+                    answer: 1,
+                    explain: 'Use the comparative form "-er" (quieter) when comparing TWO people or things.',
+                    zhExplain: '兩個人比較用比較級 quieter（-er + than）。'
+                },
+                {
+                    id: 'rs_5_2',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.4: Compare THREE OR MORE things: "Of all the piles of gifts, tonight\'s pile was the _______."',
+                    zhHint: '三者以上比較使用最高級（-est 或 most）。',
+                    options: ['good', 'better', 'best', 'more good'],
+                    answer: 2,
+                    explain: '"Good → better → best". Because it compares all piles (3 or more), use the superlative "best".',
+                    zhExplain: 'good 的比較級是 better，最高級是 best（三者以上用最高級）。'
+                },
+                {
+                    id: 'rs_5_3',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.4 (Adverbs): "Omakayas watched _______ than Pinch."',
+                    zhHint: '長副詞（如 carefully）的比較級要加 more，不加 -er。',
+                    options: [
+                        'more carefully',
+                        'carefuller',
+                        'most carefully',
+                        'more careful'
+                    ],
+                    answer: 0,
+                    explain: 'Adverbs ending in -ly use "more" for comparative (comparing two) and "most" for superlative.',
+                    zhExplain: '-ly 結尾的副詞（carefully）兩者比較時前面加 more。'
+                },
+                {
+                    id: 'rs_5_4',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.4 (Superlative Adverbs): "Among all the children, Twilight waited the _______."',
+                    zhHint: '在所有孩子當中（三者以上），用最高級副詞 most patiently。',
+                    options: [
+                        'more patiently',
+                        'patientliest',
+                        'most patiently',
+                        'patiently'
+                    ],
+                    answer: 2,
+                    explain: 'For -ly adverbs comparing three or more, use "most" + adverb ("most patiently").',
+                    zhExplain: '三者以上比較，-ly 副詞前面加 most（most patiently）。'
+                },
+                {
+                    id: 'rs_5_5',
+                    type: 'mcq',
+                    prompt: 'Grammar 4.4: Which sentence is WRITTEN CORRECTLY?',
+                    zhHint: '找出比較級／最高級文法完全正確的句子（注意不可重複加 more 和 -er）。',
+                    options: [
+                        'The rain fell more harder than yesterday.',
+                        'Pinch made the most absurdest face of all.',
+                        'The thunder sounded louder than the rain.',
+                        'She ran the faster of all five runners.'
+                    ],
+                    answer: 2,
+                    explain: '"Louder than" correctly compares two sounds without doubling "more" + "-er".',
+                    zhExplain: '不可以同時用 more + -er 或 most + -est；只有 C（louder than）正確。'
+                },
+                {
+                    id: 'rs_5_6',
+                    type: 'mcq',
+                    prompt: 'Connect to Writing: Which revision improves "She wore a red pretty new coat"?',
+                    zhHint: '寫作修訂：把形容詞順序修改為正確的「觀點 → 年齡 → 顏色」。',
+                    options: [
+                        'She wore a new pretty red coat.',
+                        'She wore a pretty new red coat.',
+                        'She wore a red new pretty coat.',
+                        'No change needed.'
+                    ],
+                    answer: 1,
+                    explain: 'Opinion (pretty) comes before age (new), which comes before color (red).',
+                    zhExplain: '正確順序：觀點 pretty → 新舊 age (new) → 顏色 color (red)。'
+                },
+                {
+                    id: 'rs_5_7',
+                    type: 'mcq',
+                    prompt: 'Unit Review (Mixed): Which pair of words BOTH have the long u sound?',
+                    zhHint: '單元總複習：哪一組兩個字都是長母音 u？',
+                    options: [
+                        'juice / clue',
+                        'under / argue',
+                        'brush / dew',
+                        'trunk / tune'
+                    ],
+                    answer: 0,
+                    explain: 'Both "juice" and "clue" have the long u sound (/uː/).',
+                    zhExplain: 'juice 與 clue 都是長母音 u；under、brush、trunk 是短母音 u。'
+                },
+                {
+                    id: 'rs_5_8',
+                    type: 'mcq',
+                    prompt: 'Unit Review (Mixed): "The campfire crackled and sighed like a sleeping giant." This sentence combines:',
+                    zhHint: '單元總複習：這句同時結合了哪兩種技巧？',
+                    options: [
+                        'Sensory sound words and a simile',
+                        'A comparative adverb and a question',
+                        'An adjective order rule and a superlative',
+                        'A metaphor and a spelling rule'
+                    ],
+                    answer: 0,
+                    explain: '"Crackled" and "sighed" are sensory sound words, and "like a sleeping giant" is a simile.',
+                    zhExplain: 'crackled/sighed 是聽覺感官描寫，like a sleeping giant 是明喻（Simile）。'
+                },
+                {
+                    id: 'rs_5_9',
+                    type: 'sentence',
+                    prompt: 'Order the words to form a correct comparative sentence:',
+                    zhHint: '排列字卡組成正確的比較級句子。',
+                    tokens: ['Omakayas', 'stayed', 'quieter', 'than', 'her', 'brother.'],
+                    answer: 'Omakayas stayed quieter than her brother.',
+                    explain: 'Comparative adjective "quieter" + "than" compares Omakayas and her brother.',
+                    zhExplain: '比較級 quieter + than 用來比較 Omakayas 與弟弟兩個人。'
+                }
+            ]
+        };
+
+        // ==================== STATE & STORAGE ====================
+        let userData = {
+            stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 99: 0 },
+            totalScore: 0,
+            mistakes: []
+        };
+        let showZhHint = false;
+        let currentStageId = null;
+        let activeQuestions = [];
+        let qIndex = 0;
+        let sessionScore = 0;
+        let sessionCorrect = 0;
+        let sessionMissed = 0;
+        let streak = 0;
+        let answered = false;
+        let selectedOption = null;
+        let builtTokens = [];
+
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        userData.stars = Object.assign({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 99: 0 }, parsed.stars || {});
+                        userData.totalScore = Number(parsed.totalScore) || 0;
+                        userData.mistakes = Array.isArray(parsed.mistakes) ? parsed.mistakes : [];
+                    }
+                }
+            } catch (_) {}
+            document.getElementById('total-score').textContent = userData.totalScore;
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+            } catch (_) {}
+        }
+
+        function resetProgress() {
+            if (!confirm('Reset all Grade 4 RS stars, score, and mistakes?')) return;
+            userData = { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 99: 0 }, totalScore: 0, mistakes: [] };
+            saveData();
+            document.getElementById('total-score').textContent = '0';
+            renderLobby();
+        }
+
+        // ==================== SPEECH SYNTHESIS (TTS) ====================
+        function speakText(text) {
+            if (!('speechSynthesis' in window) || !text) return;
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'en-US';
+            utter.rate = 0.92;
+            window.speechSynthesis.speak(utter);
+        }
+
+        function speakCurrentQuestion() {
+            const q = activeQuestions[qIndex];
+            if (!q) return;
+            if (q.speakText) {
+                speakText(q.speakText);
+            } else {
+                speakText(q.prompt.replace(/_+/g, 'blank'));
+            }
+        }
+
+        // ==================== CHINESE HINT TOGGLE ====================
+        function toggleChineseHint() {
+            if (window.SoundEngine) SoundEngine.click();
+            showZhHint = !showZhHint;
+            const btn = document.getElementById('hint-toggle');
+            const lbl = document.getElementById('hint-toggle-label');
+            lbl.textContent = showZhHint ? '中文提示: ON' : '中文提示: OFF';
+            btn.className = showZhHint
+                ? 'flex items-center gap-1.5 bg-amber-400 text-amber-950 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-amber-500 transition cursor-pointer shadow-sm'
+                : 'flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-amber-300 transition cursor-pointer';
+
+            if (!document.getElementById('quiz-view').classList.contains('hidden')) {
+                applyHintVisibility();
+            } else {
+                renderLobby();
+            }
+        }
+
+        function applyHintVisibility() {
+            const q = activeQuestions[qIndex];
+            if (!q) return;
+            const zhHintEl = document.getElementById('q-zh-hint');
+            const expZhEl = document.getElementById('feedback-explain-zh');
+            if (showZhHint && q.zhHint) {
+                zhHintEl.textContent = '💡 ' + q.zhHint;
+                zhHintEl.classList.remove('hidden');
+            } else {
+                zhHintEl.classList.add('hidden');
+            }
+            if (showZhHint && q.zhExplain && answered) {
+                expZhEl.textContent = '💡 ' + q.zhExplain;
+                expZhEl.classList.remove('hidden');
+            } else {
+                expZhEl.classList.add('hidden');
+            }
+        }
+
+        // ==================== LOBBY RENDERING ====================
+        function renderLobby() {
+            const totalStars = [1, 2, 3, 4, 5, 99].reduce((sum, id) => sum + (Number(userData.stars[id]) || 0), 0);
+            document.getElementById('lobby-stars').textContent = `${totalStars} / 18`;
+            document.getElementById('total-score').textContent = userData.totalScore;
+
+            const grid = document.getElementById('stage-grid');
+            grid.innerHTML = '';
+
+            STAGES.forEach(st => {
+                const stars = userData.stars[st.id] || 0;
+                const starStr = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+                const count = (QUESTION_BANK[st.id] || []).length;
+                const card = document.createElement('div');
+                card.className = `lab-card rounded-3xl p-6 border-2 ${st.border} flex flex-col justify-between hover:-translate-y-1 transition cursor-pointer`;
+                card.onclick = () => startStage(st.id);
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${st.color} flex items-center justify-center text-3xl shadow-sm">
+                                ${st.icon}
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-block text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full">${st.badge}</span>
+                                <div class="text-base tracking-wider mt-1">${starStr}</div>
+                            </div>
+                        </div>
+                        <h3 class="font-display text-xl font-bold text-slate-800">${st.title}</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-500 mt-0.5">${st.subtitle}</p>
+                        ${showZhHint ? `<p class="text-xs font-bold text-amber-700 mt-1">💡 ${st.zhSub}</p>` : ''}
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-black">
+                        <span class="text-slate-400">${count} Questions</span>
+                        <span class="text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl">Start Practice ➔</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Mistake Buster Card (Stage 99)
+            const mistakeCount = userData.mistakes.length;
+            const mStars = userData.stars[99] || 0;
+            const mStarStr = '⭐'.repeat(mStars) + '☆'.repeat(3 - mStars);
+            const mCard = document.createElement('div');
+            mCard.className = `lab-card rounded-3xl p-6 border-2 ${mistakeCount > 0 ? 'border-rose-300 bg-rose-50/40' : 'border-emerald-200'} flex flex-col justify-between transition ${mistakeCount > 0 ? 'hover:-translate-y-1 cursor-pointer' : 'opacity-80'}`;
+            mCard.onclick = () => {
+                if (mistakeCount > 0) startStage(99);
+            };
+            mCard.innerHTML = `
+                <div>
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${mistakeCount > 0 ? 'from-rose-400 to-orange-500' : 'from-slate-300 to-slate-400'} flex items-center justify-center text-3xl shadow-sm">
+                            📕
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block text-[11px] font-black ${mistakeCount > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'} border px-2.5 py-0.5 rounded-full">
+                                ${mistakeCount > 0 ? `${mistakeCount} To Clear` : 'All Clear!'}
+                            </span>
+                            <div class="text-base tracking-wider mt-1">${mStarStr}</div>
+                        </div>
+                    </div>
+                    <h3 class="font-display text-xl font-bold text-slate-800">Mistake Buster</h3>
+                    <p class="text-xs sm:text-sm font-bold text-slate-500 mt-0.5">Review & clear any questions you missed</p>
+                    ${showZhHint ? '<p class="text-xs font-bold text-amber-700 mt-1">💡 複習並消滅之前答錯的題目</p>' : ''}
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-black">
+                    <span class="text-slate-400">${mistakeCount} Saved Mistakes</span>
+                    <span class="${mistakeCount > 0 ? 'text-rose-700 bg-rose-100' : 'text-slate-400 bg-slate-100'} px-3 py-1.5 rounded-xl">
+                        ${mistakeCount > 0 ? 'Review Now ➔' : 'No Mistakes'}
+                    </span>
+                </div>
+            `;
+            grid.appendChild(mCard);
+        }
+
+        // ==================== QUIZ FLOW ====================
+        function findQuestionById(qId) {
+            for (const key of Object.keys(QUESTION_BANK)) {
+                const found = QUESTION_BANK[key].find(item => item.id === qId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function shuffleArray(arr) {
+            const copy = arr.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function startStage(stageId) {
+            if (window.SoundEngine) SoundEngine.click();
+            currentStageId = stageId;
+
+            if (stageId === 99) {
+                activeQuestions = userData.mistakes.map(findQuestionById).filter(Boolean);
+                if (activeQuestions.length === 0) return;
+                document.getElementById('quiz-stage-title').textContent = '📕 Mistake Buster';
+            } else {
+                const st = STAGES.find(s => s.id === stageId);
+                activeQuestions = shuffleArray(QUESTION_BANK[stageId] || []);
+                document.getElementById('quiz-stage-title').textContent = `${st.icon} ${st.title}`;
+            }
+
+            qIndex = 0;
+            sessionScore = 0;
+            sessionCorrect = 0;
+            sessionMissed = 0;
+            streak = 0;
+
+            document.getElementById('lobby-view').classList.add('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function backToLobby() {
+            if (window.SoundEngine) SoundEngine.click();
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-view').classList.add('hidden');
+            document.getElementById('lobby-view').classList.remove('hidden');
+            renderLobby();
+        }
+
+        function retryStage() {
+            startStage(currentStageId);
+        }
+
+        function renderQuestion() {
+            const q = activeQuestions[qIndex];
+            answered = false;
+            selectedOption = null;
+            builtTokens = [];
+
+            const total = activeQuestions.length;
+            document.getElementById('quiz-progress-text').textContent = `${qIndex + 1} / ${total}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((qIndex + 1) / total) * 100}%`;
+            document.getElementById('session-score').textContent = sessionScore;
+
+            const streakBadge = document.getElementById('streak-badge');
+            if (streak >= 2) {
+                streakBadge.classList.remove('hidden');
+                document.getElementById('streak-count').textContent = streak;
+            } else {
+                streakBadge.classList.add('hidden');
+            }
+
+            const typeLabels = {
+                mcq: '🔘 Multiple Choice',
+                spell: '⌨️ Dictation & Spelling',
+                sentence: '🧩 Sentence Builder'
+            };
+            document.getElementById('q-type-badge').textContent = typeLabels[q.type] || 'Question';
+            document.getElementById('q-prompt').textContent = q.prompt;
+
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            const area = document.getElementById('answer-area');
+            area.innerHTML = '';
+
+            if (q.type === 'mcq') {
+                document.getElementById('check-btn').classList.add('hidden');
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left bg-white hover:bg-emerald-50 border-2 border-slate-200 hover:border-emerald-400 rounded-2xl px-4 py-3.5 font-bold text-slate-800 transition flex items-center gap-3 cursor-pointer';
+                    btn.dataset.idx = idx;
+                    btn.innerHTML = `
+                        <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center shrink-0 text-sm">${String.fromCharCode(65 + idx)}</span>
+                        <span class="text-sm sm:text-base">${opt}</span>
+                    `;
+                    btn.onclick = () => selectMcq(idx);
+                    area.appendChild(btn);
+                });
+            } else if (q.type === 'spell') {
+                document.getElementById('check-btn').classList.remove('hidden');
+                const wrap = document.createElement('div');
+                wrap.className = 'space-y-3';
+                if (q.speakText) {
+                    const listenBtn = document.createElement('button');
+                    listenBtn.type = 'button';
+                    listenBtn.className = 'inline-flex items-center gap-2 bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-sm px-4 py-2 rounded-xl border border-amber-300 cursor-pointer transition';
+                    listenBtn.innerHTML = '<span>🔊</span><span>Hear Word Pronunciation</span>';
+                    listenBtn.onclick = () => speakText(q.speakText);
+                    wrap.appendChild(listenBtn);
+                }
+                const inp = document.createElement('input');
+                inp.id = 'spell-input';
+                inp.type = 'text';
+                inp.autocomplete = 'off';
+                inp.placeholder = 'Type the English word here...';
+                inp.className = 'w-full bg-white border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none rounded-2xl px-4 py-3.5 text-lg font-black text-slate-800 tracking-wide';
+                inp.onkeydown = (e) => {
+                    if (e.key === 'Enter' && !answered) checkCurrentAnswer();
+                };
+                wrap.appendChild(inp);
+                area.appendChild(wrap);
+                setTimeout(() => inp.focus(), 50);
+            } else if (q.type === 'sentence') {
+                document.getElementById('check-btn').classList.remove('hidden');
+
+                const dropZone = document.createElement('div');
+                dropZone.id = 'sentence-dropzone';
+                dropZone.className = 'min-h-[60px] bg-emerald-50/70 border-2 border-dashed border-emerald-300 rounded-2xl p-3 flex flex-wrap gap-2 items-center';
+                dropZone.innerHTML = '<span class="text-xs font-bold text-slate-400">Tap word chips below in order...</span>';
+                area.appendChild(dropZone);
+
+                const bank = document.createElement('div');
+                bank.id = 'sentence-bank';
+                bank.className = 'flex flex-wrap gap-2 pt-1';
+
+                const shuffled = shuffleArray(q.tokens.map((text, idx) => ({ text, id: idx })));
+                shuffled.forEach(tok => {
+                    const chip = document.createElement('button');
+                    chip.type = 'button';
+                    chip.id = `tok-${tok.id}`;
+                    chip.textContent = tok.text;
+                    chip.className = 'word-chip bg-white hover:bg-emerald-50 border-2 border-emerald-300 text-slate-800 font-black text-sm sm:text-base px-3.5 py-2 rounded-xl shadow-sm cursor-pointer';
+                    chip.onclick = () => toggleToken(tok);
+                    bank.appendChild(chip);
+                });
+                area.appendChild(bank);
+            }
+
+            applyHintVisibility();
+        }
+
+        function toggleToken(tok) {
+            if (answered) return;
+            if (window.SoundEngine) SoundEngine.click();
+            const existingIdx = builtTokens.findIndex(t => t.id === tok.id);
+            const chip = document.getElementById(`tok-${tok.id}`);
+            if (existingIdx >= 0) {
+                builtTokens.splice(existingIdx, 1);
+                chip.classList.remove('opacity-30', 'pointer-events-none');
+            } else {
+                builtTokens.push(tok);
+                chip.classList.add('opacity-30', 'pointer-events-none');
+            }
+            renderDropZone();
+        }
+
+        function renderDropZone() {
+            const dz = document.getElementById('sentence-dropzone');
+            if (!dz) return;
+            dz.innerHTML = '';
+            if (builtTokens.length === 0) {
+                dz.innerHTML = '<span class="text-xs font-bold text-slate-400">Tap word chips below in order...</span>';
+                return;
+            }
+            builtTokens.forEach(tok => {
+                const pill = document.createElement('button');
+                pill.type = 'button';
+                pill.textContent = tok.text;
+                pill.className = 'word-chip bg-emerald-500 text-white font-black text-sm sm:text-base px-3.5 py-1.5 rounded-xl shadow-sm cursor-pointer';
+                pill.onclick = () => {
+                    if (!answered) toggleToken(tok);
+                };
+                dz.appendChild(pill);
+            });
+        }
+
+        function selectMcq(idx) {
+            if (answered) return;
+            selectedOption = idx;
+            checkCurrentAnswer();
+        }
+
+        function checkCurrentAnswer() {
+            if (answered) return;
+            const q = activeQuestions[qIndex];
+            let isCorrect = false;
+
+            if (q.type === 'mcq') {
+                if (selectedOption === null) return;
+                isCorrect = selectedOption === q.answer;
+                const btns = document.querySelectorAll('#answer-area button');
+                btns.forEach((btn, idx) => {
+                    btn.classList.add('pointer-events-none');
+                    if (idx === q.answer) {
+                        btn.className = 'w-full text-left bg-emerald-100 border-2 border-emerald-500 rounded-2xl px-4 py-3.5 font-black text-emerald-900 flex items-center gap-3';
+                    } else if (idx === selectedOption && !isCorrect) {
+                        btn.className = 'w-full text-left bg-rose-100 border-2 border-rose-400 rounded-2xl px-4 py-3.5 font-black text-rose-900 flex items-center gap-3 animate-shake';
+                    } else {
+                        btn.classList.add('opacity-60');
+                    }
+                });
+            } else if (q.type === 'spell') {
+                const inp = document.getElementById('spell-input');
+                const val = (inp ? inp.value : '').trim().toLowerCase();
+                if (!val) return;
+                isCorrect = val === q.answer.toLowerCase();
+                inp.disabled = true;
+                inp.className = isCorrect
+                    ? 'w-full bg-emerald-100 border-2 border-emerald-500 rounded-2xl px-4 py-3.5 text-lg font-black text-emerald-900'
+                    : 'w-full bg-rose-100 border-2 border-rose-400 rounded-2xl px-4 py-3.5 text-lg font-black text-rose-900 animate-shake';
+            } else if (q.type === 'sentence') {
+                if (builtTokens.length === 0) return;
+                const userSentence = builtTokens.map(t => t.text).join(' ').trim();
+                isCorrect = userSentence.toLowerCase() === q.answer.toLowerCase();
+            }
+
+            answered = true;
+            document.getElementById('check-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+
+            const fbBox = document.getElementById('feedback-box');
+            const fbTitle = document.getElementById('feedback-title');
+            const fbExp = document.getElementById('feedback-explain');
+            const fbExpZh = document.getElementById('feedback-explain-zh');
+
+            fbBox.classList.remove('hidden');
+            fbExp.textContent = q.explain;
+            if (showZhHint && q.zhExplain) {
+                fbExpZh.textContent = '💡 ' + q.zhExplain;
+                fbExpZh.classList.remove('hidden');
+            } else {
+                fbExpZh.classList.add('hidden');
+            }
+
+            if (isCorrect) {
+                streak += 1;
+                sessionCorrect += 1;
+                const gained = 10 + Math.min(streak - 1, 4) * 2;
+                sessionScore += gained;
+                userData.totalScore += gained;
+
+                // Remove from mistakes if mastered in Mistake Buster
+                if (currentStageId === 99) {
+                    userData.mistakes = userData.mistakes.filter(id => id !== q.id);
+                }
+
+                if (window.SoundEngine) SoundEngine.correct(streak);
+                if (window.animateScoreTo) {
+                    animateScoreTo(userData.totalScore, 'total-score');
+                } else {
+                    document.getElementById('total-score').textContent = userData.totalScore;
+                }
+                if (window.spawnFloatingText) {
+                    spawnFloatingText(window.innerWidth * 0.5, 160, `+${gained}`, 'text-emerald-600');
+                }
+
+                fbBox.className = 'rounded-2xl p-4 border-2 bg-emerald-50 border-emerald-300 space-y-2 animate-pop';
+                fbTitle.innerHTML = `<span class="text-emerald-700">✅ Awesome! +${gained} pts</span>`;
+            } else {
+                streak = 0;
+                sessionMissed += 1;
+                if (!userData.mistakes.includes(q.id)) {
+                    userData.mistakes.push(q.id);
+                }
+                if (window.SoundEngine) SoundEngine.wrong();
+
+                fbBox.className = 'rounded-2xl p-4 border-2 bg-rose-50 border-rose-300 space-y-2';
+                const correctText = q.type === 'mcq' ? q.options[q.answer] : q.answer;
+                fbTitle.innerHTML = `<span class="text-rose-700">❌ Not quite! Answer: <span class="underline">${correctText}</span></span>`;
+            }
+
+            document.getElementById('session-score').textContent = sessionScore;
+            saveData();
+        }
+
+        function nextQuestion() {
+            if (window.SoundEngine) SoundEngine.click();
+            qIndex += 1;
+            if (qIndex < activeQuestions.length) {
+                renderQuestion();
+            } else {
+                finishStage();
+            }
+        }
+
+        function finishStage() {
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+
+            const total = activeQuestions.length;
+            const acc = Math.round((sessionCorrect / total) * 100);
+            let stars = 1;
+            if (acc >= 90) stars = 3;
+            else if (acc >= 70) stars = 2;
+
+            if (stars > (userData.stars[currentStageId] || 0)) {
+                userData.stars[currentStageId] = stars;
+            }
+            saveData();
+
+            document.getElementById('result-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            document.getElementById('res-acc').textContent = `${acc}%`;
+            document.getElementById('res-pts').textContent = `+${sessionScore}`;
+            document.getElementById('res-miss').textContent = sessionMissed;
+            document.getElementById('result-summary').textContent =
+                acc >= 90
+                    ? 'Outstanding! You are ready for the RS Unit Test!'
+                    : acc >= 70
+                    ? 'Great effort! Try once more for 3 stars!'
+                    : 'Good practice! Review the hints and try again.';
+
+            if (stars >= 2) {
+                if (window.SoundEngine) SoundEngine.victory();
+                if (window.ConfettiEngine) {
+                    ConfettiEngine.spawnBurst({ x: window.innerWidth * 0.5, y: window.innerHeight * 0.35, count: 48 });
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.ConfettiEngine) ConfettiEngine.init();
+            loadData();
+            renderLobby();
+        });
+    </script>
+</body>
+</html>
