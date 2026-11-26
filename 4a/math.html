@@ -88,6 +88,99 @@
                 linear-gradient(to bottom, #bae6fd 1px, transparent 1px);
             background-size: 28px 28px;
         }
+
+        /* 2.5D 冒險地圖與互動舞台動畫 */
+        body.theme-bakery {
+            background: linear-gradient(135deg, #fce7f3 0%, #fffbeb 55%, #ffedd5 100%);
+        }
+        body.theme-garden {
+            background: linear-gradient(135deg, #ede9fe 0%, #fce7f3 50%, #dcfce7 100%);
+        }
+        @keyframes cloudDrift {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(24px); }
+        }
+        @keyframes sparkleTwinkle {
+            0%, 100% { opacity: 0.25; transform: scale(0.75); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+        @keyframes nodeRipple {
+            0% { transform: scale(0.85); opacity: 0.85; }
+            100% { transform: scale(1.75); opacity: 0; }
+        }
+        @keyframes heroIdle {
+            0%, 100% { transform: translateY(0) scaleY(1); }
+            50% { transform: translateY(-4px) scaleY(1.03); }
+        }
+        @keyframes heroWalk {
+            0%, 100% { transform: translateY(0) rotate(-6deg) scale(1, 1); }
+            25% { transform: translateY(-10px) rotate(2deg) scale(0.96, 1.06); }
+            50% { transform: translateY(0) rotate(6deg) scale(1.04, 0.96); }
+            75% { transform: translateY(-10px) rotate(-2deg) scale(0.96, 1.06); }
+        }
+        @keyframes heroAttack {
+            0% { transform: translateX(0) scale(1); }
+            35% { transform: translateX(48px) scale(1.12) rotate(6deg); }
+            100% { transform: translateX(0) scale(1); }
+        }
+        @keyframes heroRecoil {
+            0%, 100% { transform: translateX(0); }
+            30% { transform: translateX(-14px) rotate(-8deg); }
+        }
+        @keyframes spellBeam {
+            0% { transform: translateX(0) scale(0.5); opacity: 0; }
+            25% { opacity: 1; }
+            100% { transform: translateX(260px) scale(1.25); opacity: 0; }
+        }
+        @keyframes monsterBob {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-6px) scale(1.03, 0.97); }
+        }
+        @keyframes feverGlow {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.55), 0 12px 30px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.9), 0 14px 36px rgba(245, 158, 11, 0.55); }
+        }
+        @keyframes pinPulse {
+            0%, 100% { box-shadow: 0 0 0 3px var(--pin-ring), 0 0 18px 2px var(--pin-glow), 0 10px 20px rgba(15, 23, 42, 0.22); }
+            50% { box-shadow: 0 0 0 6px var(--pin-ring), 0 0 28px 6px var(--pin-glow), 0 12px 24px rgba(15, 23, 42, 0.28); }
+        }
+        @keyframes pinFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .cloud-drift { animation: cloudDrift 10s ease-in-out infinite; }
+        .sparkle-twinkle { transform-box: fill-box; transform-origin: center; animation: sparkleTwinkle 2.6s ease-in-out infinite; }
+        .node-ripple { animation: nodeRipple 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+        .hero-idle { transform-origin: bottom center; animation: heroIdle 2.2s ease-in-out infinite; }
+        .is-walking { transform-origin: bottom center; animation: heroWalk 0.34s ease-in-out infinite; }
+        .animate-hero-attack { animation: heroAttack 0.48s cubic-bezier(0.22, 1, 0.36, 1); }
+        .animate-hero-recoil { animation: heroRecoil 0.4s ease-in-out; }
+        .animate-spell { animation: spellBeam 0.42s ease-out forwards; }
+        .monster-bob { transform-origin: bottom center; animation: monsterBob 2.4s ease-in-out infinite; }
+        .combo-fever { animation: feverGlow 1.1s ease-in-out infinite; }
+
+        .stage-pin {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 20;
+        }
+        .stage-pin:hover {
+            transform: translate(-50%, -50%) scale(1.07);
+            z-index: 30;
+        }
+        .stage-pin.is-selected {
+            transform: translate(-50%, -50%) scale(1.05);
+            z-index: 32;
+        }
+        #map-hero {
+            position: absolute;
+            transform: translate(-50%, -78%);
+            will-change: left, top;
+            z-index: 35;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5">
@@ -95,143 +188,209 @@
     <!-- 全螢幕非阻擋過關彩帶畫布 -->
     <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
 
-    <!-- 頂部狀態列 -->
-    <header class="w-full max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-md rounded-3xl shadow-lg border-4 border-amber-300 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 z-20">
-        <!-- 遊戲標題與回首頁 -->
-        <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
-            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
-                🏰
+    <!-- 頂部狀態列（雙排對齊：上排科目標題＋錯題／說明／音效，下排主角玩法＋戰績） -->
+    <header id="main-header" class="w-full max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-4 border-amber-300 px-4 py-3 sm:px-6 sm:py-3.5 space-y-2.5 z-30">
+        <!-- 上排：左側返回與科目標題，右側錯題本、說明與音效 -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <a href="../index.html" class="btn-3d bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 px-3 py-2 rounded-xl flex items-center gap-1 font-black text-xs sm:text-sm" title="返回冒險總島首頁">
+                    <span>🏝️</span>
+                    <span class="hidden sm:inline">回冒險總島</span>
+                </a>
+                <div onclick="goHome()" class="flex items-center gap-3 cursor-pointer">
+                    <div id="header-icon" class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
+                        🏰
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-black text-amber-700 tracking-wide leading-tight">四上期末考數學冒險島</h1>
+                        <p class="text-xs sm:text-sm text-slate-500 font-bold">適用翰林版四上第 6～10 單元進度・無限刷題特訓</p>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h1 class="text-lg sm:text-2xl font-black text-amber-600 tracking-wide leading-tight">四上期末考數學冒險島</h1>
-                <p class="text-xs sm:text-sm text-slate-500 font-bold">適用翰林版四上第 6～10 單元進度・無限刷題特訓</p>
+
+            <div class="flex items-center gap-2 ml-auto">
+                <button onclick="openMistakeModal()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1 relative cursor-pointer" title="家長陪讀：錯題本與弱點分析">
+                    <span>📖</span>
+                    <span class="hidden sm:inline">錯題本</span>
+                    <span id="mistake-badge" class="hidden absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+                </button>
+                <button type="button" onclick="openSubjectGuide(true)" class="btn-3d bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm cursor-pointer">
+                    ❓ 說明
+                </button>
+                <button id="sound-toggle" onclick="toggleSound()" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-black px-3 py-1.5 rounded-xl text-sm flex items-center gap-1" title="切換音效">
+                    <span id="sound-icon">🔊</span>
+                </button>
             </div>
         </div>
 
-        <!-- 積分、星星與功能按鈕 -->
-        <div class="flex items-center gap-2 sm:gap-3">
-            <!-- 返回科目總導覽大廳 -->
-            <a href="../index.html" class="btn-3d bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 px-3 py-1.5 rounded-2xl flex items-center gap-1 font-bold text-xs sm:text-sm" title="返回科目總導覽首頁">
-                <span>🏠</span>
-                <span class="hidden md:inline">科目大廳</span>
-            </a>
-
-            <!-- 總星星數 -->
-            <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-amber-800 text-sm sm:text-base">
-                <span>⭐</span>
-                <span id="total-stars">0</span>
-                <span class="text-xs text-amber-600">/ 18</span>
+        <!-- 下排：左側主角玩法切換，右側和諧寶石色總星數與積分徽章 -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs sm:text-sm font-black text-slate-500">🎭 主角玩法：</span>
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-black">
+                    <button type="button" onclick="switchTheme('hero')" id="theme-btn-hero" class="px-3 py-1 rounded-lg bg-amber-500 text-white shadow cursor-pointer transition">⚔️ 勇者</button>
+                    <button type="button" onclick="switchTheme('bakery')" id="theme-btn-bakery" class="px-3 py-1 rounded-lg text-slate-600 hover:bg-white cursor-pointer transition">🍰 甜點</button>
+                    <button type="button" onclick="switchTheme('garden')" id="theme-btn-garden" class="px-3 py-1 rounded-lg text-slate-600 hover:bg-white cursor-pointer transition">🌸 花園</button>
+                </div>
             </div>
 
-            <!-- 總積分 -->
-            <div class="bg-sky-100 border-2 border-sky-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 font-bold text-sky-800 text-sm sm:text-base">
-                <span>🏆</span>
-                <span id="total-score">0</span>
+            <div class="flex flex-wrap items-center gap-2.5 ml-auto">
+                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-2 border-violet-200 shadow-md px-4 py-1.5 rounded-2xl flex items-center gap-2">
+                    <span class="text-lg sm:text-xl leading-none drop-shadow-sm">⭐</span>
+                    <span class="text-xs sm:text-sm font-black opacity-95">總星數</span>
+                    <span id="total-stars" class="text-lg sm:text-xl font-black text-amber-300 leading-none drop-shadow-sm">0</span>
+                    <span class="text-xs sm:text-sm font-black opacity-85">/ 18</span>
+                </div>
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white border-2 border-sky-200 shadow-md px-4 py-1.5 rounded-2xl flex items-center gap-2">
+                    <span class="text-lg sm:text-xl leading-none drop-shadow-sm">🏆</span>
+                    <span class="text-xs sm:text-sm font-black opacity-95">總積分</span>
+                    <span id="total-score" class="text-lg sm:text-xl font-black leading-none drop-shadow-sm">0</span>
+                </div>
             </div>
-
-            <!-- 錯題本與弱點分析按鈕 -->
-            <button onclick="openMistakeModal()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1 relative" title="家長陪讀：錯題本與弱點分析">
-                <span>📖</span>
-                <span class="hidden sm:inline">錯題本</span>
-                <span id="mistake-badge" class="hidden absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
-            </button>
-
-            <!-- 音效開關 -->
-            <button id="sound-toggle" onclick="toggleSound()" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-2 sm:px-3 sm:py-2 rounded-2xl text-sm flex items-center gap-1" title="切換音效">
-                <span id="sound-icon">🔊</span>
-            </button>
         </div>
     </header>
 
     <!-- 主畫面容器 -->
     <main class="w-full max-w-6xl xl:max-w-7xl flex-1 flex flex-col justify-center my-4">
         
-        <!-- 1. 關卡選擇大廳 (Lobby Screen) -->
-        <section id="lobby-screen" class="animate-pop">
-            <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-5 sm:p-7 shadow-xl border-4 border-sky-200">
-                <div class="flex flex-col gap-4 mb-6 border-b-2 border-slate-100 pb-5">
-                    <div>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
-                            <span>🗺️</span> 選擇期末考特訓單元（適用翰林版四上範圍）
-                        </h2>
-                        <p class="text-sm text-slate-500 font-medium mt-1">每次點選都會自動生成全新數字、幾何圖形與生活情境題！</p>
+        <!-- 1. 2.5D 數學王國地圖大廳 (Lobby Screen) -->
+        <section id="lobby-screen" class="space-y-4 animate-pop">
+            <!-- 醒目版：自訂刷題題數選擇器（含全題型制霸、預設檔位與 1~50 自訂輸入） -->
+            <div class="bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border-2 border-indigo-200 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                    <span class="text-sm sm:text-base font-black text-indigo-900 flex items-center gap-1.5">
+                        <span>🎯</span> 設定每次練習題數：
+                    </span>
+                    <span id="qcount-estimate" class="text-xs sm:text-sm font-black text-amber-800 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full">
+                        目前設定：5 題（快速暖身・約 3 分鐘）
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="setQuestionCount('ALL')" id="qcount-ALL" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border-2 border-amber-300 hover:bg-amber-200 cursor-pointer">
+                        🌟 全題型制霸 <span class="opacity-80">(每種都練)</span>
+                    </button>
+                    <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow cursor-pointer">
+                        5 題 <span class="opacity-85 font-bold">(暖身)</span>
+                    </button>
+                    <button onclick="setQuestionCount(10)" id="qcount-10" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 cursor-pointer">
+                        10 題 <span class="opacity-75">(標準)</span>
+                    </button>
+                    <button onclick="setQuestionCount(15)" id="qcount-15" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 cursor-pointer">
+                        15 題 <span class="opacity-75">(進階)</span>
+                    </button>
+                    <button onclick="setQuestionCount(20)" id="qcount-20" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 cursor-pointer">
+                        20 題 <span class="opacity-75">(特訓)</span>
+                    </button>
+                    <button onclick="setQuestionCount(25)" id="qcount-25" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50 cursor-pointer">
+                        25 題 <span class="opacity-75">(模擬考)</span>
+                    </button>
+
+                    <!-- 自訂題數輸入框 (1~50 題) -->
+                    <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border-2 border-indigo-200 focus-within:border-indigo-500 ml-auto sm:ml-0">
+                        <label for="custom-qcount-input" class="text-xs sm:text-sm font-black text-indigo-700 whitespace-nowrap">自訂：</label>
+                        <input id="custom-qcount-input" type="number" min="1" max="50" value="5"
+                            onchange="applyCustomQuestionCount(this.value)"
+                            onkeydown="if(event.key==='Enter') applyCustomQuestionCount(this.value)"
+                            class="w-14 text-center text-sm font-black text-indigo-900 bg-white rounded-lg py-0.5 border border-indigo-200 focus:outline-none">
+                        <span class="text-xs sm:text-sm font-bold text-slate-600">題</span>
+                        <button onclick="applyCustomQuestionCount(document.getElementById('custom-qcount-input').value)"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black px-2.5 py-1 rounded-lg transition cursor-pointer">
+                            套用
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.5D 數學王國微縮模型地圖 -->
+            <div class="relative w-full rounded-[2rem] border-4 border-white shadow-2xl overflow-hidden bg-amber-100 select-none">
+                <div class="relative w-full aspect-[16/9] min-h-[280px]">
+                    <img src="../assets/math-kingdom-25d.jpg" alt="數學王國 2.5D 立體微縮模型地圖" class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
+
+                    <svg viewBox="0 0 1100 618" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full pointer-events-none">
+                        <g class="cloud-drift" opacity="0.28">
+                            <ellipse cx="145" cy="72" rx="72" ry="20" fill="#ffffff"/>
+                            <ellipse cx="195" cy="64" rx="46" ry="15" fill="#ffffff"/>
+                            <ellipse cx="945" cy="84" rx="78" ry="22" fill="#ffffff"/>
+                        </g>
+                        <g transform="translate(595, 78)">
+                            <polygon points="0,-10 3,-3 10,0 3,3 0,10 -3,3 -10,0 -3,-3" fill="#fef08a" class="sparkle-twinkle"/>
+                        </g>
+                        <g transform="translate(648, 122)">
+                            <polygon points="0,-8 2.5,-2.5 8,0 2.5,2.5 0,8 -2.5,2.5 -8,0 -2.5,-2.5" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:0.8s"/>
+                        </g>
+                        <g transform="translate(765, 225)">
+                            <polygon points="0,-9 2.5,-2.5 9,0 2.5,2.5 0,9 -2.5,2.5 -9,0 -2.5,-2.5" fill="#67e8f9" class="sparkle-twinkle" style="animation-delay:0.4s"/>
+                        </g>
+                        <g transform="translate(838, 286)">
+                            <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#a5f3fc" class="sparkle-twinkle" style="animation-delay:1.3s"/>
+                        </g>
+                        <g transform="translate(572, 325)">
+                            <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#fde047" class="sparkle-twinkle" style="animation-delay:0.6s"/>
+                        </g>
+                        <g transform="translate(875, 470)">
+                            <polygon points="0,-7 2,-2 7,0 2,2 0,7 -2,2 -7,0 -2,-2" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:1.1s"/>
+                        </g>
+                    </svg>
+
+                    <!-- 移動角色指標（3D 黏土公仔＋發光棋子底座） -->
+                    <div id="map-hero" style="left: 12%; top: 69%;">
+                        <div class="relative flex flex-col items-center">
+                            <div id="map-hero-flip" class="relative z-10 transition-transform duration-150">
+                                <div id="map-hero-sprite" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 hero-idle"></div>
+                            </div>
+                            <div id="map-hero-base" class="-mt-3 w-14 h-4 sm:w-16 sm:h-5 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-white shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(99,102,241,0.6)]"></div>
+                        </div>
                     </div>
 
-                    <!-- 醒目版：自訂刷題題數選擇器（含預設檔位與 1~50 自訂輸入） -->
-                    <div class="bg-gradient-to-r from-indigo-50 via-sky-50 to-amber-50 p-3.5 sm:p-4 rounded-2xl border-2 border-indigo-200 shadow-sm">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                            <span class="text-sm sm:text-base font-black text-indigo-900 flex items-center gap-1.5">
-                                <span>🎯</span> 設定每次練習題數：
-                            </span>
-                            <span id="qcount-estimate" class="text-xs sm:text-sm font-black text-amber-800 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full">
-                                目前設定：5 題（快速暖身・約 3 分鐘）
-                            </span>
-                        </div>
+                    <!-- 6 個立體圓盤關卡節點 -->
+                    <div id="map-pins-layer" class="absolute inset-0"></div>
+                </div>
+            </div>
 
+            <!-- 目前選中關卡情報條 -->
+            <div id="stage-info-bar" class="bg-white/95 backdrop-blur-md rounded-2xl border-2 border-amber-300 px-4 py-3 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span id="info-bar-icon" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-2xl shrink-0 shadow border-2 border-white">➗</span>
+                    <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <button onclick="setQuestionCount('ALL')" id="qcount-ALL" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-900 border-2 border-amber-300 hover:bg-amber-200">
-                                🌟 全題型制霸 <span class="opacity-80">(每種都練)</span>
-                            </button>
-                            <button onclick="setQuestionCount(5)" id="qcount-5" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow">
-                                5 題 <span class="opacity-85 font-bold">(暖身)</span>
-                            </button>
-                            <button onclick="setQuestionCount(10)" id="qcount-10" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
-                                10 題 <span class="opacity-75">(標準)</span>
-                            </button>
-                            <button onclick="setQuestionCount(15)" id="qcount-15" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
-                                15 題 <span class="opacity-75">(進階)</span>
-                            </button>
-                            <button onclick="setQuestionCount(20)" id="qcount-20" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
-                                20 題 <span class="opacity-75">(特訓)</span>
-                            </button>
-                            <button onclick="setQuestionCount(25)" id="qcount-25" class="qcount-btn px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-indigo-50">
-                                25 題 <span class="opacity-75">(模擬考)</span>
-                            </button>
-
-                            <!-- 自訂題數輸入框 (1~50 題) -->
-                            <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border-2 border-indigo-200 focus-within:border-indigo-500 ml-auto sm:ml-0">
-                                <label for="custom-qcount-input" class="text-xs font-black text-indigo-700 whitespace-nowrap">自訂：</label>
-                                <input id="custom-qcount-input" type="number" min="1" max="50" value="5"
-                                    onchange="applyCustomQuestionCount(this.value)"
-                                    onkeydown="if(event.key==='Enter') applyCustomQuestionCount(this.value)"
-                                    class="w-14 text-center text-sm font-black text-indigo-900 bg-indigo-50/70 rounded-lg py-0.5 focus:outline-none">
-                                <span class="text-xs font-bold text-slate-500">題</span>
-                                <button onclick="applyCustomQuestionCount(document.getElementById('custom-qcount-input').value)"
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black px-2.5 py-1 rounded-lg transition">
-                                    套用
-                                </button>
-                            </div>
+                            <span id="info-bar-badge" class="text-xs font-black bg-slate-900 text-sky-300 px-2.5 py-0.5 rounded-full">U6</span>
+                            <h2 id="info-bar-title" class="text-base sm:text-lg font-black text-slate-800 truncate">第 6 單元：除法</h2>
+                            <span id="info-bar-stars" class="text-xs sm:text-sm font-black bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">☆☆☆</span>
+                            <span id="info-bar-mistakes" class="hidden text-xs font-black bg-rose-100 text-rose-700 border border-rose-300 px-2.5 py-0.5 rounded-full">📕 0 錯題</span>
                         </div>
+                        <p id="info-bar-desc" class="text-xs sm:text-sm font-bold text-slate-600 mt-0.5">三、四位數除以二位數直式與商數估算</p>
                     </div>
                 </div>
+                <button type="button" id="info-bar-enter" onclick="enterStageById(selectedStageId)" class="btn-3d bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black px-5 py-2 rounded-xl text-sm sm:text-base shadow cursor-pointer shrink-0 whitespace-nowrap">
+                    ⚔️ 進入挑戰 ➔
+                </button>
+            </div>
 
-                <!-- 6 個關卡網格 (第 6~10 單元 + 期末模擬考) -->
-                <div id="stages-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- 關卡卡片由 JS 動態生成 -->
-                </div>
+            <!-- 下方快速關卡卡片列 -->
+            <div id="quick-stage-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5"></div>
 
-                <!-- 錯題消滅專屬入口橫幅（有錯題時自動出現） -->
-                <div id="lobby-mistake-banner" class="hidden mt-5 bg-gradient-to-r from-rose-50 via-amber-50 to-rose-50 border-3 border-rose-300 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <span class="text-3xl">⚔️</span>
-                        <div>
-                            <div class="font-black text-rose-800 text-sm sm:text-base">
-                                錯題本裡目前有 <span id="lobby-mistake-count" class="text-lg underline">0</span> 隻錯題怪獸！
-                            </div>
-                            <div class="text-xs text-slate-600 font-medium">進入「消滅錯題大作戰」，重新算對就能把它們徹底消滅喔！</div>
+            <!-- 錯題消滅專屬入口橫幅（有錯題時自動出現） -->
+            <div id="lobby-mistake-banner" class="hidden bg-gradient-to-r from-rose-50 via-amber-50 to-rose-50 border-3 border-rose-300 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">⚔️</span>
+                    <div>
+                        <div class="font-black text-rose-800 text-sm sm:text-base">
+                            錯題本裡目前有 <span id="lobby-mistake-count" class="text-lg underline">0</span> 隻錯題怪獸！
                         </div>
+                        <div class="text-xs text-slate-600 font-medium">進入「消滅錯題大作戰」，重新算對就能把它們徹底消滅喔！</div>
                     </div>
-                    <button onclick="startMistakeBattle()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shrink-0">
-                        <span>🔥 消滅錯題大作戰</span>
-                    </button>
                 </div>
+                <button onclick="startMistakeBattle()" class="btn-3d bg-rose-500 hover:bg-rose-600 text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <span>🔥 消滅錯題大作戰</span>
+                </button>
+            </div>
 
-                <div class="mt-5 flex justify-between items-center text-xs text-slate-400">
-                    <span>💡 小提示：計算題會自動展開「手寫草稿板」，還可切換直式方格紙！</span>
-                    <button onclick="resetProgressConfirm()" class="hover:text-rose-500 underline font-bold">
-                        重置所有紀錄
-                    </button>
-                </div>
+            <div class="flex flex-wrap justify-between items-center gap-2 text-xs text-slate-500 px-1 font-bold">
+                <span>💡 小提示：計算題會自動展開「手寫草稿板」，還可切換直式方格紙與復原步驟！</span>
+                <button onclick="resetProgressConfirm()" class="hover:text-rose-500 underline font-bold cursor-pointer">
+                    重置所有紀錄
+                </button>
             </div>
         </section>
 
@@ -294,6 +453,44 @@
                                 <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
                                 <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2.5D 主題互動舞台（一般關卡顯示：勇者打怪 / 甜點做蛋糕 / 花園澆花） -->
+                <div id="theme-arena" class="relative mb-4 rounded-2xl border-2 border-amber-200 shadow-sm overflow-hidden bg-gradient-to-b from-sky-100 via-amber-50 to-amber-100 px-4 py-3 transition-all">
+                    <svg viewBox="0 0 900 130" preserveAspectRatio="none" class="absolute inset-0 w-full h-full pointer-events-none opacity-80">
+                        <path d="M0,96 Q180,45 380,92 T740,80 T900,98 L900,130 L0,130 Z" fill="#bfdbfe"/>
+                        <ellipse cx="450" cy="126" rx="460" ry="30" fill="#fcd34d"/>
+                    </svg>
+                    <div id="hero-spell" class="hidden absolute left-[22%] top-[40%] z-20 pointer-events-none">
+                        <div id="spell-badge" class="bg-gradient-to-r from-amber-300 via-yellow-300 to-white px-3 py-1 rounded-full shadow-lg border-2 border-amber-500 text-sm sm:text-base font-black">
+                            ⚡✨
+                        </div>
+                    </div>
+                    <div class="relative z-10 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <div id="arena-hero-sprite" class="w-16 h-16 sm:w-20 sm:h-20 hero-idle drop-shadow shrink-0"></div>
+                            <span id="arena-actor-badge" class="hidden sm:inline-block bg-white/95 border border-indigo-200 text-indigo-800 text-xs font-black px-2.5 py-1 rounded-full shadow-sm">
+                                🛡️ 數學小勇者
+                            </span>
+                        </div>
+                        <div class="hidden md:flex flex-col items-center text-center">
+                            <span id="arena-status" class="bg-white/95 border-2 border-amber-300 text-amber-900 font-black text-xs sm:text-sm px-3.5 py-1 rounded-full shadow-sm">
+                                ⚔️ 答對題目就能發動魔法攻擊！
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <div class="bg-white/95 border border-rose-200 rounded-xl px-3 py-1.5 min-w-[130px] sm:min-w-[165px] shadow-sm">
+                                <div class="flex items-center justify-between text-xs font-black mb-1 gap-2">
+                                    <span id="arena-target-name" class="text-rose-700 truncate">👾 單元魔王</span>
+                                    <span id="arena-hp-text" class="text-rose-600 shrink-0">HP 5/5</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div id="arena-hp-bar" class="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div id="arena-target-sprite" class="w-16 h-16 sm:w-20 sm:h-20 monster-bob drop-shadow shrink-0"></div>
                         </div>
                     </div>
                 </div>
@@ -492,6 +689,69 @@
             ※ 免責聲明：本專案為家長自製之免費教育學習工具，僅供居家複習使用，與翰林出版事業股份有限公司無任何官方合作、授權或隸屬關係。
         </div>
     </footer>
+
+    <!-- 初次進入使用說明彈窗（全科目共用首次記錄：playground_guide_subject_v1） -->
+    <div id="subject-guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title"
+         onclick="if (event.target === this) closeSubjectGuide(true)"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-[2rem] border-4 border-amber-300 shadow-2xl p-5 sm:p-6 space-y-4 animate-pop">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-sky-100 via-amber-50 to-amber-100 border-2 border-amber-200 flex items-center justify-center shrink-0 p-1 shadow-inner">
+                        <img id="guide-actor-img" src="../assets/actor-hero-3d.png" alt="冒險小嚮導" class="w-full h-full object-contain drop-shadow">
+                    </div>
+                    <div class="min-w-0">
+                        <h2 id="guide-modal-title" class="text-xl sm:text-2xl font-black text-slate-800">🧭 冒險闖關小指南</h2>
+                        <p class="text-xs sm:text-sm font-bold text-slate-500 mt-0.5">3 秒看懂怎麼玩（全科目通用，只會自動顯示一次）</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSubjectGuide(true)" aria-label="關閉說明"
+                        class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-black flex items-center justify-center shrink-0 cursor-pointer transition">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex items-start gap-3 bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3.5">
+                    <span class="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center shrink-0 text-base shadow-sm">1</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-indigo-950">🎭 選主角與練習題數</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-700 mt-0.5 leading-relaxed">
+                            上方隨時切換 <strong>⚔️ 勇者打怪 / 🍰 甜點師做蛋糕 / 🌸 花精靈澆花</strong>，並挑選 5～50 題或全題型制霸。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl p-3.5">
+                    <span class="w-9 h-9 rounded-xl bg-amber-500 text-white font-black flex items-center justify-center shrink-0 text-base shadow-sm">2</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-amber-950">🗺️ 點地圖圓盤出發</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-700 mt-0.5 leading-relaxed">
+                            點圓盤讓主角走過去，抵達後<strong>再點一次圓盤</strong>或按「進入挑戰」就能開戰！地圖下方可看單元重點。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3.5">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center shrink-0 text-base shadow-sm">3</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-emerald-950">⭐ 用工具集滿 3 顆星</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-700 mt-0.5 leading-relaxed">
+                            答題可開 <strong>✏️ 草稿紙</strong>算直式或看 <strong>💡 小提示</strong>；圓盤右上角紅點 <strong>📕</strong> 代表該單元還有待消滅的錯題喔！
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-1 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <span class="text-xs font-bold text-slate-400">之後隨時點右上角「❓ 說明」都可再看一次</span>
+                <button type="button" onclick="closeSubjectGuide(true)"
+                        class="btn-3d w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-sky-500 hover:brightness-105 text-white font-black px-6 py-2.5 rounded-2xl text-sm sm:text-base shadow-lg cursor-pointer">
+                    🚀 我知道了，開始冒險！
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- 錯題回顧與弱點分析 Modal -->
     <div id="mistake-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -947,13 +1207,264 @@
            3. 翰林版四上期末考關卡定義（第 6～10 單元 + 期末模擬考）
            ========================================================================== */
         const STAGES = [
-            { id: 6, title: '第 6 單元：除法', subtitle: '三、四位數除以二位數直式與商數估算', icon: '➗', color: 'from-sky-400 to-blue-600', border: 'border-sky-300' },
-            { id: 7, title: '第 7 單元：三角形與全等', subtitle: '三角形分類、角度計算與全等對應邊角', icon: '📐', color: 'from-purple-400 to-indigo-600', border: 'border-purple-300' },
-            { id: 8, title: '第 8 單元：兩步驟問題與併式', subtitle: '括號優先、先乘除後加減與購物應用', icon: '🧮', color: 'from-pink-400 to-rose-600', border: 'border-pink-300' },
-            { id: 9, title: '第 9 單元：二位小數', subtitle: '百分位化聚、大小比較與直式加減法', icon: '🪙', color: 'from-emerald-400 to-teal-600', border: 'border-emerald-300' },
-            { id: 10, title: '第 10 單元：統計圖表', subtitle: '報讀長條圖與折線圖、數據比較與趨勢', icon: '📊', color: 'from-amber-400 to-orange-600', border: 'border-amber-300' },
-            { id: 99, title: '期末考綜合模擬考', subtitle: '混合第 6～10 單元全範圍隨機出題', icon: '👑', color: 'from-yellow-400 via-orange-500 to-red-600', border: 'border-yellow-400' }
+            { id: 6, x: 21, y: 70, unitBadge: 'U6', short: '除法迷宮', brief: '除法與餘數', title: '第 6 單元：除法', subtitle: '三、四位數除以二位數直式與商數估算', icon: '➗', color: 'from-amber-400 to-orange-500', border: 'border-amber-300', monsterName: '史萊姆除數王', monsterColor: '#f59e0b' },
+            { id: 7, x: 36, y: 49, unitBadge: 'U7', short: '幾何三角峰', brief: '三角形與全等', title: '第 7 單元：三角形與全等', subtitle: '三角形分類、角度計算與全等對應邊角', icon: '📐', color: 'from-sky-400 to-indigo-500', border: 'border-sky-300', monsterName: '三角岩石巨人', monsterColor: '#0ea5e9' },
+            { id: 8, x: 52, y: 68, unitBadge: 'U8', short: '併式魔法塔', brief: '兩步驟括號併式', title: '第 8 單元：兩步驟問題與併式', subtitle: '括號優先、先乘除後加減與購物應用', icon: '🧮', color: 'from-purple-400 to-pink-500', border: 'border-purple-300', monsterName: '括號巫師', monsterColor: '#a855f7' },
+            { id: 9, x: 72, y: 50, unitBadge: 'U9', short: '小數水晶洞', brief: '二位小數加減', title: '第 9 單元：二位小數', subtitle: '百分位化聚、大小比較與直式加減法', icon: '🪙', color: 'from-emerald-400 to-teal-500', border: 'border-emerald-300', monsterName: '百分位水晶怪', monsterColor: '#10b981' },
+            { id: 10, x: 84, y: 69, unitBadge: 'U10', short: '圖表港灣', brief: '長條圖與折線圖', title: '第 10 單元：統計圖表', subtitle: '報讀長條圖與折線圖、數據比較與趨勢', icon: '📊', color: 'from-rose-400 to-orange-500', border: 'border-rose-300', monsterName: '長條圖章魚', monsterColor: '#f43f5e' },
+            { id: 99, x: 54, y: 24, unitBadge: 'BOSS', short: '魔王城堡', brief: '6～10 單元總模擬', title: '期末考綜合模擬考', subtitle: '混合第 6～10 單元全範圍隨機出題', icon: '👑', color: 'from-yellow-400 via-orange-500 to-red-600', border: 'border-yellow-400', monsterName: '期末數學大魔王', monsterColor: '#e11d48' }
         ];
+
+        const THEMES_25D = {
+            hero: {
+                id: 'hero',
+                headerIcon: '🏰',
+                actorLabel: '🛡️ 數學小勇者',
+                spell: '⚡✨',
+                spellColor: 'from-amber-300 via-yellow-300 to-white border-amber-500',
+                idleMsg: '⚔️ 答對題目就能發動魔法攻擊！',
+                feverMsg: '⚡ 進入連擊狂熱！攻擊力加倍！',
+                hitMsg: '💥 命中怪獸！造成 1 點魔法傷害！',
+                missMsg: '😈 怪獸反擊了！看看詳解下次打回來！',
+                enterBtnText: '⚔️ 進入挑戰 ➔',
+                enterBtnGrad: 'from-amber-500 to-orange-500',
+                pinRing: '#6366f1',
+                pinGlow: 'rgba(99, 102, 241, 0.65)',
+                pinLabelActive: 'bg-indigo-700 border-sky-300 text-white',
+                quickActive: 'bg-indigo-50 ring-2 ring-indigo-500 border-indigo-500'
+            },
+            bakery: {
+                id: 'bakery',
+                headerIcon: '🍰',
+                actorLabel: '👩‍🍳 魔法甜點師',
+                spell: '🍓✨',
+                spellColor: 'from-pink-300 via-rose-200 to-white border-pink-400',
+                idleMsg: '🍰 答對題目就能加上一層魔法食材！',
+                feverMsg: '🌟 甜點狂熱時刻！香味飄滿整座島！',
+                hitMsg: '🍓 好香喔！蛋糕又完成了一層裝飾！',
+                missMsg: '🧁 哎呀，糖粉灑出來了，看看解析再試一次！',
+                enterBtnText: '🍰 開始做甜點 ➔',
+                enterBtnGrad: 'from-pink-500 to-amber-500',
+                pinRing: '#f43f5e',
+                pinGlow: 'rgba(244, 63, 94, 0.6)',
+                pinLabelActive: 'bg-rose-600 border-pink-200 text-white',
+                quickActive: 'bg-rose-50 ring-2 ring-rose-400 border-rose-400'
+            },
+            garden: {
+                id: 'garden',
+                headerIcon: '🌸',
+                actorLabel: '🧚 星光小精靈',
+                spell: '💧✨',
+                spellColor: 'from-sky-300 via-cyan-200 to-white border-sky-400',
+                idleMsg: '💧 答對題目就能澆下星光魔法水！',
+                feverMsg: '🦋 花瓣飛舞狂熱！小蝴蝶都飛過來了！',
+                hitMsg: '🌷 太棒了！魔法花朵又長大一階段囉！',
+                missMsg: '🌱 沒關係，再給小花一點陽光與耐心！',
+                enterBtnText: '🌸 開始澆花 ➔',
+                enterBtnGrad: 'from-fuchsia-500 to-emerald-500',
+                pinRing: '#7c3aed',
+                pinGlow: 'rgba(124, 58, 237, 0.6)',
+                pinLabelActive: 'bg-violet-700 border-fuchsia-200 text-white',
+                quickActive: 'bg-violet-50 ring-2 ring-violet-500 border-violet-500'
+            }
+        };
+
+        let activeTheme = 'hero';
+        let selectedStageId = 6;
+        let arrivedStageId = 6;
+        let mapHeroX = 12;
+        let mapHeroY = 69;
+        let heroAnimFrame = null;
+
+        function getLeftActorImg(themeId) {
+            const labels = { hero: '數學小勇者', bakery: '魔法甜點師', garden: '星光小精靈' };
+            const key = labels[themeId] ? themeId : 'hero';
+            return `<img src="../assets/actor-${key}-3d.png" alt="${labels[key]}" class="w-full h-full object-contain select-none pointer-events-none drop-shadow-[0_6px_8px_rgba(15,23,42,0.42)]">`;
+        }
+
+        function getUnitMonsterSVG(color, hp, maxHp) {
+            const defeated = hp <= 0;
+            const hurt = hp > 0 && hp <= Math.ceil(maxHp * 0.4);
+            const face = defeated
+                ? `<text x="42" y="64" font-size="18" font-weight="900" fill="#64748b">✕</text>
+                   <text x="72" y="64" font-size="18" font-weight="900" fill="#64748b">✕</text>
+                   <path d="M46,84 Q60,76 74,84" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>`
+                : hurt
+                ? `<circle cx="46" cy="60" r="8" fill="#fff"/><circle cx="74" cy="60" r="8" fill="#fff"/>
+                   <circle cx="46" cy="60" r="3.5" fill="#0f172a"/><circle cx="74" cy="60" r="3.5" fill="#0f172a"/>
+                   <path d="M46,84 Q60,76 74,84" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                   <text x="92" y="42" font-size="16">💦</text>`
+                : `<circle cx="46" cy="60" r="8" fill="#fff"/><circle cx="74" cy="60" r="8" fill="#fff"/>
+                   <circle cx="47" cy="60" r="4" fill="#0f172a"/><circle cx="75" cy="60" r="4" fill="#0f172a"/>
+                   <path d="M44,80 Q60,92 76,80" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`;
+            return `
+                <svg viewBox="0 0 120 120" class="w-full h-full">
+                    <polygon points="34,38 24,14 48,30" fill="#fde047" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                    <polygon points="86,38 96,14 72,30" fill="#fde047" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                    <rect x="20" y="28" width="80" height="76" rx="34" fill="${defeated ? '#cbd5e1' : color}" stroke="#1e293b" stroke-width="4"/>
+                    ${face}
+                </svg>`;
+        }
+
+        function getRightTargetSVG(themeId, color, progressCount, totalCount) {
+            if (themeId === 'bakery') {
+                const lvl = Math.min(5, Math.round((progressCount / Math.max(1, totalCount)) * 5));
+                return `
+                    <svg viewBox="0 0 120 120" class="w-full h-full">
+                        <ellipse cx="60" cy="102" rx="44" ry="8" fill="#fbbf24" stroke="#b45309" stroke-width="2.5"/>
+                        <rect x="52" y="102" width="16" height="8" fill="#d97706"/>
+                        ${lvl >= 1 ? '<rect x="24" y="72" width="72" height="28" rx="8" fill="#fcd34d" stroke="#b45309" stroke-width="2.5"/>' : '<text x="48" y="88" font-size="22">🥣</text>'}
+                        ${lvl >= 2 ? '<path d="M24,74 Q36,84 48,74 Q60,84 72,74 Q84,84 96,74 L96,70 L24,70 Z" fill="#ffffff" stroke="#f472b6" stroke-width="2"/>' : ''}
+                        ${lvl >= 3 ? '<circle cx="38" cy="68" r="6" fill="#f43f5e"/><circle cx="60" cy="68" r="6" fill="#f43f5e"/><circle cx="82" cy="68" r="6" fill="#f43f5e"/>' : ''}
+                        ${lvl >= 4 ? '<rect x="36" y="44" width="48" height="22" rx="7" fill="#fbcfe8" stroke="#db2777" stroke-width="2.5"/><path d="M36,48 Q48,56 60,48 Q72,56 84,48 L84,43 L36,43 Z" fill="#ffffff"/>' : ''}
+                        ${lvl >= 5 ? '<rect x="57" y="24" width="6" height="19" rx="2" fill="#38bdf8"/><polygon points="60,12 64,22 56,22" fill="#facc15"/><text x="20" y="34" font-size="16">✨</text><text x="86" y="34" font-size="16">💖</text>' : ''}
+                    </svg>`;
+            }
+            if (themeId === 'garden') {
+                const lvl = Math.min(5, Math.round((progressCount / Math.max(1, totalCount)) * 5));
+                return `
+                    <svg viewBox="0 0 120 120" class="w-full h-full">
+                        <polygon points="34,76 86,76 78,108 42,108" fill="#fb923c" stroke="#9a3412" stroke-width="3" stroke-linejoin="round"/>
+                        <rect x="30" y="70" width="60" height="10" rx="4" fill="#fdba74" stroke="#9a3412" stroke-width="2.5"/>
+                        ${lvl === 0 ? '<ellipse cx="60" cy="68" rx="8" ry="5" fill="#78350f"/>' : ''}
+                        ${lvl >= 1 ? '<path d="M60,70 Q60,52 60,42" stroke="#16a34a" stroke-width="4" stroke-linecap="round"/>' : ''}
+                        ${lvl >= 2 ? '<ellipse cx="47" cy="56" rx="11" ry="6" fill="#4ade80" stroke="#15803d" stroke-width="2" transform="rotate(-25 47 56)"/><ellipse cx="73" cy="54" rx="11" ry="6" fill="#4ade80" stroke="#15803d" stroke-width="2" transform="rotate(25 73 54)"/>' : ''}
+                        ${lvl === 3 ? '<circle cx="60" cy="36" r="10" fill="#f472b6" stroke="#be185d" stroke-width="2.5"/>' : ''}
+                        ${lvl >= 4 ? `
+                            <circle cx="48" cy="32" r="10" fill="#fbcfe8" stroke="#db2777" stroke-width="2"/>
+                            <circle cx="72" cy="32" r="10" fill="#fbcfe8" stroke="#db2777" stroke-width="2"/>
+                            <circle cx="60" cy="22" r="10" fill="#f9a8d4" stroke="#db2777" stroke-width="2"/>
+                            <circle cx="60" cy="40" r="10" fill="#f9a8d4" stroke="#db2777" stroke-width="2"/>
+                            <circle cx="60" cy="32" r="8" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>` : ''}
+                        ${lvl >= 5 ? '<text x="84" y="28" font-size="18">🦋</text><text x="18" y="34" font-size="16">✨</text>' : ''}
+                    </svg>`;
+            }
+            const hp = Math.max(0, totalCount - progressCount);
+            return getUnitMonsterSVG(color, hp, totalCount);
+        }
+
+        function switchTheme(themeId, playSnd = true) {
+            if (!THEMES_25D[themeId]) themeId = 'hero';
+            activeTheme = themeId;
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+            try { localStorage.setItem('playground_theme_v1', themeId); } catch (_) {}
+
+            const t = THEMES_25D[themeId];
+            document.body.className = `text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5 ${themeId === 'hero' ? '' : 'theme-' + themeId}`.trim();
+
+            ['hero', 'bakery', 'garden'].forEach(id => {
+                const btn = document.getElementById(`theme-btn-${id}`);
+                if (!btn) return;
+                const activeCls = id === 'hero' ? 'bg-amber-500 text-white shadow' : id === 'bakery' ? 'bg-pink-500 text-white shadow' : 'bg-fuchsia-500 text-white shadow';
+                btn.className = id === themeId
+                    ? `px-3 py-1 rounded-lg ${activeCls} cursor-pointer transition`
+                    : 'px-3 py-1 rounded-lg text-slate-600 hover:bg-white cursor-pointer transition';
+            });
+
+            const mapSprite = document.getElementById('map-hero-sprite');
+            if (mapSprite) mapSprite.innerHTML = getLeftActorImg(themeId);
+            const mapBase = document.getElementById('map-hero-base');
+            if (mapBase) {
+                const baseCls = themeId === 'bakery'
+                    ? 'from-pink-300 to-rose-500 shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(244,63,94,0.6)]'
+                    : themeId === 'garden'
+                    ? 'from-fuchsia-300 to-emerald-500 shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(124,58,237,0.6)]'
+                    : 'from-amber-300 to-amber-500 shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(99,102,241,0.6)]';
+                mapBase.className = `-mt-3 w-14 h-4 sm:w-16 sm:h-5 rounded-full bg-gradient-to-b border-2 border-white ${baseCls}`;
+            }
+
+            renderLobby();
+            if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
+                updateThemeArena();
+            }
+        }
+
+        function updateThemeArena() {
+            const arena = document.getElementById('theme-arena');
+            if (!arena) return;
+            if (currentSession.isMistakeBattle) {
+                arena.classList.add('hidden');
+                return;
+            }
+            arena.classList.remove('hidden');
+
+            const t = THEMES_25D[activeTheme];
+            const st = STAGES.find(s => s.id === currentSession.stageId) || STAGES[0];
+            const total = Math.max(1, currentSession.questions.length);
+            const done = currentSession.correctCount;
+            const remain = Math.max(0, total - done);
+            const pct = activeTheme === 'hero'
+                ? Math.round((remain / total) * 100)
+                : Math.round((done / total) * 100);
+
+            arena.className = `relative mb-4 rounded-2xl border-2 border-amber-200 shadow-sm overflow-hidden bg-gradient-to-b from-sky-100 via-amber-50 to-amber-100 px-4 py-3 transition-all ${currentSession.combo >= 3 ? 'combo-fever' : ''}`;
+
+            const heroSprite = document.getElementById('arena-hero-sprite');
+            if (heroSprite) heroSprite.innerHTML = getLeftActorImg(activeTheme);
+            const actorBadge = document.getElementById('arena-actor-badge');
+            if (actorBadge) actorBadge.textContent = t.actorLabel;
+            const spellBadge = document.getElementById('spell-badge');
+            if (spellBadge) {
+                spellBadge.textContent = t.spell;
+                spellBadge.className = `bg-gradient-to-r ${t.spellColor} px-3 py-1 rounded-full shadow-lg border-2 text-sm sm:text-base font-black`;
+            }
+
+            const tName = document.getElementById('arena-target-name');
+            const tHpText = document.getElementById('arena-hp-text');
+            const tHpBar = document.getElementById('arena-hp-bar');
+            const tSprite = document.getElementById('arena-target-sprite');
+            const statusEl = document.getElementById('arena-status');
+
+            if (activeTheme === 'bakery') {
+                if (tName) tName.textContent = `🍓 夢幻草莓蛋糕`;
+                if (tHpText) tHpText.textContent = `完成 ${done}/${total}`;
+                if (tHpBar) tHpBar.className = 'h-full bg-gradient-to-r from-pink-400 to-rose-500 transition-all duration-300';
+            } else if (activeTheme === 'garden') {
+                if (tName) tName.textContent = `🌷 星光魔法花`;
+                if (tHpText) tHpText.textContent = `成長 ${done}/${total}`;
+                if (tHpBar) tHpBar.className = 'h-full bg-gradient-to-r from-emerald-400 to-fuchsia-500 transition-all duration-300';
+            } else {
+                if (tName) tName.textContent = `👾 ${st.monsterName}`;
+                if (tHpText) tHpText.textContent = `HP ${remain}/${total}`;
+                if (tHpBar) tHpBar.className = 'h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300';
+            }
+            if (tHpBar) tHpBar.style.width = `${pct}%`;
+            if (tSprite) tSprite.innerHTML = getRightTargetSVG(activeTheme, st.monsterColor, done, total);
+            if (statusEl && !currentSession.answered) {
+                statusEl.textContent = currentSession.combo >= 3 ? t.feverMsg : t.idleMsg;
+            }
+        }
+
+        function triggerArenaFeedback(isCorrect) {
+            if (currentSession.isMistakeBattle) return;
+            const t = THEMES_25D[activeTheme];
+            const heroSprite = document.getElementById('arena-hero-sprite');
+            const spellEl = document.getElementById('hero-spell');
+            const statusEl = document.getElementById('arena-status');
+
+            if (isCorrect) {
+                if (heroSprite) {
+                    heroSprite.classList.remove('animate-hero-attack');
+                    void heroSprite.offsetWidth;
+                    heroSprite.classList.add('animate-hero-attack');
+                }
+                if (spellEl) {
+                    spellEl.classList.remove('hidden', 'animate-spell');
+                    void spellEl.offsetWidth;
+                    spellEl.classList.add('animate-spell');
+                    setTimeout(() => spellEl.classList.add('hidden'), 430);
+                }
+                if (statusEl) statusEl.textContent = t.hitMsg;
+            } else {
+                if (heroSprite) {
+                    heroSprite.classList.remove('animate-hero-recoil');
+                    void heroSprite.offsetWidth;
+                    heroSprite.classList.add('animate-hero-recoil');
+                }
+                if (statusEl) statusEl.textContent = t.missMsg;
+            }
+            updateThemeArena();
+        }
 
         // 遊戲儲存狀態
         let gameState = {
@@ -2633,40 +3144,218 @@
         }
 
         function renderLobby() {
-            const grid = document.getElementById('stages-grid');
-            grid.innerHTML = STAGES.map(stage => {
-                const earnedStars = gameState.stars[stage.id] || 0;
-                const starsHtml = [1, 2, 3].map(i =>
-                    `<span class="${i <= earnedStars ? 'opacity-100 scale-110' : 'opacity-25 grayscale'} transition-all">⭐</span>`
-                ).join('');
-                const clickHandler = stage.id === 99 ? 'openMockExamModal()' : `startStage(${stage.id})`;
-                const unitTemplateMap = { 6: 8, 7: 8, 8: 7, 9: 8, 10: 6, 99: 37 };
-                const unitTotal = unitTemplateMap[stage.id] || 5;
-                const countHint = gameState.questionCountPref === 'ALL'
-                    ? `🌟 全部 ${unitTotal} 種題型`
-                    : (stage.id === 99 ? `目前 ${gameState.questionCountPref} 題（共 ${unitTotal} 題型）` : `每次 ${gameState.questionCountPref} 題（共 ${unitTotal} 題型）`);
+            const pinsLayer = document.getElementById('map-pins-layer');
+            const quickGrid = document.getElementById('quick-stage-grid');
+            if (!pinsLayer || !quickGrid) return;
+            const t = THEMES_25D[activeTheme] || THEMES_25D.hero;
+
+            const mistakesByUnit = {};
+            const totalMistakes = Array.isArray(gameState.mistakes) ? gameState.mistakes.length : 0;
+            if (Array.isArray(gameState.mistakes)) {
+                gameState.mistakes.forEach(m => {
+                    if (m && m.unitId) mistakesByUnit[m.unitId] = (mistakesByUnit[m.unitId] || 0) + 1;
+                });
+            }
+
+            pinsLayer.innerHTML = STAGES.map((st, idx) => {
+                const earnedStars = Number(gameState.stars[st.id]) || 0;
+                const starStr = '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars);
+                const mistakeCount = st.id === 99 ? totalMistakes : (mistakesByUnit[st.id] || 0);
+                const mistakeDot = mistakeCount > 0
+                    ? `<span class="absolute -top-2 -right-3 z-20 bg-rose-600 text-white text-xs font-black px-2 py-0.5 rounded-full border-2 border-white shadow-md whitespace-nowrap animate-bounce">📕 ${mistakeCount}</span>`
+                    : '';
+                const isSel = st.id === selectedStageId;
+                const isArrived = st.id === arrivedStageId;
+                const boxAnim = isSel
+                    ? `animation: pinFloat 3s ease-in-out ${idx * 0.3}s infinite, pinPulse 1.5s ease-in-out infinite;`
+                    : `animation: pinFloat 3s ease-in-out ${idx * 0.3}s infinite;`;
+                const boxStyle = isSel
+                    ? `--pin-ring:${t.pinRing}; --pin-glow:${t.pinGlow}; ${boxAnim}`
+                    : boxAnim;
+                const rippleRing = isSel
+                    ? `<span class="node-ripple absolute -inset-2 rounded-full border-[3px] pointer-events-none" style="border-color:${t.pinRing};"></span>`
+                    : '';
+                const plaqueCls = isSel
+                    ? `${t.pinLabelActive} ring-2 ring-slate-900/75 shadow-[0_8px_20px_rgba(15,23,42,0.8)] rounded-xl px-3.5 py-1`
+                    : 'bg-slate-900 border-sky-400 text-white shadow-[0_6px_16px_rgba(15,23,42,0.75)] rounded-xl px-3 py-1';
 
                 return `
-                    <div onclick="${clickHandler}" class="btn-3d cursor-pointer bg-white hover:bg-indigo-50/40 rounded-2xl p-5 border-3 ${stage.border} flex flex-col justify-between transition-all group">
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center text-3xl shadow-md group-hover:scale-110 transition-transform">
-                                    ${stage.icon}
-                                </div>
-                                <div class="flex gap-1 text-lg bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-100">${starsHtml}</div>
+                    <div role="button" tabindex="0" onclick="selectStage(${st.id})"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage(${st.id});}"
+                         style="left: ${st.x}%; top: ${st.y}%;"
+                         class="stage-pin ${isSel ? 'is-selected' : ''} cursor-pointer focus:outline-none">
+                        <div class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-b ${st.color} border-[3px] border-white ring-2 ring-slate-900/55 shadow-[0_8px_16px_rgba(15,23,42,0.45),inset_0_-4px_6px_rgba(0,0,0,0.22),inset_0_3px_4px_rgba(255,255,255,0.45)] flex items-center justify-center text-xl sm:text-2xl" style="${boxStyle}">
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 bg-slate-900 border-2 border-sky-400/90 text-amber-300 rounded-full px-2.5 py-0.5 shadow-[0_4px_12px_rgba(15,23,42,0.7)] text-xs sm:text-sm tracking-tight leading-none whitespace-nowrap">
+                                ${starStr}
                             </div>
-                            <h3 class="text-lg font-black text-slate-800 leading-snug">${stage.title}</h3>
-                            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed">${stage.subtitle}</p>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-400">${countHint}</span>
-                            <span class="text-xs sm:text-sm font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                開始刷題 ➔
-                            </span>
+                            ${rippleRing}
+                            <span class="relative z-10 drop-shadow-sm">${st.icon}</span>
+                            ${mistakeDot}
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex flex-col items-center">
+                                <div class="border-2 ${plaqueCls} text-center transition-colors">
+                                    <div class="flex items-center gap-1.5 text-xs sm:text-sm md:text-base font-black whitespace-nowrap">
+                                        <span class="text-[11px] sm:text-xs font-black px-1.5 py-0.5 rounded-md ${isSel ? 'bg-slate-900/45 text-white' : 'bg-sky-500 text-white'}">${st.unitBadge}</span>
+                                        <span>${st.short}</span>
+                                    </div>
+                                </div>
+                                ${isArrived ? `
+                                    <button type="button" onclick="event.stopPropagation(); enterStageById(${st.id})"
+                                            class="btn-3d mt-2 animate-pop bg-gradient-to-r ${t.enterBtnGrad} hover:brightness-105 text-white font-black px-4 py-1.5 rounded-full text-xs sm:text-sm md:text-base shadow-[0_6px_16px_rgba(15,23,42,0.45)] border-2 border-white ring-2 ring-slate-900/50 whitespace-nowrap cursor-pointer">
+                                        ${t.enterBtnText}
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            quickGrid.innerHTML = STAGES.map(st => {
+                const earnedStars = Number(gameState.stars[st.id]) || 0;
+                const isSel = st.id === selectedStageId;
+                return `
+                    <button type="button" onclick="selectStage(${st.id})" class="btn-3d ${isSel ? t.quickActive : 'bg-white hover:bg-amber-50 ' + st.border} border-2 rounded-2xl p-3 text-left flex items-center gap-2.5 cursor-pointer transition">
+                        <span class="w-10 h-10 rounded-xl bg-gradient-to-br ${st.color} flex items-center justify-center text-xl shrink-0">${st.icon}</span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] font-black bg-slate-900 text-sky-300 px-1.5 py-0.5 rounded shrink-0">${st.unitBadge}</span>
+                                <span class="text-sm sm:text-base font-black text-slate-800 truncate">${st.short}</span>
+                            </div>
+                            <div class="text-xs font-bold text-slate-500 truncate mt-0.5">${st.brief}</div>
+                            <div class="text-xs sm:text-sm font-bold text-amber-600 mt-0.5">${'⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars)}</div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            updateStageInfoBar();
+        }
+
+        function updateStageInfoBar() {
+            const st = STAGES.find(s => s.id === selectedStageId) || STAGES[0];
+            const t = THEMES_25D[activeTheme] || THEMES_25D.hero;
+            const stars = Number(gameState.stars[st.id]) || 0;
+            const totalMistakes = Array.isArray(gameState.mistakes) ? gameState.mistakes.length : 0;
+            const unitMistakes = st.id === 99
+                ? totalMistakes
+                : (Array.isArray(gameState.mistakes) ? gameState.mistakes.filter(m => m && m.unitId === st.id).length : 0);
+
+            const unitTemplateMap = { 6: 8, 7: 8, 8: 7, 9: 8, 10: 6, 99: 37 };
+            const unitTotal = unitTemplateMap[st.id] || 5;
+            const countHint = gameState.questionCountPref === 'ALL'
+                ? `🌟 全題型制霸（全部 ${unitTotal} 種題型）`
+                : `本次練習 ${gameState.questionCountPref || 5} 題（本單元收錄 ${unitTotal} 種變化題型）`;
+
+            const iconEl = document.getElementById('info-bar-icon');
+            const badgeEl = document.getElementById('info-bar-badge');
+            const titleEl = document.getElementById('info-bar-title');
+            const starsEl = document.getElementById('info-bar-stars');
+            const mistEl = document.getElementById('info-bar-mistakes');
+            const descEl = document.getElementById('info-bar-desc');
+            const enterEl = document.getElementById('info-bar-enter');
+
+            if (iconEl) {
+                iconEl.textContent = st.icon;
+                iconEl.className = `w-11 h-11 rounded-2xl bg-gradient-to-br ${st.color} flex items-center justify-center text-2xl shrink-0 shadow border-2 border-white`;
+            }
+            if (badgeEl) badgeEl.textContent = st.unitBadge;
+            if (titleEl) titleEl.textContent = st.title;
+            if (starsEl) starsEl.textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            if (mistEl) {
+                if (unitMistakes > 0) {
+                    mistEl.textContent = `📕 ${unitMistakes} 題待消滅`;
+                    mistEl.classList.remove('hidden');
+                } else {
+                    mistEl.classList.add('hidden');
+                }
+            }
+            if (descEl) descEl.textContent = `${st.subtitle}｜${countHint}`;
+            if (enterEl) {
+                enterEl.textContent = st.id === 99 ? '👑 選擇模擬考題數 ➔' : t.enterBtnText;
+                enterEl.className = `btn-3d bg-gradient-to-r ${t.enterBtnGrad} text-white font-black px-5 py-2 rounded-xl text-sm sm:text-base shadow cursor-pointer shrink-0 whitespace-nowrap`;
+            }
+        }
+
+        function enterStageById(stageId) {
+            if (stageId === 99) openMockExamModal();
+            else startStage(stageId);
+        }
+
+        function selectStage(stageId, playSnd = true) {
+            if (playSnd && arrivedStageId === stageId) {
+                if (typeof SoundEngine !== 'undefined') SoundEngine.click();
+                enterStageById(stageId);
+                return;
+            }
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+            const st = STAGES.find(s => s.id === stageId);
+            if (!st) return;
+            selectedStageId = stageId;
+
+            const targetX = Math.max(8, st.x - 8.5);
+            const targetY = st.y - 1;
+            const hero = document.getElementById('map-hero');
+            const flip = document.getElementById('map-hero-flip');
+            const sprite = document.getElementById('map-hero-sprite');
+            const dist = Math.hypot(targetX - mapHeroX, targetY - mapHeroY);
+
+            if (heroAnimFrame !== null) {
+                cancelAnimationFrame(heroAnimFrame);
+                heroAnimFrame = null;
+            }
+
+            if (playSnd && dist > 0.5) {
+                arrivedStageId = null;
+                renderLobby();
+                if (flip) flip.style.transform = targetX < mapHeroX ? 'scaleX(-1)' : 'scaleX(1)';
+                if (sprite) {
+                    sprite.classList.remove('hero-idle');
+                    sprite.classList.add('is-walking');
+                }
+                const startX = mapHeroX;
+                const startY = mapHeroY;
+                const duration = Math.min(620, Math.max(220, dist * 10));
+                const startTime = performance.now();
+
+                function stepMove(now) {
+                    const elapsed = now - startTime;
+                    const t = Math.min(1, elapsed / duration);
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    mapHeroX = startX + (targetX - startX) * ease;
+                    mapHeroY = startY + (targetY - startY) * ease;
+                    if (hero) {
+                        hero.style.left = `${mapHeroX}%`;
+                        hero.style.top = `${mapHeroY}%`;
+                    }
+                    if (t < 1) {
+                        heroAnimFrame = requestAnimationFrame(stepMove);
+                    } else {
+                        heroAnimFrame = null;
+                        if (sprite) {
+                            sprite.classList.remove('is-walking');
+                            sprite.classList.add('hero-idle');
+                        }
+                        if (flip) flip.style.transform = 'scaleX(1)';
+                        arrivedStageId = stageId;
+                        renderLobby();
+                    }
+                }
+                heroAnimFrame = requestAnimationFrame(stepMove);
+            } else {
+                if (flip) flip.style.transform = 'scaleX(1)';
+                if (sprite) {
+                    sprite.classList.remove('is-walking');
+                    sprite.classList.add('hero-idle');
+                }
+                mapHeroX = targetX;
+                mapHeroY = targetY;
+                if (hero) {
+                    hero.style.left = `${targetX}%`;
+                    hero.style.top = `${targetY}%`;
+                }
+                arrivedStageId = stageId;
+                renderLobby();
+            }
         }
 
         function openMockExamModal() {
@@ -2844,8 +3533,9 @@
                 typeTag.className = 'text-xs font-black px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-700';
             }
 
-            // 更新錯題怪獸 Boss 血條（若非錯題模式則自動隱藏）
+            // 更新錯題怪獸 Boss 血條（若非錯題模式則自動隱藏）與 2.5D 主題互動舞台
             MonsterBoss.renderUI();
+            updateThemeArena();
 
             // 填入題目文字與輔助圖形
             document.getElementById('question-text').innerHTML = q.text;
@@ -3064,6 +3754,7 @@
                 nextBtn.innerHTML = '<span>下一題</span><span>➡️</span>';
             }
 
+            triggerArenaFeedback(isCorrect);
             saveProgress(isCorrect);
         }
 
@@ -3287,8 +3978,41 @@
             closeConfirmModal();
         }
 
-        // 實體鍵盤快捷鍵支援（作答區）
+        // 科目首次使用指南（全科目共用首次開關：playground_guide_subject_v1）
+        const SUBJECT_GUIDE_KEY = 'playground_guide_subject_v1';
+
+        function openSubjectGuide(playSnd = false) {
+            const modal = document.getElementById('subject-guide-modal');
+            if (!modal) return;
+            const img = document.getElementById('guide-actor-img');
+            if (img) {
+                const key = ['hero', 'bakery', 'garden'].includes(activeTheme) ? activeTheme : 'hero';
+                img.src = `../assets/actor-${key}-3d.png`;
+            }
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSubjectGuide(markSeen = true) {
+            const modal = document.getElementById('subject-guide-modal');
+            if (!modal) return;
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (markSeen) {
+                try { localStorage.setItem(SUBJECT_GUIDE_KEY, '1'); } catch (_) {}
+            }
+        }
+
+        // 實體鍵盤快捷鍵支援（作答區）與彈窗 Esc 關閉
         window.addEventListener('keydown', (e) => {
+            const guideModal = document.getElementById('subject-guide-modal');
+            if (e.key === 'Escape' && guideModal && !guideModal.classList.contains('hidden')) {
+                e.preventDefault();
+                closeSubjectGuide(true);
+                return;
+            }
             if (e.ctrlKey || e.metaKey || e.altKey) return;
             const quizScreen = document.getElementById('quiz-screen');
             if (!quizScreen || quizScreen.classList.contains('hidden')) return;
@@ -3336,7 +4060,29 @@
             ConfettiEngine.init();
             Scratchpad.init();
             loadProgress();
+
+            let savedTheme = 'hero';
+            try {
+                const t = localStorage.getItem('playground_theme_v1') || localStorage.getItem('demo_math_25d_theme');
+                if (THEMES_25D[t]) savedTheme = t;
+            } catch (_) {}
+            switchTheme(savedTheme, false);
+            selectStage(selectedStageId, false);
+
+            try {
+                if (!localStorage.getItem(SUBJECT_GUIDE_KEY)) {
+                    setTimeout(() => openSubjectGuide(false), 280);
+                }
+            } catch (_) {}
         };
+        window.addEventListener('pageshow', () => {
+            let savedTheme = activeTheme;
+            try {
+                const t = localStorage.getItem('playground_theme_v1');
+                if (THEMES_25D[t]) savedTheme = t;
+            } catch (_) {}
+            if (savedTheme !== activeTheme) switchTheme(savedTheme, false);
+        });
     </script>
 </body>
 </html>

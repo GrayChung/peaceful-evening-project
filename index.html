@@ -9,14 +9,11 @@
     <meta name="theme-color" content="#f59e0b">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
     <title>國小親子互動複習遊樂場｜多科目學習大廳</title>
-    <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 載入 Google Fonts 繁體中文圓體與英數字體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="Styles/common.css">
+    <link rel="stylesheet" href="./Styles/common.css">
     <script>
         document.documentElement.classList.add('page-loading');
         (function () {
@@ -35,47 +32,168 @@
     </script>
     <style>
         body {
-            background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #dcfce7 100%);
+            background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 45%, #fef9c3 100%);
+            transition: background 0.45s ease;
+        }
+        body.theme-bakery {
+            background: linear-gradient(180deg, #fce7f3 0%, #fffbeb 55%, #ffedd5 100%);
+        }
+        body.theme-garden {
+            background: linear-gradient(180deg, #ede9fe 0%, #fce7f3 50%, #dcfce7 100%);
+        }
+        body.section-english {
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 55%, #0f172a 100%);
+        }
+
+        @keyframes cloudDrift {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(28px); }
+        }
+        @keyframes cloudDriftSlow {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(-24px); }
+        }
+        @keyframes sunSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes waveBob {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-14px) translateY(3px); }
+        }
+        @keyframes heroIdle {
+            0%, 100% { transform: translateY(0) scaleY(1); }
+            50% { transform: translateY(-4px) scaleY(1.03); }
+        }
+        @keyframes heroWalk {
+            0%, 100% { transform: translateY(0) rotate(-6deg) scale(1, 1); }
+            25% { transform: translateY(-10px) rotate(2deg) scale(0.96, 1.06); }
+            50% { transform: translateY(0) rotate(6deg) scale(1.04, 0.96); }
+            75% { transform: translateY(-10px) rotate(-2deg) scale(0.96, 1.06); }
+        }
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.35; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes trainRide {
+            0% { transform: translateX(-80px); }
+            100% { transform: translateX(1180px); }
+        }
+        @keyframes pathDash {
+            from { stroke-dashoffset: 36; }
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes pinPulse {
+            0%, 100% { box-shadow: 0 0 0 3px var(--pin-ring), 0 0 18px 2px var(--pin-glow), 0 10px 20px rgba(15, 23, 42, 0.22); }
+            50% { box-shadow: 0 0 0 6px var(--pin-ring), 0 0 28px 6px var(--pin-glow), 0 12px 24px rgba(15, 23, 42, 0.28); }
+        }
+        @keyframes pinFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        @keyframes sparkleTwinkle {
+            0%, 100% { opacity: 0.25; transform: scale(0.75); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+        @keyframes nodeRipple {
+            0% { transform: scale(0.85); opacity: 0.85; }
+            100% { transform: scale(1.75); opacity: 0; }
+        }
+
+        .cloud-a { animation: cloudDrift 10s ease-in-out infinite; }
+        .cloud-b { animation: cloudDriftSlow 13s ease-in-out infinite; }
+        .sun-rays { transform-origin: center; animation: sunSpin 28s linear infinite; }
+        .wave-bob { animation: waveBob 5s ease-in-out infinite; }
+        .hero-idle { transform-origin: bottom center; animation: heroIdle 2.2s ease-in-out infinite; }
+        .is-walking { transform-origin: bottom center; animation: heroWalk 0.34s ease-in-out infinite; }
+        .star-twinkle { transform-origin: center; animation: starTwinkle 2.4s ease-in-out infinite; }
+        .sparkle-twinkle { transform-box: fill-box; transform-origin: center; animation: sparkleTwinkle 2.6s ease-in-out infinite; }
+        .node-ripple { animation: nodeRipple 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+        .train-ride { animation: trainRide 14s linear infinite; }
+        .road-flow { stroke-dasharray: 10 8; animation: pathDash 1.8s linear infinite; }
+
+        .landmark-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 20;
+        }
+        .landmark-node:hover {
+            transform: translate(-50%, -50%) scale(1.07);
+            z-index: 30;
+        }
+        .landmark-node.is-selected {
+            transform: translate(-50%, -50%) scale(1.05);
+            z-index: 32;
+        }
+
+        #hero-marker {
+            position: absolute;
+            transform: translate(-50%, -78%);
+            will-change: left, top;
+            z-index: 35;
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="text-slate-800 flex flex-col items-center justify-between p-4 sm:p-6">
+<body class="text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5 min-h-screen">
 
-    <!-- 頂部大廳招牌 -->
-    <header class="w-full max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-4 border-amber-300 px-5 py-4 sm:px-8 sm:py-5 flex flex-wrap items-center justify-between gap-4 animate-pop">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-md border-2 border-white">
-                🎒
+    <!-- 頂部導覽列（雙排結構：上排大廳標題＋系統工具，下排主角玩法＋戰績徽章） -->
+    <header id="main-header" class="w-full max-w-6xl xl:max-w-7xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-4 border-amber-300 px-4 py-3 sm:px-6 sm:py-3.5 space-y-2.5 animate-pop z-30">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div id="header-icon" class="w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white">
+                    🎒
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-black text-slate-800 tracking-wide">國小親子互動複習遊樂場</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 font-bold">跨年級、多科目動態出題冒險總島・支援 iPad 觸控手寫草稿</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-xl sm:text-3xl font-black text-slate-800 tracking-wide">
-                    國小親子互動複習遊樂場
-                </h1>
-                <p class="text-xs sm:text-sm text-slate-500 font-bold mt-0.5">
-                    跨年級、多科目動態出題練習平台・支援 iPad 觸控手寫草稿
-                </p>
+
+            <div class="flex items-center gap-2 ml-auto">
+                <button type="button" onclick="openHubGuide(true)" class="btn-3d bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm cursor-pointer">
+                    ❓ 說明
+                </button>
+                <button id="sound-toggle" onclick="toggleSound()" data-active-bg="bg-emerald-500" class="btn-3d bg-emerald-500 text-white font-black px-3 py-1.5 rounded-xl text-sm">
+                    <span id="sound-icon">🔊</span>
+                </button>
             </div>
         </div>
 
-        <!-- 主區塊切換：國小學科 vs 雙語英文學科 vs 劍橋英檢 -->
-        <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-            <button onclick="switchSection('school')" id="sec-tab-school" class="section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition">
-                🇹🇼 國小學科
-            </button>
-            <button onclick="switchSection('bilingual')" id="sec-tab-bilingual" class="section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                🌍 雙語英文學科
-            </button>
-            <button onclick="switchSection('english')" id="sec-tab-english" class="section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                🇬🇧 劍橋英檢
-            </button>
+        <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs sm:text-sm font-black text-slate-500">🎭 主角玩法：</span>
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs sm:text-sm font-black">
+                    <button onclick="switchTheme('hero')" id="theme-btn-hero" class="px-3 py-1 rounded-lg bg-amber-500 text-white shadow cursor-pointer transition">⚔️ 勇者</button>
+                    <button onclick="switchTheme('bakery')" id="theme-btn-bakery" class="px-3 py-1 rounded-lg text-slate-600 hover:bg-white cursor-pointer transition">🍰 甜點</button>
+                    <button onclick="switchTheme('garden')" id="theme-btn-garden" class="px-3 py-1 rounded-lg text-slate-600 hover:bg-white cursor-pointer transition">🌸 花園</button>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 ml-auto">
+                <div class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-2 border-violet-200 shadow-md px-3.5 py-1.5 rounded-2xl flex items-center gap-1.5">
+                    <span class="text-base sm:text-lg leading-none">⭐</span>
+                    <span class="text-xs sm:text-sm font-black opacity-95">星星</span>
+                    <span id="sec-stars" class="text-sm sm:text-base font-black text-amber-300 leading-none">0 / 75</span>
+                </div>
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white border-2 border-sky-200 shadow-md px-3.5 py-1.5 rounded-2xl flex items-center gap-1.5">
+                    <span class="text-base sm:text-lg leading-none">🏆</span>
+                    <span class="text-xs sm:text-sm font-black opacity-95">積分</span>
+                    <span id="sec-score" class="text-sm sm:text-base font-black leading-none">0</span>
+                </div>
+                <span id="sec-mistakes" class="bg-emerald-100 text-emerald-800 border-2 border-emerald-300 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-black shadow-sm">
+                    ✨ 0 錯題
+                </span>
+            </div>
         </div>
     </header>
 
-    <!-- 主內容區：科目卡片導覽 -->
-    <main class="w-full max-w-6xl xl:max-w-7xl flex-1 my-6">
-        
+    <!-- 主內容區 -->
+    <main class="w-full max-w-6xl xl:max-w-7xl flex-1 my-4 space-y-4">
+
         <!-- iPad 加入主畫面小提醒橫幅 -->
-        <div id="ipad-tip-banner" class="bg-sky-50/95 border-2 border-sky-200 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-sky-900 shadow-sm">
+        <div id="ipad-tip-banner" class="bg-sky-50/95 border-2 border-sky-200 rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-sky-900 shadow-sm">
             <div class="flex items-center gap-2 font-bold flex-1 min-w-[220px]">
                 <span class="text-lg">📱</span>
                 <span>iPad 使用小技巧：在 Safari 點擊右上角「分享 ⬆」➔「加入主畫面」，就能像 App 一樣一鍵開啟所有科目！</span>
@@ -88,551 +206,296 @@
             </div>
         </div>
 
-        <!-- ==================== 區塊一：國小學科 ==================== -->
-        <div id="section-school">
-            <!-- 年級與進度子列 -->
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <div class="flex flex-wrap items-center gap-2 bg-white/80 p-1.5 rounded-2xl border border-slate-200 shadow-sm">
-                    <button onclick="filterGrade('all')" id="tab-all" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition">
-                        全部科目
+        <!-- 區域切換列 + 分區完成進度條 -->
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl border-2 border-sky-200 px-4 py-2.5 space-y-2 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                    <button onclick="switchSection('school')" id="sec-btn-school" class="px-4 py-1.5 rounded-xl text-sm sm:text-base font-black bg-indigo-600 text-white shadow transition cursor-pointer">
+                        🇹🇼 國小學科
                     </button>
-                    <button onclick="filterGrade('4')" id="tab-4" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                        四年級專區
+                    <button onclick="switchSection('bilingual')" id="sec-btn-bilingual" class="px-4 py-1.5 rounded-xl text-sm sm:text-base font-bold text-slate-600 hover:bg-white transition cursor-pointer">
+                        🌍 雙語英文學科
                     </button>
-                    <button onclick="filterGrade('coming')" id="tab-coming" class="grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                        即將推出
+                    <button onclick="switchSection('english')" id="sec-btn-english" class="px-4 py-1.5 rounded-xl text-sm sm:text-base font-bold text-slate-600 hover:bg-white transition cursor-pointer">
+                        🇬🇧 劍橋英檢
                     </button>
                 </div>
+                <span id="section-progress-label" class="text-xs sm:text-sm font-black text-indigo-800">📊 本區冒險進度：0%</span>
             </div>
-
-            <!-- 四科總覽進度橫幅 -->
-            <div id="overall-progress-banner" class="bg-white/90 border-2 border-indigo-200 rounded-2xl px-4 py-3 mb-6 flex flex-col gap-2.5 shadow-sm">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-indigo-900">
-                        <span class="text-lg">📊</span>
-                        <span>四年級上學期學習進度總覽</span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                        <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
-                            ⭐ 總星星 <span id="overall-stars">0</span> / 75
-                        </span>
-                        <span class="bg-indigo-100 text-indigo-800 border border-indigo-300 px-3 py-1 rounded-full">
-                            🏆 總積分 <span id="overall-score">0</span>
-                        </span>
-                        <span id="overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
-                            ✨ 0 錯題
-                        </span>
-                    </div>
-                </div>
-                <div class="w-full h-2 bg-indigo-100 rounded-full overflow-hidden">
-                    <div id="school-progress-bar" class="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-indigo-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <!-- 科目卡片網格 -->
-            <div id="portal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-            <!-- 卡片 1：四年級上學期數學（已上線：./4a/math.html） -->
-            <a href="./4a/math.html" data-grade="4" data-status="live"
-               class="portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-amber-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                    ● 已開放遊玩
-                </div>
-                <div>
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                        🏰
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-black bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-lg">四年級上學期</span>
-                        <span class="text-xs font-bold text-slate-400">數學科</span>
-                    </div>
-                    <h2 class="text-xl font-black text-slate-800 mt-1">
-                        四上期末考數學冒險島
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                        適用翰林版第 6～10 單元進度（除法、三角形與全等、兩步驟併式、二位小數、統計圖表）。內建直式方格草稿板與錯題大作戰！
-                    </p>
-                </div>
-
-                <div>
-                    <div id="progress-math" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                        <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
-                        <span class="bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full">🏆 0</span>
-                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-sm font-black text-amber-600 bg-amber-50 group-hover:bg-amber-500 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
-                            進入挑戰 ➔
-                        </span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- 卡片 2：四年級上學期社會（已上線：./4a/society.html） -->
-            <a href="./4a/society.html" data-grade="4" data-status="live"
-               class="portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-orange-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                    ● 已開放遊玩
-                </div>
-                <div>
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                        🏮
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-black bg-orange-100 text-orange-800 px-2.5 py-0.5 rounded-lg">四年級上學期</span>
-                        <span class="text-xs font-bold text-slate-400">社會科</span>
-                    </div>
-                    <h2 class="text-xl font-black text-slate-800 mt-1">
-                        四上期末考社會探險家
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                        適用康軒版第三、四單元進度（傳統信仰與老街、生活的作息、傳統節慶與現代節日）。附原創文化圖解與錯題消滅戰！
-                    </p>
-                </div>
-
-                <div>
-                    <div id="progress-society" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                        <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
-                        <span class="bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full">🏆 0</span>
-                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-sm font-black text-orange-600 bg-orange-50 group-hover:bg-orange-500 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
-                            進入探險 ➔
-                        </span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- 卡片 3：四年級上學期國語（已上線：./4a/chinese.html） -->
-            <a href="./4a/chinese.html" data-grade="4" data-status="live"
-               class="portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-rose-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                    ● 已開放遊玩
-                </div>
-                <div>
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                        📖
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-black bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-lg">四年級上學期</span>
-                        <span class="text-xs font-bold text-slate-400">國語科</span>
-                    </div>
-                    <h2 class="text-xl font-black text-slate-800 mt-1">
-                        四上期末考國語文勇者試煉
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                        適用南一版第 7～12 課進度（易錯字音與多音字、形近字偵探、成語與歇後語、修辭技巧與故事寓意）。
-                    </p>
-                </div>
-
-                <div>
-                    <div id="progress-chinese" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                        <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 21</span>
-                        <span class="bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full">🏆 0</span>
-                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-sm font-black text-rose-600 bg-rose-50 group-hover:bg-rose-600 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
-                            進入試煉 ➔
-                        </span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- 卡片 4：四年級上學期自然（已上線：./4a/science.html） -->
-            <a href="./4a/science.html" data-grade="4" data-status="live"
-               class="portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-emerald-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                    ● 已開放遊玩
-                </div>
-                <div>
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                        🔬
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-black bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-lg">四年級上學期</span>
-                        <span class="text-xs font-bold text-slate-400">自然科</span>
-                    </div>
-                    <h2 class="text-xl font-black text-slate-800 mt-1">
-                        四上期末考自然科學探險營
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                        適用康軒版第三、四單元進度（聲音與光的特性、燈泡通路/斷路/短路實驗、串並聯與安全用電）。附原創實驗 SVG 圖解！
-                    </p>
-                </div>
-
-                <div>
-                    <div id="progress-science" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                        <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
-                        <span class="bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full">🏆 0</span>
-                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-sm font-black text-emerald-700 bg-emerald-50 group-hover:bg-emerald-600 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
-                            進入實驗 ➔
-                        </span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- 卡片 5：四年級下學期數學（預留擴充：./4b/math.html） -->
-            <div data-grade="4" data-status="coming" onclick="showComingSoon('四年級下學期｜數學冒險島', '4b/math.html')"
-                 class="portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-sky-200 flex flex-col justify-between relative transition">
-                <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
-                    🛠️ 籌備建置中
-                </div>
-                <div>
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-300 to-indigo-400 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
-                        📐
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-black bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-lg">四年級下學期</span>
-                        <span class="text-xs font-bold text-slate-400">數學科</span>
-                    </div>
-                    <h2 class="text-xl font-black text-slate-700 mt-1">
-                        四下數學冒險島
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                        預計收錄概數、四則運算、四邊形、分數、周長與面積、小數乘整數與立體積木。
-                    </p>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
-                    <span class="text-xs font-black text-sky-600 bg-sky-50 px-3 py-1.5 rounded-xl">
-                        查看規劃說明
-                    </span>
-                </div>
-            </div>
-
-        </div>
-        </div>
-
-        <!-- ==================== 區塊二：雙語英文學科 ==================== -->
-        <div id="section-bilingual" class="hidden">
-            <!-- 年級與狀態篩選列 -->
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <div class="flex flex-wrap items-center gap-2 bg-white/80 p-1.5 rounded-2xl border border-cyan-200 shadow-sm">
-                    <button onclick="filterBilingual('all')" id="bi-tab-all" class="bi-grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-cyan-600 text-white shadow transition">
-                        全部科目
-                    </button>
-                    <button onclick="filterBilingual('4')" id="bi-tab-4" class="bi-grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                        四年級專區
-                    </button>
-                    <button onclick="filterBilingual('coming')" id="bi-tab-coming" class="bi-grade-tab px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition">
-                        即將推出
-                    </button>
-                </div>
-            </div>
-
-            <!-- 雙語學科總覽進度橫幅 -->
-            <div class="bg-gradient-to-r from-cyan-50 via-white to-emerald-50 border-2 border-cyan-200 rounded-2xl px-4 py-3 mb-6 flex flex-col gap-2.5 shadow-sm">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-cyan-900">
-                        <span class="text-lg">🌍</span>
-                        <span>雙語小學英文學科進度總覽（全英文出題・可切換中文提示與朗讀）</span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                        <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
-                            ⭐ 總星星 <span id="bilingual-overall-stars">0</span> / 30
-                        </span>
-                        <span class="bg-cyan-100 text-cyan-800 border border-cyan-300 px-3 py-1 rounded-full">
-                            🏆 總積分 <span id="bilingual-overall-score">0</span>
-                        </span>
-                        <span id="bilingual-overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
-                            ✨ 0 錯題
-                        </span>
-                    </div>
-                </div>
-                <div class="w-full h-2 bg-cyan-100 rounded-full overflow-hidden">
-                    <div id="bilingual-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <!-- 雙語學科卡片網格 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-                <!-- 雙語卡片 1：四年級上學期 Integrated Science (IS)（已上線：./4a/en-is.html） -->
-                <a href="./4a/en-is.html" data-grade="4" data-status="live"
-                   class="bilingual-card portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-cyan-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                        ● 已開放遊玩
-                    </div>
-                    <div>
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 via-sky-500 to-teal-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                            🔦
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-black bg-cyan-100 text-cyan-800 px-2.5 py-0.5 rounded-lg">Grade 4</span>
-                            <span class="text-xs font-bold text-slate-400">Integrated Science (IS)</span>
-                        </div>
-                        <h2 class="text-xl font-black text-slate-800 mt-1">
-                            IS 雙語科學實驗室
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                            收錄 Ch.7 Properties of Light（光線直進、反射與表面材質、Ray Diagram 互動繪圖、字彙拼寫與短文完整句答題特訓），支援英文朗讀與中文提示！
-                        </p>
-                    </div>
-
-                    <div>
-                        <div id="progress-is" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 15</span>
-                            <span class="bg-cyan-50 text-cyan-700 border border-cyan-200 px-2 py-0.5 rounded-full">🏆 0</span>
-                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
-                            <span class="text-sm font-black text-cyan-700 bg-cyan-50 group-hover:bg-cyan-600 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
-                                Enter Lab ➔
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- 雙語卡片 2：四年級上學期 Reading Street (RS) -->
-                <a href="./4a/en-rs.html" data-grade="4" data-status="live"
-                   class="bilingual-card portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-emerald-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                        ● 已開放遊玩
-                    </div>
-                    <div>
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                            📚
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-black bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-lg">4上 / Grade 4</span>
-                            <span class="text-xs font-bold text-slate-400">Reading Street (RS)</span>
-                        </div>
-                        <h2 class="text-xl font-black text-slate-800 group-hover:text-emerald-700 transition-colors mt-1">
-                            RS · The Game of Silence & Grammar
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                            全英文閱讀、短長音 u 聽寫、修辭感官與形容詞/副詞文法（含中文提示與英語朗讀）。
-                        </p>
-                    </div>
-
-                    <div>
-                        <div id="progress-rs" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 15</span>
-                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">🏆 0</span>
-                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-end">
-                            <span class="text-sm font-black text-emerald-700 bg-emerald-50 group-hover:bg-emerald-600 group-hover:text-white px-4 py-1.5 rounded-xl transition-colors">
-                                Enter Lab ➔
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- 雙語卡片 3：四年級下學期/後續章節預告（預留擴充） -->
-                <div data-grade="4" data-status="coming" onclick="showComingSoon('Grade 4 IS｜Ch.8 Electric Circuits', '4a/en-is.html')"
-                     class="bilingual-card portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-cyan-200 flex flex-col justify-between relative transition">
-                    <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
-                        🛠️ 籌備建置中
-                    </div>
-                    <div>
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 to-cyan-400 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
-                            ⚡
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-black bg-cyan-100 text-cyan-700 px-2.5 py-0.5 rounded-lg">Grade 4</span>
-                            <span class="text-xs font-bold text-slate-400">Integrated Science (IS)</span>
-                        </div>
-                        <h2 class="text-xl font-black text-slate-700 mt-1">
-                            IS · Ch.8 Electric Circuits
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                            預計收錄全英文電路符號、導電體與絕緣體、串並聯實驗互動與核心科學字彙特訓。
-                        </p>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-xs font-black text-cyan-600 bg-cyan-50 px-3 py-1.5 rounded-xl">
-                            查看規劃說明
-                        </span>
-                    </div>
-                </div>
-
+            <div class="w-full h-2 bg-indigo-100 rounded-full overflow-hidden">
+                <div id="section-progress-bar" class="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-indigo-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
             </div>
         </div>
 
-        <!-- ==================== 區塊三：劍橋英檢 ==================== -->
-        <div id="section-english" class="hidden">
-            <!-- 英檢總覽進度橫幅 -->
-            <div class="bg-slate-900/95 text-white border-2 border-teal-400/60 rounded-2xl px-4 py-3 mb-6 flex flex-col gap-2.5 shadow-md">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-teal-300">
-                        <span class="text-lg">🇬🇧</span>
-                        <span>Cambridge English 劍橋英檢進度總覽</span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                        <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-full">
-                            ⭐ 總星星 <span id="english-overall-stars">0</span> / 18
-                        </span>
-                        <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-3 py-1 rounded-full">
-                            🏆 總積分 <span id="english-overall-score">0</span>
-                        </span>
-                        <span id="english-overall-mistakes-badge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-full">
-                            ✨ 0 錯題
-                        </span>
+        <!-- 2.5D 微縮模型冒險總島舞台 -->
+        <section class="relative w-full rounded-[2rem] border-4 border-white shadow-2xl overflow-hidden bg-sky-200 select-none">
+            <div class="relative w-full aspect-[16/9] min-h-[280px]">
+
+                <!-- 國小學科：2.5D 微縮插畫總島底圖 -->
+                <img id="world-diorama-img" src="./assets/world-island-school-25d.jpg" alt="2.5D 微縮冒險總島地圖" class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
+
+                <!-- 輕量動態氣氛覆蓋層（國小分區顯示星光與飄雲；雙語/英檢分區顯示專屬島嶼 SVG） -->
+                <svg id="island-scene-svg" viewBox="0 0 1100 618" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+
+                <!-- 3D 黏土公仔主角＋發光棋子底座（停在目前選擇科目的左側） -->
+                <div id="hero-marker" style="left: 16.5%; top: 62%;">
+                    <div class="relative flex flex-col items-center">
+                        <div id="map-hero-flip" class="relative z-10 transition-transform duration-150">
+                            <div id="map-hero-sprite" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 hero-idle"></div>
+                        </div>
+                        <div id="map-hero-base" class="-mt-3 w-14 h-4 sm:w-16 sm:h-5 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-white shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(99,102,241,0.6)]"></div>
                     </div>
                 </div>
-                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div id="english-progress-bar" class="h-full bg-gradient-to-r from-teal-400 via-cyan-400 to-amber-400 transition-all duration-500 rounded-full" style="width: 0%"></div>
-                </div>
-            </div>
 
-            <!-- 英檢卡片網格 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-                <!-- 英檢卡片 1：Cambridge PET (B1)（已上線：./cambridge/pet.html） -->
-                <a href="./cambridge/pet.html"
-                   class="portal-card btn-3d group bg-slate-900 text-white rounded-3xl p-6 border-4 border-teal-400 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                        ● 已開放遊玩
-                    </div>
-                    <div>
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-indigo-600 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
-                            🚆
+                <!-- 左下角貓頭鷹小夥伴（單行自動寬度、7 秒不重複隨機輪播） -->
+                <div id="mascot-wrap" onclick="pokeMascot()" class="absolute bottom-2.5 left-2.5 sm:bottom-4 sm:left-4 z-30 flex items-center gap-2 bg-white/95 backdrop-blur-sm border-2 border-indigo-300 rounded-2xl px-3 py-1.5 sm:py-2 shadow-lg cursor-pointer hover:scale-[1.02] transition w-fit max-w-[calc(100%-1.25rem)] sm:max-w-[calc(100%-2rem)]">
+                    <span class="text-xl sm:text-2xl shrink-0">🦉</span>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <span id="mascot-rank-badge" class="text-[11px] sm:text-xs font-black bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full whitespace-nowrap">🥚 Lv.1 見習探險家</span>
                         </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-0.5 rounded-lg">CEFR B1</span>
-                            <span class="text-xs font-bold text-slate-400">劍橋中級英檢</span>
-                        </div>
-                        <h2 class="text-xl font-black text-white mt-1">
-                            Cambridge PET Express
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-300 font-medium mt-2 leading-relaxed">
-                            專為小學生設計的 PET (B1) 互動特訓！涵蓋同義替換配對、62 個新增動詞片語、Part 6 拼字、Part 4 句子還原與聽寫挑戰。
+                        <p id="mascot-bubble" class="text-xs sm:text-sm font-bold text-slate-700 leading-snug sm:whitespace-nowrap mt-0.5">
+                            點點島上的科目出發探險吧！
                         </p>
                     </div>
-
-                    <div>
-                        <div id="progress-pet" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                            <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
-                            <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-2 py-0.5 rounded-full">🏆 0</span>
-                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-slate-700 flex items-center justify-end">
-                            <span class="text-sm font-black text-slate-950 bg-teal-400 group-hover:bg-teal-300 px-4 py-1.5 rounded-xl transition-colors">
-                                搭車出發 ➔
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- 英檢卡片 2：Cambridge KET (A2)（預留擴充：./cambridge/ket.html） -->
-                <div onclick="showComingSoon('Cambridge KET (A2) 基礎特訓', 'cambridge/ket.html')"
-                     class="portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-sky-200 flex flex-col justify-between relative transition">
-                    <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
-                        🛠️ 籌備建置中
-                    </div>
-                    <div>
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
-                            🛫
-                        </div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-black bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-lg">CEFR A2</span>
-                            <span class="text-xs font-bold text-slate-400">劍橋初級英檢</span>
-                        </div>
-                        <h2 class="text-xl font-black text-slate-700 mt-1">
-                            Cambridge KET 基礎冒險站
-                        </h2>
-                        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
-                            預計收錄 A2 Key 核心生活字彙、基礎句型閱讀與聽力入門練習，適合作為銜接 PET 的前哨站。
-                        </p>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
-                        <span class="text-xs font-black text-sky-600 bg-sky-50 px-3 py-1.5 rounded-xl">
-                            查看規劃說明
-                        </span>
-                    </div>
                 </div>
 
+                <!-- 動態地標容器 -->
+                <div id="landmarks-layer" class="absolute inset-0"></div>
             </div>
-        </div>
+        </section>
+
+        <!-- 目前選中科目情報條 -->
+        <section id="subject-info-bar" class="bg-white/95 backdrop-blur-md rounded-2xl border-2 border-amber-300 px-4 py-3 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <span id="info-bar-icon" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shrink-0 shadow border-2 border-white">🏰</span>
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="info-bar-badge" class="text-xs font-black bg-slate-900 text-sky-300 px-2.5 py-0.5 rounded-full">數學</span>
+                        <h2 id="info-bar-title" class="text-base sm:text-lg font-black text-slate-800 truncate">四上期末考數學冒險島</h2>
+                        <span id="info-bar-stars" class="text-xs sm:text-sm font-black bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">⭐ 0/18</span>
+                        <span id="info-bar-mistakes" class="hidden text-xs font-black bg-rose-100 text-rose-700 border border-rose-300 px-2.5 py-0.5 rounded-full">📕 0 題待消滅</span>
+                    </div>
+                    <p id="info-bar-desc" class="text-xs sm:text-sm font-bold text-slate-600 mt-0.5">載入中...</p>
+                </div>
+            </div>
+            <div id="info-bar-action" class="shrink-0"></div>
+        </section>
+
+        <!-- 下方快速科目列 -->
+        <section class="bg-white/95 backdrop-blur-md rounded-2xl border-2 border-sky-200 p-3.5 sm:p-4 shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5 px-1">
+                <span class="text-xs sm:text-sm font-black text-slate-500 uppercase tracking-wider">⚡ 快速切換科目（點選讓主角走過去，再點即可出發）</span>
+            </div>
+            <div id="quick-dock" class="flex flex-wrap gap-2.5"></div>
+        </section>
     </main>
 
-    <!-- 頁尾免責聲明與授權 -->
-    <footer class="w-full max-w-6xl xl:max-w-7xl text-center text-xs text-slate-500 font-medium py-3 px-4 space-y-1">
-        <div>國小親子互動複習遊樂場｜採模組化架構設計，所有題目與圖表皆由程式動態隨機生成 ✨</div>
-        <div class="text-[11px] text-slate-400 leading-relaxed">
-            ※ 免責聲明：本專案為家長自製之免費教育學習工具，採 CC BY-NC 4.0 非商業授權。頁面提及之出版社名稱僅作課程進度對照之指示性說明，與各教科書出版社無任何官方合作或隸屬關係。
-        </div>
-    </footer>
+    <!-- 首頁初次進入使用說明彈窗（首頁專用開關） -->
+    <div id="hub-guide-modal" role="dialog" aria-modal="true" aria-labelledby="hub-guide-title"
+         onclick="if (event.target === this) closeHubGuide(true)"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-[2rem] border-4 border-sky-300 shadow-2xl p-5 sm:p-6 space-y-4 animate-pop">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-sky-100 via-cyan-50 to-amber-50 border-2 border-sky-200 flex items-center justify-center shrink-0 p-1 shadow-inner">
+                        <img id="hub-guide-actor-img" src="./assets/actor-hero-3d.png" alt="冒險島小嚮導" class="w-full h-full object-contain drop-shadow">
+                    </div>
+                    <div class="min-w-0">
+                        <h2 id="hub-guide-title" class="text-xl sm:text-2xl font-black text-slate-800">🏝️ 歡迎來到冒險總島！</h2>
+                        <p class="text-xs sm:text-sm font-bold text-slate-500 mt-0.5">3 步驟帶你展開學習冒險（只會自動顯示一次）</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeHubGuide(true)" aria-label="關閉說明"
+                        class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-black flex items-center justify-center shrink-0 cursor-pointer transition">
+                    ✕
+                </button>
+            </div>
 
-    <!-- 建置中提示小視窗 -->
-    <div id="info-modal" onclick="if(event.target===this) closeInfoModal()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-sky-300 animate-pop">
-            <div class="text-5xl mb-3">🚧</div>
-            <h3 id="modal-title" class="text-xl font-black text-slate-800 mb-2">模組規劃中</h3>
-            <p id="modal-desc" class="text-sm text-slate-600 leading-relaxed mb-5"></p>
-            <button onclick="closeInfoModal()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-2.5 rounded-xl text-sm">
-                我知道了
-            </button>
+            <div class="space-y-3">
+                <div class="flex items-start gap-3 bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-3.5">
+                    <span class="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center shrink-0 text-base shadow-sm">1</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-indigo-950">🎭 選主角玩法與學習分區</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-700 mt-0.5 leading-relaxed">
+                            上方可隨時切換 <strong>⚔️ 勇者 / 🍰 甜點師 / 🌸 花精靈</strong>，並在不同分頁探索國小、雙語或劍橋英檢島嶼。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl p-3.5">
+                    <span class="w-9 h-9 rounded-xl bg-amber-500 text-white font-black flex items-center justify-center shrink-0 text-base shadow-sm">2</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-amber-950">🗺️ 點圓盤移動・再點一次出發</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-700 mt-0.5 leading-relaxed">
+                            點地圖圓盤讓 3D 小公仔走過去，抵達後<strong>再點一次圓盤</strong>或按「進入挑戰」就能進入該科目！
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3.5">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center shrink-0 text-base shadow-sm">3</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-emerald-950">⭐ 收集星星與消滅錯題 📕</h3>
+                        <p class="text-xs sm:text-sm font-bold text-slate-700 mt-0.5 leading-relaxed">
+                            每個科目上方都會即時同步已收集的星星數與紅點 <strong>📕 錯題提醒</strong>，快去把錯題通通清零吧！
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-1 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <span class="text-xs font-bold text-slate-400">之後隨時點右上角「❓ 說明」都可再看一次</span>
+                <button type="button" onclick="closeHubGuide(true)"
+                        class="btn-3d w-full sm:w-auto bg-gradient-to-r from-sky-500 to-indigo-600 hover:brightness-105 text-white font-black px-6 py-2.5 rounded-2xl text-sm sm:text-base shadow-lg cursor-pointer">
+                    🚀 開始探索冒險島！
+                </button>
+            </div>
         </div>
     </div>
 
+    <footer class="w-full max-w-6xl text-center text-xs text-slate-500/90 font-bold py-2">
+        🌙 Peaceful Evening 國小親子互動複習遊樂場｜進度與主題偏好自動存檔於本機瀏覽器
+    </footer>
+
+    <script src="./Scripts/sound-engine.js"></script>
     <script>
-        function switchSection(section) {
-            const sections = {
-                school: { el: 'section-school', btn: 'sec-tab-school', activeClass: 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-indigo-600 text-white shadow transition' },
-                bilingual: { el: 'section-bilingual', btn: 'sec-tab-bilingual', activeClass: 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-cyan-600 text-white shadow transition' },
-                english: { el: 'section-english', btn: 'sec-tab-english', activeClass: 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-slate-900 text-teal-300 shadow transition' }
-            };
-            const inactiveBtnClass = 'section-tab px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition';
-            const target = sections[section] ? section : 'school';
-
-            Object.entries(sections).forEach(([key, cfg]) => {
-                const secEl = document.getElementById(cfg.el);
-                const btnEl = document.getElementById(cfg.btn);
-                const isActive = key === target;
-                if (secEl) secEl.classList.toggle('hidden', !isActive);
-                if (btnEl) btnEl.className = isActive ? cfg.activeClass : inactiveBtnClass;
-            });
-
-            try { sessionStorage.setItem('portal_active_section', target); } catch (_) {}
-        }
-
-        function filterCardsByScope(scopeSelector, tabSelector, tabPrefix, activeBgClass, filter) {
-            document.querySelectorAll(tabSelector).forEach(btn => {
-                btn.className = `${tabSelector.slice(1)} px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-white transition`;
-            });
-            const activeBtn = document.getElementById(`${tabPrefix}${filter}`);
-            if (activeBtn) {
-                activeBtn.className = `${tabSelector.slice(1)} px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black ${activeBgClass} text-white shadow transition`;
+        const THEMES = {
+            hero: {
+                id: 'hero',
+                enterBtnText: '⚔️ 進入挑戰 ➔',
+                enterBtnGrad: 'from-amber-500 to-orange-500',
+                pinRing: '#6366f1',
+                pinGlow: 'rgba(99, 102, 241, 0.65)',
+                pinLabelActive: 'bg-indigo-700 border-sky-300 text-white',
+                quickActive: 'bg-indigo-50 ring-2 ring-indigo-500 border-indigo-500'
+            },
+            bakery: {
+                id: 'bakery',
+                enterBtnText: '🍰 開始做甜點 ➔',
+                enterBtnGrad: 'from-pink-500 to-amber-500',
+                pinRing: '#f43f5e',
+                pinGlow: 'rgba(244, 63, 94, 0.6)',
+                pinLabelActive: 'bg-rose-600 border-pink-200 text-white',
+                quickActive: 'bg-rose-50 ring-2 ring-rose-400 border-rose-400'
+            },
+            garden: {
+                id: 'garden',
+                enterBtnText: '🌸 開始澆花 ➔',
+                enterBtnGrad: 'from-fuchsia-500 to-emerald-500',
+                pinRing: '#7c3aed',
+                pinGlow: 'rgba(124, 58, 237, 0.6)',
+                pinLabelActive: 'bg-violet-700 border-fuchsia-200 text-white',
+                quickActive: 'bg-violet-50 ring-2 ring-violet-500 border-violet-500'
             }
+        };
 
-            document.querySelectorAll(scopeSelector).forEach(card => {
-                const grade = card.getAttribute('data-grade');
-                const status = card.getAttribute('data-status');
-                if (filter === 'all') {
-                    card.classList.remove('hidden');
-                } else if (filter === '4') {
-                    card.classList.toggle('hidden', grade !== '4');
-                } else if (filter === 'coming') {
-                    card.classList.toggle('hidden', status !== 'coming');
-                }
-            });
-        }
+        const SUBJECT_SECTIONS = {
+            school: {
+                maxStars: 75,
+                label: '國小學科',
+                items: [
+                    {
+                        id: 'math', x: 25, y: 63, badge: '數學', brief: '翰林 6～10 單元', icon: '🏰', short: '數學冒險島',
+                        title: '四上期末考數學冒險島',
+                        desc: '適用翰林版第 6～10 單元（除法、三角形與全等、兩步驟併式、二位小數、統計圖表）。內建直式方格草稿板與錯題大作戰！',
+                        href: './4a/math.html', key: 'hanlin_math_4a_final_v2', stageIds: [6, 7, 8, 9, 10, 99], maxStars: 18,
+                        grad: 'from-amber-400 to-orange-500', border: 'border-amber-300', status: 'live'
+                    },
+                    {
+                        id: 'society', x: 42, y: 33, badge: '社會', brief: '康軒 3～4 單元', icon: '🏮', short: '社會探險家',
+                        title: '四上期末考社會探險家',
+                        desc: '適用康軒版第三、四單元（傳統信仰與老街、生活的作息、傳統節慶與現代節日）。附原創文化圖解與錯題消滅戰！',
+                        href: './4a/society.html', key: 'knsh_society_4a_final_v1', stageIds: [31, 32, 41, 42, 43, 99], maxStars: 18,
+                        grad: 'from-orange-400 to-rose-500', border: 'border-orange-300', status: 'live'
+                    },
+                    {
+                        id: 'chinese', x: 53, y: 62, badge: '國語', brief: '南一 7～12 課', icon: '📖', short: '國語勇者試煉',
+                        title: '四上期末考國語文勇者試煉',
+                        desc: '適用南一版第 7～12 課（易錯字音與多音字、形近字偵探、成語與歇後語、修辭技巧與故事寓意）。',
+                        href: './4a/chinese.html', key: 'nani_chinese_4a_final_v1', stageIds: [1, 2, 3, 4, 5, 6, 99], maxStars: 21,
+                        grad: 'from-rose-400 to-pink-600', border: 'border-rose-300', status: 'live'
+                    },
+                    {
+                        id: 'science', x: 66, y: 33, badge: '自然', brief: '康軒聲光與電路', icon: '🔬', short: '自然科學營',
+                        title: '四上期末考自然科學探險營',
+                        desc: '適用康軒版第三、四單元（聲音與光的特性、燈泡通路/斷路/短路實驗、串並聯用電）。',
+                        href: './4a/science.html', key: 'knsh_science_4a_final_v1', stageIds: [31, 32, 41, 42, 43, 99], maxStars: 18,
+                        grad: 'from-emerald-400 to-teal-600', border: 'border-emerald-300', status: 'live'
+                    },
+                    {
+                        id: 'math4b', x: 77, y: 70, badge: '四下', brief: '新單元籌備中', icon: '📐', short: '四下數學',
+                        title: '四下數學冒險島（籌備中）',
+                        desc: '預計收錄概數、四則運算、四邊形、分數、周長面積與立體積木，敬請期待！',
+                        href: null, key: null, stageIds: [], maxStars: 0,
+                        grad: 'from-sky-300 to-indigo-400', border: 'border-sky-300', status: 'coming'
+                    }
+                ]
+            },
+            bilingual: {
+                maxStars: 30,
+                label: '雙語英文學科',
+                items: [
+                    {
+                        id: 'is', x: 31, y: 53, badge: 'IS', brief: 'Ch.7 光學實驗', icon: '🔦', short: 'IS 科學實驗室',
+                        title: 'IS 雙語科學實驗室',
+                        desc: 'Ch.7 Properties of Light（光線直進、反射、Ray Diagram 互動繪圖與英語朗讀）。',
+                        href: './4a/en-is.html', key: 'bilingual_is_4a_v1', stageIds: [71, 72, 73, 74, 75], maxStars: 15,
+                        grad: 'from-cyan-400 to-teal-500', border: 'border-cyan-300', status: 'live'
+                    },
+                    {
+                        id: 'rs', x: 57, y: 37, badge: 'RS', brief: '閱讀文法聽寫', icon: '📚', short: 'RS 雙語閱讀',
+                        title: 'RS · The Game of Silence & Grammar',
+                        desc: '全英文閱讀理解、短長音 u 聽寫、修辭感官與形容詞/副詞文法。',
+                        href: './4a/en-rs.html', key: 'bilingual_rs_4a_v1', stageIds: [1, 2, 3, 4, 5], maxStars: 15,
+                        grad: 'from-emerald-400 to-teal-500', border: 'border-emerald-300', status: 'live'
+                    },
+                    {
+                        id: 'isCh8', x: 75, y: 65, badge: 'Ch.8', brief: '電路實驗籌備中', icon: '⚡', short: 'IS Ch.8 電路',
+                        title: 'IS · Ch.8 Electric Circuits（籌備中）',
+                        desc: '預計收錄全英文電路符號、導電體與絕緣體、串並聯實驗與字彙特訓。',
+                        href: null, key: null, stageIds: [], maxStars: 0,
+                        grad: 'from-amber-300 to-cyan-400', border: 'border-cyan-200', status: 'coming'
+                    }
+                ]
+            },
+            english: {
+                maxStars: 18,
+                label: '劍橋英檢',
+                items: [
+                    {
+                        id: 'pet', x: 37, y: 49, badge: 'B1', brief: '劍橋 PET 特訓', icon: '🚆', short: 'PET 特快車',
+                        title: 'Cambridge PET Express (B1)',
+                        desc: '同義替換配對、62 個動詞片語、Part 6 拼字、Part 4 句子還原與聽寫特訓。',
+                        href: './cambridge/pet.html', key: 'cambridge_pet_v1', stageIds: [1, 2, 3, 4, 5, 99], maxStars: 18,
+                        grad: 'from-teal-400 to-indigo-600', border: 'border-teal-400', status: 'live'
+                    },
+                    {
+                        id: 'ket', x: 67, y: 54, badge: 'A2', brief: 'KET 基礎籌備中', icon: '🛫', short: 'KET 基礎站',
+                        title: 'Cambridge KET 基礎冒險站（籌備中）',
+                        desc: '預計收錄 A2 Key 核心生活字彙、基礎句型閱讀與聽力入門練習。',
+                        href: null, key: null, stageIds: [], maxStars: 0,
+                        grad: 'from-sky-400 to-blue-500', border: 'border-sky-300', status: 'coming'
+                    }
+                ]
+            }
+        };
 
-        function filterGrade(filter) {
-            filterCardsByScope('#section-school .portal-card', '.grade-tab', 'tab-', 'bg-indigo-600', filter);
-        }
+        let activeSection = 'school';
+        let activeTheme = 'hero';
+        let selectedItemId = 'math';
+        let arrivedItemId = 'math';
+        let heroX = 16.5;
+        let heroY = 62;
+        let heroAnimFrame = null;
+        let progressCache = {};
+        let mascotMsgIndex = 0;
+        let mascotTimer = null;
 
-        function filterBilingual(filter) {
-            filterCardsByScope('#section-bilingual .bilingual-card', '.bi-grade-tab', 'bi-tab-', 'bg-cyan-600', filter);
-        }
-
-        function showComingSoon(title) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-desc').innerHTML = '此學習單元目前正在籌備中，尚未上線！<br>敬請期待後續開放體驗 ✨';
-            document.getElementById('info-modal').classList.remove('hidden');
-        }
-
-        function closeInfoModal() {
-            document.getElementById('info-modal').classList.add('hidden');
+        function getActorSVG(themeId) {
+            const labels = { hero: '冒險小勇者', bakery: '魔法甜點師', garden: '星光小精靈' };
+            const key = labels[themeId] ? themeId : 'hero';
+            return `<img src="./assets/actor-${key}-3d.png" alt="${labels[key]}" class="w-full h-full object-contain select-none pointer-events-none drop-shadow-[0_6px_8px_rgba(15,23,42,0.42)]">`;
         }
 
         function dismissIpadTip() {
@@ -641,207 +504,539 @@
             try { localStorage.setItem('portal_hide_ipad_tip', '1'); } catch (_) {}
         }
 
-        function renderPortalProgress() {
-            const subjects = [
-                { elId: 'progress-math', key: 'hanlin_math_4a_final_v2', maxStars: 18, stageIds: [6, 7, 8, 9, 10, 99] },
-                { elId: 'progress-society', key: 'knsh_society_4a_final_v1', maxStars: 18, stageIds: [31, 32, 41, 42, 43, 99] },
-                { elId: 'progress-chinese', key: 'nani_chinese_4a_final_v1', maxStars: 21, stageIds: [1, 2, 3, 4, 5, 6, 99] },
-                { elId: 'progress-science', key: 'knsh_science_4a_final_v1', maxStars: 18, stageIds: [31, 32, 41, 42, 43, 99] }
-            ];
-
-            let totalStarsAll = 0;
-            let totalScoreAll = 0;
-            let totalMistakesAll = 0;
-
-            subjects.forEach(sub => {
-                let stars = 0;
-                let score = 0;
-                let mistakes = 0;
-
-                try {
-                    const raw = localStorage.getItem(sub.key);
-                    if (raw) {
-                        const data = JSON.parse(raw);
-                        if (data && data.stars) {
-                            stars = sub.stageIds.reduce((sum, id) => sum + (Number(data.stars[id]) || 0), 0);
-                        }
-                        if (data && typeof data.totalScore === 'number') {
-                            score = data.totalScore;
-                        }
-                        if (data && Array.isArray(data.mistakes)) {
-                            mistakes = data.mistakes.length;
-                        }
+        function readSubjectProgress(item) {
+            if (!item.key) return { stars: 0, score: 0, mistakes: 0 };
+            let stars = 0, score = 0, mistakes = 0;
+            try {
+                const raw = localStorage.getItem(item.key);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    if (data && data.stars) {
+                        stars = item.stageIds.reduce((sum, id) => sum + (Number(data.stars[id]) || 0), 0);
                     }
-                } catch (_) {}
+                    if (data && typeof data.totalScore === 'number') score = data.totalScore;
+                    if (data && Array.isArray(data.mistakes)) mistakes = data.mistakes.length;
+                }
+            } catch (_) {}
+            return { stars, score, mistakes };
+        }
 
-                totalStarsAll += stars;
-                totalScoreAll += score;
-                totalMistakesAll += mistakes;
+        function getActiveSectionStats() {
+            const cfg = SUBJECT_SECTIONS[activeSection] || SUBJECT_SECTIONS.school;
+            let stars = 0, mistakes = 0;
+            cfg.items.forEach(item => {
+                const p = progressCache[item.id] || { stars: 0, mistakes: 0 };
+                stars += p.stars;
+                mistakes += p.mistakes;
+            });
+            const names = { school: '國小學科', bilingual: '雙語英文', english: '劍橋英檢' };
+            return { stars, mistakes, secName: names[activeSection] || '冒險總島' };
+        }
 
-                const el = document.getElementById(sub.elId);
-                if (!el) return;
-
-                const mistakeBadge = mistakes > 0
-                    ? `<span class="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">📕 ${mistakes} 題待消滅</span>`
-                    : `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
-
-                el.innerHTML = `
-                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${stars} / ${sub.maxStars}</span>
-                    <span class="bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full">🏆 ${score}</span>
-                    ${mistakeBadge}
-                `;
+        function refreshAllProgress() {
+            progressCache = {};
+            let grandStars = 0;
+            Object.values(SUBJECT_SECTIONS).forEach(sec => {
+                sec.items.forEach(item => {
+                    const p = readSubjectProgress(item);
+                    progressCache[item.id] = p;
+                    grandStars += p.stars;
+                });
             });
 
-            const starsEl = document.getElementById('overall-stars');
-            const scoreEl = document.getElementById('overall-score');
-            const mistakesEl = document.getElementById('overall-mistakes-badge');
-
-            if (starsEl) starsEl.textContent = totalStarsAll;
-            if (scoreEl) scoreEl.textContent = totalScoreAll;
-            const schoolBar = document.getElementById('school-progress-bar');
-            if (schoolBar) schoolBar.style.width = `${Math.min(100, Math.round((totalStarsAll / 75) * 100))}%`;
-            if (mistakesEl) {
-                if (totalMistakesAll > 0) {
-                    mistakesEl.textContent = `📕 ${totalMistakesAll} 題待消滅`;
-                    mistakesEl.className = 'bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1 rounded-full';
-                } else {
-                    mistakesEl.textContent = '✨ 0 錯題';
-                    mistakesEl.className = 'bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full';
-                }
+            const rankBadge = document.getElementById('mascot-rank-badge');
+            if (rankBadge) {
+                if (grandStars >= 60) rankBadge.textContent = `👑 Lv.4 傳說學霸 (${grandStars}⭐)`;
+                else if (grandStars >= 25) rankBadge.textContent = `🌟 Lv.3 黃金領航員 (${grandStars}⭐)`;
+                else if (grandStars >= 6) rankBadge.textContent = `🧭 Lv.2 冒險小隊員 (${grandStars}⭐)`;
+                else rankBadge.textContent = `🥚 Lv.1 見習探險家 (${grandStars}⭐)`;
             }
+            const stats = getActiveSectionStats();
+            updateMascotBubble(stats.stars, stats.mistakes, false);
+        }
 
-            // 同步渲染雙語英文學科 (IS + RS) 進度（僅計算正式 5 關，滿星各 15 顆）
-            let isStars = 0, isScore = 0, isMistakes = 0;
-            try {
-                const rawIs = localStorage.getItem('bilingual_is_4a_v1');
-                if (rawIs) {
-                    const isData = JSON.parse(rawIs);
-                    if (isData && isData.stars) {
-                        isStars = [71, 72, 73, 74, 75].reduce((sum, id) => sum + (Number(isData.stars[id]) || 0), 0);
+        function getMascotTips(secStars, secMistakes) {
+            const { secName } = getActiveSectionStats();
+            return [
+                secMistakes > 0
+                    ? `「${secName}」目前有 ${secMistakes} 題錯題待消滅，點紅點科目出發吧！`
+                    : `太棒了！「${secName}」目前 0 錯題，已收集 ${secStars} 顆星！`,
+                `點圓盤讓 3D 小夥伴走過去，再點一次就能直接出發！`,
+                `切換上方 ⚔️ 勇者／🍰 甜點／🌸 花園，進科目頁也會延續喔！`,
+                `咕咕～今天的你看起來特別聰明，一定能滿星過關！`,
+                `答錯一兩題沒關係，抓到錯題怪獸反而會變超強喔！`,
+                `試試看點一下 🍰 甜點師，一邊算數學一邊做草莓蛋糕吧！`,
+                `每天練個 5 題暖暖身，考前就能輕鬆笑著寫考卷囉！`,
+                `小祕訣：算除法和併式時，記得打開 ✏️ 草稿紙幫忙檢查！`,
+                `連對題目會有超帥的連擊特效，快去收集 ✨ 星星吧！`,
+                `讀書累了就點點我聊聊天，咕咕永遠幫你加油打氣！`
+            ];
+        }
+
+        function pickRandomMascotIndex(total) {
+            if (total <= 1) return 0;
+            let next = mascotMsgIndex;
+            while (next === mascotMsgIndex) {
+                next = Math.floor(Math.random() * total);
+            }
+            return next;
+        }
+
+        function updateMascotBubble(secStars, secMistakes, playVoice) {
+            const bubble = document.getElementById('mascot-bubble');
+            if (!bubble) return;
+            const tips = getMascotTips(secStars, secMistakes);
+            bubble.textContent = tips[mascotMsgIndex % tips.length];
+            if (playVoice && typeof SoundEngine !== 'undefined') SoundEngine.click();
+        }
+
+        function resetMascotTimer() {
+            if (mascotTimer) {
+                clearInterval(mascotTimer);
+                mascotTimer = null;
+            }
+            mascotTimer = setInterval(() => {
+                const stats = getActiveSectionStats();
+                const tips = getMascotTips(stats.stars, stats.mistakes);
+                mascotMsgIndex = pickRandomMascotIndex(tips.length);
+                updateMascotBubble(stats.stars, stats.mistakes, false);
+            }, 7000);
+        }
+
+        function pokeMascot() {
+            const stats = getActiveSectionStats();
+            const tips = getMascotTips(stats.stars, stats.mistakes);
+            mascotMsgIndex = pickRandomMascotIndex(tips.length);
+            updateMascotBubble(stats.stars, stats.mistakes, true);
+            resetMascotTimer();
+        }
+
+        function renderSceneSvg(section) {
+            const svg = document.getElementById('island-scene-svg');
+            const dioramaImg = document.getElementById('world-diorama-img');
+            const dioramaMap = {
+                school: { src: './assets/world-island-school-25d.jpg', alt: '2.5D 國小學科冒險總島地圖' },
+                bilingual: { src: './assets/world-island-bilingual-25d.jpg', alt: '2.5D 雙語英文冒險總島地圖' },
+                english: { src: './assets/world-island-english-25d.jpg', alt: '2.5D 劍橋英檢冒險總島地圖' }
+            };
+            const activeDiorama = dioramaMap[section];
+            if (dioramaImg) {
+                if (activeDiorama) {
+                    if (dioramaImg.getAttribute('src') !== activeDiorama.src) {
+                        dioramaImg.setAttribute('src', activeDiorama.src);
                     }
-                    if (isData && typeof isData.totalScore === 'number') isScore = isData.totalScore;
-                    if (isData && Array.isArray(isData.mistakes)) isMistakes = isData.mistakes.length;
-                }
-            } catch (_) {}
-
-            let rsStars = 0, rsScore = 0, rsMistakes = 0;
-            try {
-                const rawRs = localStorage.getItem('bilingual_rs_4a_v1');
-                if (rawRs) {
-                    const rsData = JSON.parse(rawRs);
-                    if (rsData && rsData.stars) {
-                        rsStars = [1, 2, 3, 4, 5].reduce((sum, id) => sum + (Number(rsData.stars[id]) || 0), 0);
-                    }
-                    if (rsData && typeof rsData.totalScore === 'number') rsScore = rsData.totalScore;
-                    if (rsData && Array.isArray(rsData.mistakes)) rsMistakes = rsData.mistakes.length;
-                }
-            } catch (_) {}
-
-            const isProgressEl = document.getElementById('progress-is');
-            if (isProgressEl) {
-                const isMistakeBadge = isMistakes > 0
-                    ? `<span class="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">📕 ${isMistakes} 題待消滅</span>`
-                    : `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
-                isProgressEl.innerHTML = `
-                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${isStars} / 15</span>
-                    <span class="bg-cyan-50 text-cyan-700 border border-cyan-200 px-2 py-0.5 rounded-full">🏆 ${isScore}</span>
-                    ${isMistakeBadge}
-                `;
-            }
-
-            const rsProgressEl = document.getElementById('progress-rs');
-            if (rsProgressEl) {
-                const rsMistakeBadge = rsMistakes > 0
-                    ? `<span class="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">📕 ${rsMistakes} 題待消滅</span>`
-                    : `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
-                rsProgressEl.innerHTML = `
-                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${rsStars} / 15</span>
-                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">🏆 ${rsScore}</span>
-                    ${rsMistakeBadge}
-                `;
-            }
-
-            const biTotalStars = isStars + rsStars;
-            const biTotalScore = isScore + rsScore;
-            const biTotalMistakes = isMistakes + rsMistakes;
-
-            const biStarsEl = document.getElementById('bilingual-overall-stars');
-            const biScoreEl = document.getElementById('bilingual-overall-score');
-            const biMistakesEl = document.getElementById('bilingual-overall-mistakes-badge');
-            if (biStarsEl) biStarsEl.textContent = biTotalStars;
-            if (biScoreEl) biScoreEl.textContent = biTotalScore;
-            const biBar = document.getElementById('bilingual-progress-bar');
-            if (biBar) biBar.style.width = `${Math.min(100, Math.round((biTotalStars / 30) * 100))}%`;
-            if (biMistakesEl) {
-                if (biTotalMistakes > 0) {
-                    biMistakesEl.textContent = `📕 ${biTotalMistakes} 題待消滅`;
-                    biMistakesEl.className = 'bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1 rounded-full';
+                    dioramaImg.setAttribute('alt', activeDiorama.alt);
+                    dioramaImg.classList.remove('hidden');
                 } else {
-                    biMistakesEl.textContent = '✨ 0 錯題';
-                    biMistakesEl.className = 'bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full';
+                    dioramaImg.classList.add('hidden');
                 }
             }
+            if (!svg) return;
+            svg.setAttribute('viewBox', '0 0 1100 618');
 
-            // 同步渲染劍橋英檢 (PET) 進度
-            let petStars = 0, petScore = 0, petMistakes = 0;
-            try {
-                const rawPet = localStorage.getItem('cambridge_pet_v1');
-                if (rawPet) {
-                    const pData = JSON.parse(rawPet);
-                    if (pData && pData.stars) {
-                        petStars = [1, 2, 3, 4, 5, 99].reduce((sum, id) => sum + (Number(pData.stars[id]) || 0), 0);
-                    }
-                    if (pData && typeof pData.totalScore === 'number') petScore = pData.totalScore;
-                    if (pData && Array.isArray(pData.mistakes)) petMistakes = pData.mistakes.length;
-                }
-            } catch (_) {}
-
-            const petProgressEl = document.getElementById('progress-pet');
-            if (petProgressEl) {
-                const petMistakeBadge = petMistakes > 0
-                    ? `<span class="bg-rose-500/20 text-rose-300 border border-rose-400/40 px-2 py-0.5 rounded-full">📕 ${petMistakes} 題待消滅</span>`
-                    : `<span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
-                petProgressEl.innerHTML = `
-                    <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full">⭐ ${petStars} / 18</span>
-                    <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-2 py-0.5 rounded-full">🏆 ${petScore}</span>
-                    ${petMistakeBadge}
+            if (section === 'bilingual' || section === 'english') {
+                svg.innerHTML = `
+                    <g class="cloud-a" opacity="0.28">
+                        <ellipse cx="150" cy="72" rx="68" ry="20" fill="#ffffff"/>
+                        <ellipse cx="200" cy="64" rx="44" ry="15" fill="#ffffff"/>
+                    </g>
+                    <g class="cloud-b" opacity="0.26">
+                        <ellipse cx="920" cy="84" rx="72" ry="20" fill="#ffffff"/>
+                        <ellipse cx="968" cy="78" rx="46" ry="15" fill="#ffffff"/>
+                    </g>
+                    <g transform="translate(225, 168)">
+                        <polygon points="0,-9 2.5,-2.5 9,0 2.5,2.5 0,9 -2.5,2.5 -9,0 -2.5,-2.5" fill="#fef08a" class="sparkle-twinkle"/>
+                    </g>
+                    <g transform="translate(625, 130)">
+                        <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#a5f3fc" class="sparkle-twinkle" style="animation-delay:0.6s"/>
+                    </g>
+                    <g transform="translate(880, 340)">
+                        <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:1.1s"/>
+                    </g>
+                    <g transform="translate(120, 520)">
+                        <polygon points="0,-7 2,-2 7,0 2,2 0,7 -2,2 -7,0 -2,-2" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:1.5s"/>
+                    </g>
                 `;
+                return;
             }
-            const engStarsEl = document.getElementById('english-overall-stars');
-            const engScoreEl = document.getElementById('english-overall-score');
-            const engMistakesEl = document.getElementById('english-overall-mistakes-badge');
-            if (engStarsEl) engStarsEl.textContent = petStars;
-            if (engScoreEl) engScoreEl.textContent = petScore;
-            const engBar = document.getElementById('english-progress-bar');
-            if (engBar) engBar.style.width = `${Math.min(100, Math.round((petStars / 18) * 100))}%`;
-            if (engMistakesEl) {
-                if (petMistakes > 0) {
-                    engMistakesEl.textContent = `📕 ${petMistakes} 題待消滅`;
-                    engMistakesEl.className = 'bg-rose-500/20 text-rose-300 border border-rose-400/40 px-3 py-1 rounded-full';
+
+            // 國小學科：2.5D 微縮插畫總島輕量氣氛層（飄雲＋海面與地標閃光）
+            svg.innerHTML = `
+                <g class="cloud-a" opacity="0.28">
+                    <ellipse cx="145" cy="72" rx="68" ry="20" fill="#ffffff"/>
+                    <ellipse cx="195" cy="64" rx="44" ry="15" fill="#ffffff"/>
+                </g>
+                <g class="cloud-b" opacity="0.26">
+                    <ellipse cx="935" cy="88" rx="72" ry="20" fill="#ffffff"/>
+                    <ellipse cx="980" cy="82" rx="46" ry="15" fill="#ffffff"/>
+                </g>
+                <g transform="translate(205, 225)">
+                    <polygon points="0,-9 2.5,-2.5 9,0 2.5,2.5 0,9 -2.5,2.5 -9,0 -2.5,-2.5" fill="#fef08a" class="sparkle-twinkle"/>
+                </g>
+                <g transform="translate(450, 96)">
+                    <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#fde047" class="sparkle-twinkle" style="animation-delay:0.6s"/>
+                </g>
+                <g transform="translate(765, 118)">
+                    <polygon points="0,-9 2.5,-2.5 9,0 2.5,2.5 0,9 -2.5,2.5 -9,0 -2.5,-2.5" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:1.1s"/>
+                </g>
+                <g transform="translate(888, 298)">
+                    <polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#a5f3fc" class="sparkle-twinkle" style="animation-delay:0.4s"/>
+                </g>
+                <g transform="translate(110, 520)">
+                    <polygon points="0,-7 2,-2 7,0 2,2 0,7 -2,2 -7,0 -2,-2" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:1.5s"/>
+                </g>
+                <g transform="translate(965, 535)">
+                    <polygon points="0,-7 2,-2 7,0 2,2 0,7 -2,2 -7,0 -2,-2" fill="#ffffff" class="sparkle-twinkle" style="animation-delay:0.9s"/>
+                </g>
+            `;
+        }
+
+        function switchTheme(themeId, playSnd = true) {
+            if (!THEMES[themeId]) themeId = 'hero';
+            activeTheme = themeId;
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+            try { localStorage.setItem('playground_theme_v1', themeId); } catch (_) {}
+
+            const themeCls = activeTheme === 'hero' ? '' : `theme-${activeTheme}`;
+            const secCls = activeSection === 'english' ? 'section-english' : '';
+            document.body.className = `text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5 min-h-screen ${themeCls} ${secCls}`.trim();
+
+            ['hero', 'bakery', 'garden'].forEach(id => {
+                const btn = document.getElementById(`theme-btn-${id}`);
+                if (!btn) return;
+                const activeCls = id === 'hero' ? 'bg-amber-500 text-white shadow' : id === 'bakery' ? 'bg-pink-500 text-white shadow' : 'bg-fuchsia-500 text-white shadow';
+                btn.className = id === themeId
+                    ? `px-3 py-1 rounded-lg ${activeCls} cursor-pointer transition`
+                    : 'px-3 py-1 rounded-lg text-slate-600 hover:bg-white cursor-pointer transition';
+            });
+
+            const mapSprite = document.getElementById('map-hero-sprite');
+            if (mapSprite) mapSprite.innerHTML = getActorSVG(themeId);
+            const mapBase = document.getElementById('map-hero-base');
+            if (mapBase) {
+                const baseCls = themeId === 'bakery'
+                    ? 'from-pink-300 to-rose-500 shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(244,63,94,0.6)]'
+                    : themeId === 'garden'
+                    ? 'from-fuchsia-300 to-emerald-500 shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(124,58,237,0.6)]'
+                    : 'from-amber-300 to-amber-500 shadow-[0_6px_14px_rgba(15,23,42,0.55),0_0_16px_rgba(99,102,241,0.6)]';
+                mapBase.className = `-mt-3 w-14 h-4 sm:w-16 sm:h-5 rounded-full bg-gradient-to-b border-2 border-white ${baseCls}`;
+            }
+
+            renderSceneSvg(activeSection);
+            renderLandmarks();
+        }
+
+        function switchSection(section, playSnd = true) {
+            if (!SUBJECT_SECTIONS[section]) section = 'school';
+            activeSection = section;
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+
+            const themeCls = activeTheme === 'hero' ? '' : `theme-${activeTheme}`;
+            const secCls = section === 'english' ? 'section-english' : '';
+            document.body.className = `text-slate-800 flex flex-col items-center justify-between p-3 sm:p-5 min-h-screen ${themeCls} ${secCls}`.trim();
+
+            const tabStyles = {
+                school: 'px-4 py-1.5 rounded-xl text-sm sm:text-base font-black bg-indigo-600 text-white shadow transition cursor-pointer',
+                bilingual: 'px-4 py-1.5 rounded-xl text-sm sm:text-base font-black bg-cyan-600 text-white shadow transition cursor-pointer',
+                english: 'px-4 py-1.5 rounded-xl text-sm sm:text-base font-black bg-slate-900 text-teal-300 shadow transition cursor-pointer'
+            };
+            ['school', 'bilingual', 'english'].forEach(k => {
+                const btn = document.getElementById(`sec-btn-${k}`);
+                if (!btn) return;
+                btn.className = k === section
+                    ? tabStyles[k]
+                    : 'px-4 py-1.5 rounded-xl text-sm sm:text-base font-bold text-slate-600 hover:bg-white transition cursor-pointer';
+            });
+
+            renderSceneSvg(section);
+            mascotMsgIndex = 0;
+            const stats = getActiveSectionStats();
+            updateMascotBubble(stats.stars, stats.mistakes, false);
+            resetMascotTimer();
+            const firstItem = SUBJECT_SECTIONS[section].items[0];
+            if (firstItem) selectLandmark(firstItem.id, false);
+            try { sessionStorage.setItem('portal_active_section', section); } catch (_) {}
+        }
+
+        function renderLandmarks() {
+            const cfg = SUBJECT_SECTIONS[activeSection];
+            const t = THEMES[activeTheme];
+            const layer = document.getElementById('landmarks-layer');
+            const dock = document.getElementById('quick-dock');
+            if (!layer || !dock) return;
+
+            let secStars = 0, secScore = 0, secMistakes = 0;
+
+            layer.innerHTML = cfg.items.map((item, idx) => {
+                const p = progressCache[item.id] || { stars: 0, score: 0, mistakes: 0 };
+                secStars += p.stars;
+                secScore += p.score;
+                secMistakes += p.mistakes;
+
+                const isComing = item.status === 'coming';
+                const isSel = item.id === selectedItemId;
+                const isArrived = item.id === arrivedItemId;
+
+                const topPill = isComing
+                    ? `<span class="text-xs sm:text-sm font-black bg-slate-900 border-2 border-slate-400 text-slate-200 px-2.5 py-0.5 rounded-full shadow-[0_4px_12px_rgba(15,23,42,0.7)]">🛠️ 籌備中</span>`
+                    : `<span class="text-xs sm:text-sm font-black bg-slate-900 border-2 border-sky-400/90 text-amber-300 px-2.5 py-0.5 rounded-full shadow-[0_4px_12px_rgba(15,23,42,0.7)]">⭐ ${p.stars}/${item.maxStars}</span>`;
+
+                const mistakeDot = p.mistakes > 0
+                    ? `<span class="absolute -top-2 -right-3 z-20 bg-rose-600 text-white text-xs font-black px-2 py-0.5 rounded-full border-2 border-white shadow-md whitespace-nowrap animate-bounce">📕 ${p.mistakes}</span>`
+                    : '';
+
+                const boxAnim = isSel
+                    ? `animation: pinFloat 3.2s ease-in-out ${idx * 0.35}s infinite, pinPulse 1.5s ease-in-out infinite;`
+                    : `animation: pinFloat 3.2s ease-in-out ${idx * 0.35}s infinite;`;
+                const boxStyle = isSel
+                    ? `--pin-ring:${t.pinRing}; --pin-glow:${t.pinGlow}; ${boxAnim}`
+                    : boxAnim;
+                const rippleRing = isSel
+                    ? `<span class="node-ripple absolute -inset-2 rounded-full border-[3px] pointer-events-none" style="border-color:${t.pinRing};"></span>`
+                    : '';
+                const plaqueCls = isSel
+                    ? `${t.pinLabelActive} ring-2 ring-slate-900/75 shadow-[0_8px_20px_rgba(15,23,42,0.8)] rounded-xl px-3.5 py-1`
+                    : 'bg-slate-900 border-sky-400 text-white shadow-[0_6px_16px_rgba(15,23,42,0.75)] rounded-xl px-3 py-1';
+
+                const actionBelow = !isArrived ? '' : isComing
+                    ? `<span class="mt-2 animate-pop bg-slate-800 text-slate-200 font-black px-3.5 py-1.5 rounded-full text-xs sm:text-sm shadow border-2 border-white ring-2 ring-slate-900/50 whitespace-nowrap">🛠️ 籌備建置中</span>`
+                    : `<a href="${item.href}" onclick="event.stopPropagation()" class="portal-prefetch-link btn-3d mt-2 animate-pop bg-gradient-to-r ${t.enterBtnGrad} hover:brightness-105 text-white font-black px-4 py-1.5 rounded-full text-xs sm:text-sm md:text-base shadow-[0_6px_16px_rgba(15,23,42,0.45)] border-2 border-white ring-2 ring-slate-900/50 whitespace-nowrap">${t.enterBtnText}</a>`;
+
+                return `
+                    <div role="button" tabindex="0" onclick="selectLandmark('${item.id}')"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectLandmark('${item.id}');}"
+                         style="left: ${item.x}%; top: ${item.y}%;"
+                         class="landmark-node ${isSel ? 'is-selected' : ''} cursor-pointer focus:outline-none">
+                        <div class="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b ${item.grad} border-[3px] border-white ring-2 ring-slate-900/55 shadow-[0_8px_16px_rgba(15,23,42,0.45),inset_0_-4px_6px_rgba(0,0,0,0.22),inset_0_3px_4px_rgba(255,255,255,0.45)] flex items-center justify-center text-2xl sm:text-3xl ${isComing ? 'opacity-85 grayscale-[15%]' : ''}" style="${boxStyle}">
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 whitespace-nowrap">${topPill}</div>
+                            ${rippleRing}
+                            <span class="relative z-10 drop-shadow-sm">${item.icon}</span>
+                            ${mistakeDot}
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex flex-col items-center">
+                                <div class="border-2 ${plaqueCls} text-center transition-colors">
+                                    <div class="flex items-center gap-1.5 text-xs sm:text-sm md:text-base font-black whitespace-nowrap">
+                                        <span class="text-[11px] sm:text-xs font-black px-1.5 py-0.5 rounded-md ${isSel ? 'bg-slate-900/45 text-white' : 'bg-sky-500 text-white'}">${item.badge || ''}</span>
+                                        <span>${item.short}</span>
+                                    </div>
+                                </div>
+                                ${actionBelow}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            dock.innerHTML = cfg.items.map(item => {
+                const p = progressCache[item.id] || { stars: 0, mistakes: 0 };
+                const isSel = item.id === selectedItemId;
+                return `
+                    <button onclick="selectLandmark('${item.id}')"
+                            class="btn-3d ${isSel ? t.quickActive : 'bg-white hover:bg-sky-50 ' + item.border} border-2 rounded-2xl px-3.5 py-2.5 text-left flex items-center gap-2.5 cursor-pointer transition">
+                        <span class="w-10 h-10 rounded-xl bg-gradient-to-br ${item.grad} flex items-center justify-center text-xl shrink-0 shadow-sm">${item.icon}</span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] font-black bg-slate-900 text-sky-300 px-1.5 py-0.5 rounded shrink-0">${item.badge || ''}</span>
+                                <span class="text-sm sm:text-base font-black text-slate-800 whitespace-nowrap">${item.short}</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs font-bold text-slate-500 whitespace-nowrap">${item.brief || ''}</span>
+                                ${item.status === 'live'
+                                    ? `<span class="text-xs bg-amber-100 text-amber-800 font-black px-2 py-0.5 rounded-full whitespace-nowrap">⭐ ${p.stars}/${item.maxStars}</span>`
+                                    : `<span class="text-xs bg-slate-100 text-slate-500 font-black px-2 py-0.5 rounded-full whitespace-nowrap">籌備中</span>`}
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            document.getElementById('sec-stars').textContent = `${secStars} / ${cfg.maxStars}`;
+            document.getElementById('sec-score').textContent = secScore;
+            const pct = cfg.maxStars > 0 ? Math.min(100, Math.round((secStars / cfg.maxStars) * 100)) : 0;
+            const secBar = document.getElementById('section-progress-bar');
+            const secLbl = document.getElementById('section-progress-label');
+            if (secBar) secBar.style.width = `${pct}%`;
+            if (secLbl) secLbl.textContent = `📊 ${cfg.label}進度總覽：${pct}%`;
+
+            const mEl = document.getElementById('sec-mistakes');
+            if (secMistakes > 0) {
+                mEl.textContent = `📕 ${secMistakes} 題待消滅`;
+                mEl.className = 'bg-rose-100 text-rose-800 border-2 border-rose-300 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-black shadow-sm';
+            } else {
+                mEl.textContent = '✨ 0 錯題';
+                mEl.className = 'bg-emerald-100 text-emerald-800 border-2 border-emerald-300 px-3 py-1.5 rounded-2xl text-xs sm:text-sm font-black shadow-sm';
+            }
+
+            updateSubjectInfoBar();
+            bindPrefetchLinks();
+        }
+
+        function updateSubjectInfoBar() {
+            const cfg = SUBJECT_SECTIONS[activeSection];
+            const item = cfg.items.find(i => i.id === selectedItemId) || cfg.items[0];
+            if (!item) return;
+            const p = progressCache[item.id] || { stars: 0, mistakes: 0 };
+            const t = THEMES[activeTheme];
+            const isComing = item.status === 'coming';
+
+            const iconEl = document.getElementById('info-bar-icon');
+            const badgeEl = document.getElementById('info-bar-badge');
+            const titleEl = document.getElementById('info-bar-title');
+            const starsEl = document.getElementById('info-bar-stars');
+            const mistEl = document.getElementById('info-bar-mistakes');
+            const descEl = document.getElementById('info-bar-desc');
+            const actEl = document.getElementById('info-bar-action');
+
+            if (iconEl) {
+                iconEl.textContent = item.icon;
+                iconEl.className = `w-11 h-11 rounded-2xl bg-gradient-to-br ${item.grad} flex items-center justify-center text-2xl shrink-0 shadow border-2 border-white`;
+            }
+            if (badgeEl) badgeEl.textContent = item.badge || item.short;
+            if (titleEl) titleEl.textContent = item.title;
+            if (starsEl) starsEl.textContent = isComing ? '🛠️ 籌備中' : `⭐ ${p.stars}/${item.maxStars}`;
+            if (mistEl) {
+                if (!isComing && p.mistakes > 0) {
+                    mistEl.textContent = `📕 ${p.mistakes} 題待消滅`;
+                    mistEl.classList.remove('hidden');
                 } else {
-                    engMistakesEl.textContent = '✨ 0 錯題';
-                    engMistakesEl.className = 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-full';
+                    mistEl.classList.add('hidden');
                 }
+            }
+            if (descEl) descEl.textContent = item.desc;
+            if (actEl) {
+                actEl.innerHTML = isComing
+                    ? `<span class="inline-block bg-slate-200 text-slate-600 font-black px-4 py-2 rounded-xl text-sm">🛠️ 即將推出</span>`
+                    : `<a href="${item.href}" class="portal-prefetch-link btn-3d inline-block bg-gradient-to-r ${t.enterBtnGrad} text-white font-black px-5 py-2 rounded-xl text-sm sm:text-base shadow whitespace-nowrap">${t.enterBtnText}</a>`;
             }
         }
 
-        function setupCardPrefetch() {
+        function selectLandmark(itemId, playSnd = true) {
+            const cfg = SUBJECT_SECTIONS[activeSection];
+            const item = cfg.items.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (playSnd && arrivedItemId === itemId) {
+                if (typeof SoundEngine !== 'undefined') SoundEngine.click();
+                if (item.status === 'live' && item.href) {
+                    window.location.href = item.href;
+                }
+                return;
+            }
+
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+            selectedItemId = itemId;
+
+            const targetX = Math.max(8, item.x - 8.5);
+            const targetY = item.y - 1;
+            const hero = document.getElementById('hero-marker');
+            const flip = document.getElementById('map-hero-flip');
+            const sprite = document.getElementById('map-hero-sprite');
+            const dist = Math.hypot(targetX - heroX, targetY - heroY);
+
+            if (heroAnimFrame !== null) {
+                cancelAnimationFrame(heroAnimFrame);
+                heroAnimFrame = null;
+            }
+
+            if (playSnd && dist > 0.5) {
+                arrivedItemId = null;
+                renderLandmarks();
+                if (flip) flip.style.transform = targetX < heroX ? 'scaleX(-1)' : 'scaleX(1)';
+                if (sprite) {
+                    sprite.classList.remove('hero-idle');
+                    sprite.classList.add('is-walking');
+                }
+                const startX = heroX;
+                const startY = heroY;
+                const duration = Math.min(620, Math.max(220, dist * 10));
+                const startTime = performance.now();
+
+                function stepMove(now) {
+                    const elapsed = now - startTime;
+                    const t = Math.min(1, elapsed / duration);
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    heroX = startX + (targetX - startX) * ease;
+                    heroY = startY + (targetY - startY) * ease;
+                    if (hero) {
+                        hero.style.left = `${heroX}%`;
+                        hero.style.top = `${heroY}%`;
+                    }
+                    if (t < 1) {
+                        heroAnimFrame = requestAnimationFrame(stepMove);
+                    } else {
+                        heroAnimFrame = null;
+                        if (sprite) {
+                            sprite.classList.remove('is-walking');
+                            sprite.classList.add('hero-idle');
+                        }
+                        if (flip) flip.style.transform = 'scaleX(1)';
+                        arrivedItemId = itemId;
+                        renderLandmarks();
+                    }
+                }
+                heroAnimFrame = requestAnimationFrame(stepMove);
+            } else {
+                if (flip) flip.style.transform = 'scaleX(1)';
+                if (sprite) {
+                    sprite.classList.remove('is-walking');
+                    sprite.classList.add('hero-idle');
+                }
+                heroX = targetX;
+                heroY = targetY;
+                if (hero) {
+                    hero.style.left = `${targetX}%`;
+                    hero.style.top = `${targetY}%`;
+                }
+                arrivedItemId = itemId;
+                renderLandmarks();
+            }
+        }
+
+        const _prefetchedHrefs = new Set();
+        function bindPrefetchLinks() {
             if (window.location.protocol === 'file:') return;
-            const prefetched = new Set();
-            const prefetchHref = (href) => {
-                if (!href || prefetched.has(href)) return;
-                prefetched.add(href);
+            const prefetch = (href) => {
+                if (!href || _prefetchedHrefs.has(href)) return;
+                _prefetchedHrefs.add(href);
                 const link = document.createElement('link');
                 link.rel = 'prefetch';
                 link.href = href;
                 link.as = 'document';
                 document.head.appendChild(link);
             };
-            document.querySelectorAll('a.portal-card[href]').forEach(card => {
-                const href = card.getAttribute('href');
-                card.addEventListener('pointerenter', () => prefetchHref(href), { passive: true });
-                card.addEventListener('touchstart', () => prefetchHref(href), { passive: true });
+            document.querySelectorAll('a.portal-prefetch-link[href]').forEach(el => {
+                if (el.dataset.prefetchBound) return;
+                el.dataset.prefetchBound = '1';
+                const href = el.getAttribute('href');
+                el.addEventListener('pointerenter', () => prefetch(href), { passive: true });
+                el.addEventListener('touchstart', () => prefetch(href), { passive: true });
             });
+        }
+
+        // ==================== 首頁初次使用指南（首頁專用開關） ====================
+        const HUB_GUIDE_KEY = 'playground_guide_hub_v1';
+
+        function openHubGuide(playSnd = false) {
+            const modal = document.getElementById('hub-guide-modal');
+            if (!modal) return;
+            const img = document.getElementById('hub-guide-actor-img');
+            if (img) {
+                const key = ['hero', 'bakery', 'garden'].includes(activeTheme) ? activeTheme : 'hero';
+                img.src = `./assets/actor-${key}-3d.png`;
+            }
+            if (playSnd && typeof SoundEngine !== 'undefined') SoundEngine.click();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeHubGuide(markSeen = true) {
+            const modal = document.getElementById('hub-guide-modal');
+            if (!modal) return;
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (markSeen) {
+                try { localStorage.setItem(HUB_GUIDE_KEY, '1'); } catch (_) {}
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -851,16 +1046,45 @@
                     if (banner) banner.classList.add('hidden');
                 }
             } catch (_) {}
-            renderPortalProgress();
-            setupCardPrefetch();
+
+            refreshAllProgress();
+            let savedTheme = 'hero';
             try {
-                const savedSec = sessionStorage.getItem('portal_active_section');
-                if (savedSec === 'english' || savedSec === 'school' || savedSec === 'bilingual') switchSection(savedSec);
+                const t = localStorage.getItem('playground_theme_v1') || localStorage.getItem('demo_math_25d_theme');
+                if (THEMES[t]) savedTheme = t;
+            } catch (_) {}
+
+            let savedSec = 'school';
+            try {
+                const s = sessionStorage.getItem('portal_active_section');
+                if (SUBJECT_SECTIONS[s]) savedSec = s;
+            } catch (_) {}
+
+            activeSection = savedSec;
+            switchTheme(savedTheme, false);
+            switchSection(savedSec, false);
+            try {
+                if (!localStorage.getItem(HUB_GUIDE_KEY)) {
+                    setTimeout(() => openHubGuide(false), 280);
+                }
             } catch (_) {}
         });
-        window.addEventListener('pageshow', renderPortalProgress);
+        window.addEventListener('pageshow', () => {
+            refreshAllProgress();
+            let savedTheme = activeTheme;
+            try {
+                const t = localStorage.getItem('playground_theme_v1');
+                if (THEMES[t]) savedTheme = t;
+            } catch (_) {}
+            if (savedTheme !== activeTheme) switchTheme(savedTheme, false);
+            else renderLandmarks();
+        });
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeInfoModal();
+            const modal = document.getElementById('hub-guide-modal');
+            if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                e.preventDefault();
+                closeHubGuide(true);
+            }
         });
     </script>
 </body>
