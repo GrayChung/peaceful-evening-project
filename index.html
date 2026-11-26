@@ -17,6 +17,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="Styles/common.css">
+    <script>
+        document.documentElement.classList.add('page-loading');
+        (function () {
+            var revealed = false;
+            function reveal() {
+                if (revealed) return;
+                revealed = true;
+                document.documentElement.classList.remove('page-loading');
+            }
+            window.addEventListener('DOMContentLoaded', function () {
+                requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+            });
+            window.addEventListener('pageshow', reveal);
+            setTimeout(reveal, 600);
+        })();
+    </script>
     <style>
         body {
             background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #dcfce7 100%);
@@ -809,6 +825,25 @@
             }
         }
 
+        function setupCardPrefetch() {
+            if (window.location.protocol === 'file:') return;
+            const prefetched = new Set();
+            const prefetchHref = (href) => {
+                if (!href || prefetched.has(href)) return;
+                prefetched.add(href);
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = href;
+                link.as = 'document';
+                document.head.appendChild(link);
+            };
+            document.querySelectorAll('a.portal-card[href]').forEach(card => {
+                const href = card.getAttribute('href');
+                card.addEventListener('pointerenter', () => prefetchHref(href), { passive: true });
+                card.addEventListener('touchstart', () => prefetchHref(href), { passive: true });
+            });
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 if (localStorage.getItem('portal_hide_ipad_tip') === '1') {
@@ -817,6 +852,7 @@
                 }
             } catch (_) {}
             renderPortalProgress();
+            setupCardPrefetch();
             try {
                 const savedSec = sessionStorage.getItem('portal_active_section');
                 if (savedSec === 'english' || savedSec === 'school' || savedSec === 'bilingual') switchSection(savedSec);

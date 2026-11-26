@@ -17,6 +17,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        @view-transition {
+            navigation: auto;
+        }
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation-duration: 0.22s;
+            animation-timing-function: ease-out;
+        }
+        html.page-loading body > *:not(#pet-fx-canvas) {
+            opacity: 0;
+        }
+        body > *:not(#pet-fx-canvas) {
+            transition: opacity 0.22s ease-out;
+        }
+
         :root {
             --navy-deep: #0b132b;
             --navy-card: #1c2541;
@@ -136,6 +151,10 @@
                 transition-duration: 0.01ms !important;
                 scroll-behavior: auto !important;
             }
+            ::view-transition-old(root),
+            ::view-transition-new(root) {
+                animation: none !important;
+            }
         }
 
         /* 粒子畫布 */
@@ -146,6 +165,22 @@
             z-index: 75;
         }
     </style>
+    <script>
+        document.documentElement.classList.add('page-loading');
+        (function () {
+            var revealed = false;
+            function reveal() {
+                if (revealed) return;
+                revealed = true;
+                document.documentElement.classList.remove('page-loading');
+            }
+            window.addEventListener('DOMContentLoaded', function () {
+                requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+            });
+            window.addEventListener('pageshow', reveal);
+            setTimeout(reveal, 600);
+        })();
+    </script>
 </head>
 <body class="bg-grid-pattern flex flex-col items-center p-3 sm:p-6">
 

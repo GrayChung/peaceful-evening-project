@@ -17,6 +17,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="../Styles/common.css">
+    <script>
+        document.documentElement.classList.add('page-loading');
+        (function () {
+            var revealed = false;
+            function reveal() {
+                if (revealed) return;
+                revealed = true;
+                document.documentElement.classList.remove('page-loading');
+            }
+            window.addEventListener('DOMContentLoaded', function () {
+                requestAnimationFrame(function () { requestAnimationFrame(reveal); });
+            });
+            window.addEventListener('pageshow', reveal);
+            setTimeout(reveal, 600);
+        })();
+    </script>
     <style>
         /* 社會專屬溫暖人文色調背景 */
         body {

@@ -1,6 +1,22 @@
 /* ==========================================================================
    全站共用基礎排版與遊戲互動動畫樣式
    ========================================================================== */
+@view-transition {
+    navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.22s;
+    animation-timing-function: ease-out;
+}
+
+html.page-loading body > *:not(#confetti-canvas) {
+    opacity: 0;
+}
+body > *:not(#confetti-canvas) {
+    transition: opacity 0.22s ease-out;
+}
+
 body {
     font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
     min-height: 100vh;
@@ -154,5 +170,9 @@ button, a {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none !important;
     }
 }
