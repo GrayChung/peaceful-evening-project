@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Grade 4 IS Lab">
+    <meta name="theme-color" content="#06b6d4">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔦</text></svg>">
     <title>Grade 4 IS Lab｜Integrated Science 雙語互動實驗室</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -94,13 +99,13 @@
                     <button class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black bg-cyan-600 text-white shadow">
                         Ch.7 Properties of Light
                     </button>
-                    <button onclick="alert('Ch.8 Electric Circuits 等後續章節將於課堂進度推進後開放！')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 hover:bg-slate-200 transition">
+                    <button onclick="showToast('Ch.8 Electric Circuits 等後續章節將於課堂進度推進後開放！')" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-400 hover:bg-slate-200 transition">
                         Ch.8 (Coming Soon)
                     </button>
                 </div>
                 <div class="flex items-center gap-2 text-xs font-black">
                     <span class="bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-full">
-                        ⭐ <span id="lobby-stars">0</span> / 18
+                        ⭐ <span id="lobby-stars">0</span> / 15
                     </span>
                     <span id="lobby-mistakes-badge" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">
                         ✨ 0 Mistakes
@@ -131,7 +136,7 @@
                         <span>✏️</span>
                         <span>Ray Sketchpad</span>
                     </button>
-                    <button onclick="speakCurrentQuestion()" class="btn-3d bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+                    <button id="tts-btn" onclick="speakCurrentQuestion()" class="btn-3d bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 font-black px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1">
                         <span>🔊</span>
                         <span>Read Aloud</span>
                     </button>
@@ -141,6 +146,32 @@
             <!-- 進度條 -->
             <div class="w-full bg-slate-200/80 h-3 rounded-full overflow-hidden border border-white shadow-inner">
                 <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- 錯題怪獸 Boss 戰面板（Stage 99 顯示） -->
+            <div id="mistake-boss-panel" class="hidden bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3 sm:px-4 sm:py-3 border-2 border-rose-300 shadow-sm">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div id="monster-stage" class="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+                        <div id="monster-svg-wrap" class="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center"></div>
+                        <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
+                            <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+                            <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center justify-between gap-1 mb-1">
+                            <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full truncate">
+                                😈 錯題魔王登場！答對題目就能削減它的生命值！
+                            </span>
+                            <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600 shrink-0">HP 0 / 0</span>
+                        </div>
+                        <div class="relative w-full h-4 sm:h-5 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                            <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
+                            <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
+                            <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 題目卡片 -->
@@ -208,7 +239,7 @@
     </main>
 
     <!-- iPad 光線草稿畫板 Modal -->
-    <div id="sketchpad-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
+    <div id="sketchpad-modal" onclick="if(event.target===this) closeSketchpad()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6">
         <div class="bg-white rounded-3xl w-full max-w-2xl p-4 sm:p-6 shadow-2xl border-4 border-indigo-300 space-y-3 animate-pop">
             <div class="flex items-center justify-between">
                 <div>
@@ -255,8 +286,10 @@
             qIndex: 0,
             correctCount: 0,
             answered: false,
+            mcqOptions: [],
             sentenceTokens: [],
-            selectedRayIds: []
+            selectedRayIds: [],
+            bossSession: { isMistakeBattle: false, bossMaxHp: 0, bossHp: 0 }
         };
 
         // ==================== SVG 圖解工廠 ====================
@@ -826,7 +859,7 @@
             const streakEl = document.getElementById('streak-count');
             if (streakEl) streakEl.textContent = state.streak;
 
-            const totalStars = [71, 72, 73, 74, 75, 99].reduce((sum, id) => sum + (Number(state.stars[id]) || 0), 0);
+            const totalStars = [71, 72, 73, 74, 75].reduce((sum, id) => sum + (Number(state.stars[id]) || 0), 0);
             const lobbyStars = document.getElementById('lobby-stars');
             if (lobbyStars) lobbyStars.textContent = totalStars;
 
@@ -857,7 +890,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-3">
                                 <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl shadow-sm">${st.icon}</div>
-                                <span class="text-sm tracking-widest">${starStr}</span>
+                                ${isMistakeStage ? '' : `<span class="text-sm tracking-widest">${starStr}</span>`}
                             </div>
                             <span class="text-[11px] font-black ${st.badgeBg} px-2.5 py-0.5 rounded-full">Ch.7 Properties of Light</span>
                             <h3 class="text-lg font-black text-slate-800 mt-2">${st.title}</h3>
@@ -871,13 +904,51 @@
             }).join('');
         }
 
+        // ==================== 工具與輕提示 Toast ====================
+        function showToast(message, tone = 'info') {
+            if (!document.body) return;
+            document.querySelectorAll('.toast-notice').forEach(el => el.remove());
+            const el = document.createElement('div');
+            const toneClass = tone === 'warn'
+                ? 'bg-amber-500 text-white border-2 border-amber-200'
+                : tone === 'success'
+                ? 'bg-emerald-600 text-white border-2 border-emerald-200'
+                : 'bg-slate-800 text-white border-2 border-cyan-300';
+            el.className = `toast-notice ${toneClass}`;
+            el.textContent = message;
+            document.body.appendChild(el);
+            setTimeout(() => { if (el.parentNode) el.remove(); }, 2400);
+        }
+
+        function shuffleArray(arr) {
+            const copy = arr.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
         // ==================== 語音與雙語提示 ====================
+        function setTtsButtonState(speaking) {
+            const btn = document.getElementById('tts-btn');
+            if (!btn) return;
+            btn.innerHTML = speaking
+                ? '<span>🔊</span><span>Speaking...</span>'
+                : '<span>🔊</span><span>Read Aloud</span>';
+            btn.classList.toggle('bg-cyan-200', speaking);
+            btn.classList.toggle('bg-cyan-50', !speaking);
+        }
+
         function speakText(text) {
             if (!('speechSynthesis' in window) || !text) return;
             window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'en-US';
             utter.rate = 0.92;
+            utter.onstart = () => setTtsButtonState(true);
+            utter.onend = () => setTtsButtonState(false);
+            utter.onerror = () => setTtsButtonState(false);
             window.speechSynthesis.speak(utter);
         }
 
@@ -938,17 +1009,23 @@
             if (stageId === 99) {
                 qList = state.mistakes.map(findQuestionById).filter(Boolean);
                 if (qList.length === 0) {
-                    alert('Awesome! You have 0 mistakes right now! ✨');
+                    showToast('Awesome! You have 0 mistakes right now! ✨', 'success');
                     return;
                 }
             } else {
-                qList = [...(QUESTION_BANK[stageId] || [])];
+                qList = shuffleArray(QUESTION_BANK[stageId] || []);
             }
 
             state.currentStageId = stageId;
             state.questions = qList;
             state.qIndex = 0;
             state.correctCount = 0;
+            state.bossSession = {
+                isMistakeBattle: stageId === 99,
+                bossMaxHp: qList.length,
+                bossHp: qList.length
+            };
+            if (typeof MonsterBoss !== 'undefined') MonsterBoss.renderUI(state.bossSession);
 
             const stageInfo = STAGES.find(s => s.id === stageId);
             document.getElementById('quiz-stage-title').textContent = stageInfo ? stageInfo.title : 'Practice';
@@ -961,6 +1038,7 @@
 
         function returnToLobby() {
             window.speechSynthesis && window.speechSynthesis.cancel();
+            setTtsButtonState(false);
             document.getElementById('quiz-view').classList.add('hidden');
             document.getElementById('result-view').classList.add('hidden');
             document.getElementById('lobby-view').classList.remove('hidden');
@@ -974,9 +1052,18 @@
         function renderQuestion() {
             const q = state.questions[state.qIndex];
             state.answered = false;
+            state.mcqOptions = [];
             state.singleZhOverride = false;
             state.sentenceTokens = [];
             state.selectedRayIds = [];
+            setTtsButtonState(false);
+
+            const qCard = document.getElementById('question-card');
+            if (qCard) {
+                qCard.classList.remove('animate-slide-up');
+                void qCard.offsetWidth;
+                qCard.classList.add('animate-slide-up');
+            }
 
             const total = state.questions.length;
             document.getElementById('quiz-progress-text').textContent = `Question ${state.qIndex + 1} / ${total}`;
@@ -1012,11 +1099,14 @@
             // Render interaction by type
             const area = document.getElementById('q-interaction-area');
             if (q.type === 'mcq') {
+                const indexed = q.options.map((text, origIdx) => ({ text, isCorrect: origIdx === q.answer }));
+                const isTrueFalse = q.options.length === 2 && q.options[0] === 'True' && q.options[1] === 'False';
+                state.mcqOptions = isTrueFalse ? indexed : shuffleArray(indexed);
                 area.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    ${q.options.map((opt, idx) => `
+                    ${state.mcqOptions.map((opt, idx) => `
                         <button onclick="submitMcq(${idx})" id="opt-btn-${idx}" class="btn-3d text-left bg-slate-50 hover:bg-cyan-50 border-2 border-slate-200 hover:border-cyan-400 rounded-2xl p-4 font-bold text-slate-800 text-sm sm:text-base flex items-center gap-3">
                             <span class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-black text-cyan-700 shrink-0">${String.fromCharCode(65 + idx)}</span>
-                            <span>${opt}</span>
+                            <span>${opt.text}</span>
                         </button>
                     `).join('')}
                 </div>`;
@@ -1027,7 +1117,7 @@
                         <div class="flex flex-wrap gap-2">
                             <input id="spell-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                                    placeholder="Type your spelling here..."
-                                   onkeydown="if(event.key==='Enter') submitSpell()"
+                                   onkeydown="if(event.key==='Enter' && !state.answered){ event.stopPropagation(); submitSpell(); }"
                                    class="flex-1 min-w-[200px] bg-white border-2 border-cyan-300 focus:border-cyan-500 outline-none rounded-xl px-4 py-2.5 font-black text-base text-slate-800">
                             <button onclick="submitSpell()" class="btn-3d bg-cyan-600 hover:bg-cyan-700 text-white font-black px-5 py-2.5 rounded-xl text-sm sm:text-base">
                                 Check Spelling ✓
@@ -1036,7 +1126,7 @@
                     </div>`;
                 setTimeout(() => { const inp = document.getElementById('spell-input'); if (inp) inp.focus(); }, 60);
             } else if (q.type === 'sentence') {
-                const shuffled = [...q.tokens].sort(() => Math.random() - 0.5);
+                const shuffled = shuffleArray(q.tokens);
                 area.innerHTML = `
                     <div class="space-y-3">
                         <div class="min-h-[60px] bg-slate-50 border-2 border-dashed border-cyan-300 rounded-2xl p-3 flex flex-wrap gap-2 items-center" id="sentence-dropzone">
@@ -1044,7 +1134,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2" id="sentence-pool">
                             ${shuffled.map((tok, i) => `
-                                <button onclick="pickSentenceToken(this, ${JSON.stringify(tok).replace(/"/g, '&quot;')})" data-idx="${i}"
+                                <button onclick="pickSentenceToken(this, ${i}, ${JSON.stringify(tok).replace(/"/g, '&quot;')})" data-idx="${i}"
                                         class="word-chip btn-3d bg-white hover:bg-cyan-50 border-2 border-slate-200 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-sm sm:text-base">
                                     ${tok}
                                 </button>
@@ -1079,14 +1169,17 @@
                             <text x="301" y="194" text-anchor="middle" font-size="11" font-weight="900" fill="#0369a1">Bag</text>
                             <!-- Clickable Ray Paths -->
                             <g onclick="toggleRayPath('lamp-to-bag')" class="cursor-pointer">
+                                <line x1="205" y1="48" x2="290" y2="118" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
                                 <line id="ray-lamp-to-bag" x1="205" y1="48" x2="290" y2="118" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
                                 <text x="262" y="78" font-size="10" font-weight="900" fill="#0284c7">Path 1</text>
                             </g>
                             <g onclick="toggleRayPath('bag-to-eyes')" class="cursor-pointer">
+                                <line x1="274" y1="138" x2="96" y2="115" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
                                 <line id="ray-bag-to-eyes" x1="274" y1="138" x2="96" y2="115" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
                                 <text x="185" y="142" font-size="10" font-weight="900" fill="#0284c7">Path 2</text>
                             </g>
                             <g onclick="toggleRayPath('eyes-to-bag')" class="cursor-pointer">
+                                <line x1="92" y1="100" x2="274" y2="122" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
                                 <line id="ray-eyes-to-bag" x1="92" y1="100" x2="274" y2="122" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="5,5" stroke-linecap="round"/>
                                 <text x="185" y="96" font-size="10" font-weight="800" fill="#64748b">Path 3 (Eyes ➔ Bag?)</text>
                             </g>
@@ -1113,14 +1206,17 @@
                         <text x="203" y="192" text-anchor="middle" font-size="11" font-weight="900" fill="#0369a1">Science Book</text>
                         <!-- Paths -->
                         <g onclick="toggleRayPath('lamp-to-book')" class="cursor-pointer">
+                            <line x1="280" y1="58" x2="215" y2="148" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
                             <line id="ray-lamp-to-book" x1="280" y1="58" x2="215" y2="148" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
                             <text x="262" y="110" font-size="10" font-weight="900" fill="#0284c7">Path A</text>
                         </g>
                         <g onclick="toggleRayPath('book-to-suri')" class="cursor-pointer">
+                            <line x1="185" y1="148" x2="105" y2="102" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
                             <line id="ray-book-to-suri" x1="185" y1="148" x2="105" y2="102" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
                             <text x="128" y="142" font-size="10" font-weight="900" fill="#0284c7">Path B</text>
                         </g>
                         <g onclick="toggleRayPath('lamp-to-suri')" class="cursor-pointer">
+                            <line x1="255" y1="52" x2="108" y2="90" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
                             <line id="ray-lamp-to-suri" x1="255" y1="52" x2="108" y2="90" stroke="#e2e8f0" stroke-width="6" stroke-dasharray="5,5" stroke-linecap="round"/>
                             <text x="180" y="62" font-size="10" font-weight="800" fill="#64748b">Path C (Skip book?)</text>
                         </g>
@@ -1161,12 +1257,26 @@
         }
 
         // ==================== 句型重組互動 ====================
-        function pickSentenceToken(btn, token) {
+        function pickSentenceToken(btn, btnIdx, token) {
             if (state.answered) return;
             SoundEngine.click();
             btn.disabled = true;
             btn.classList.add('opacity-30');
-            state.sentenceTokens.push(token);
+            state.sentenceTokens.push({ text: token, btnIdx });
+            renderSentenceDropzone();
+        }
+
+        function removeSentenceToken(posIdx) {
+            if (state.answered) return;
+            SoundEngine.click();
+            const [removed] = state.sentenceTokens.splice(posIdx, 1);
+            if (removed) {
+                const poolBtn = document.querySelector(`#sentence-pool button[data-idx="${removed.btnIdx}"]`);
+                if (poolBtn) {
+                    poolBtn.disabled = false;
+                    poolBtn.classList.remove('opacity-30');
+                }
+            }
             renderSentenceDropzone();
         }
 
@@ -1178,7 +1288,10 @@
                 return;
             }
             dz.innerHTML = state.sentenceTokens.map((t, idx) => `
-                <span class="bg-cyan-600 text-white font-bold px-3 py-1.5 rounded-xl text-sm shadow-sm">${idx + 1}. ${t}</span>
+                <button type="button" onclick="removeSentenceToken(${idx})" title="Tap to remove"
+                        class="word-chip bg-cyan-600 hover:bg-cyan-700 text-white font-bold px-3 py-1.5 rounded-xl text-sm shadow-sm cursor-pointer">
+                    ${idx + 1}. ${t.text} ✕
+                </button>
             `).join('');
         }
 
@@ -1196,10 +1309,10 @@
             if (state.answered) return;
             const q = state.questions[state.qIndex];
             if (state.sentenceTokens.length !== q.answerOrder.length) {
-                alert('Please place all word blocks into the sentence box first!');
+                showToast('Please place all word blocks into the sentence box first!', 'warn');
                 return;
             }
-            const isCorrect = q.answerOrder.every((t, i) => t === state.sentenceTokens[i]);
+            const isCorrect = q.answerOrder.every((t, i) => t === state.sentenceTokens[i].text);
             handleAnswer(isCorrect);
         }
 
@@ -1207,9 +1320,11 @@
         function submitMcq(idx) {
             if (state.answered) return;
             const q = state.questions[state.qIndex];
-            const isCorrect = idx === q.answer;
+            const opts = state.mcqOptions.length ? state.mcqOptions : q.options.map((text, i) => ({ text, isCorrect: i === q.answer }));
+            const correctIdx = opts.findIndex(o => o.isCorrect);
+            const isCorrect = idx === correctIdx;
             const chosenBtn = document.getElementById(`opt-btn-${idx}`);
-            const rightBtn = document.getElementById(`opt-btn-${q.answer}`);
+            const rightBtn = document.getElementById(`opt-btn-${correctIdx}`);
             if (rightBtn) rightBtn.classList.add('border-emerald-500', 'bg-emerald-50');
             if (!isCorrect && chosenBtn) chosenBtn.classList.add('border-rose-500', 'bg-rose-50', 'animate-shake');
             handleAnswer(isCorrect);
@@ -1246,9 +1361,14 @@
                 SoundEngine.correct(state.streak);
                 spawnFloatingText(window.innerWidth / 2, window.innerHeight * 0.35, `+${pts} ✨`, 'text-emerald-600');
 
-                // 若在錯題本答對，移除錯題
+                // 若在錯題本答對，移除錯題並扣減怪獸血量
                 if (state.currentStageId === 99) {
                     state.mistakes = state.mistakes.filter(id => id !== q.id);
+                    if (typeof MonsterBoss !== 'undefined') {
+                        state.bossSession.bossHp = Math.max(0, state.bossSession.bossHp - 1);
+                        MonsterBoss.triggerHit();
+                        MonsterBoss.renderUI(state.bossSession);
+                    }
                 }
 
                 fbBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
@@ -1258,6 +1378,10 @@
                 SoundEngine.wrong();
                 if (!state.mistakes.includes(q.id)) {
                     state.mistakes.push(q.id);
+                }
+                if (state.currentStageId === 99 && typeof MonsterBoss !== 'undefined') {
+                    MonsterBoss.triggerCounter();
+                    MonsterBoss.renderUI(state.bossSession);
                 }
                 fbBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
                 fbTitle.textContent = '💡 Good try! Let\'s review:';
@@ -1281,11 +1405,12 @@
         }
 
         function finishStage() {
+            document.getElementById('quiz-progress-bar').style.width = '100%';
             const total = state.questions.length;
             const ratio = total > 0 ? state.correctCount / total : 1;
             const earnedStars = ratio >= 0.9 ? 3 : ratio >= 0.65 ? 2 : 1;
 
-            if ((state.stars[state.currentStageId] || 0) < earnedStars) {
+            if (state.currentStageId !== 99 && (state.stars[state.currentStageId] || 0) < earnedStars) {
                 state.stars[state.currentStageId] = earnedStars;
             }
             saveProgress();
@@ -1297,7 +1422,11 @@
 
             document.getElementById('quiz-view').classList.add('hidden');
             document.getElementById('result-view').classList.remove('hidden');
-            document.getElementById('result-stars').textContent = '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars);
+            document.getElementById('result-stars').innerHTML = [0, 1, 2].map(i =>
+                i < earnedStars
+                    ? `<span class="inline-block animate-star-pop opacity-0" style="animation-delay:${i * 180}ms">⭐</span>`
+                    : `<span class="inline-block opacity-35">☆</span>`
+            ).join('');
             document.getElementById('result-summary').textContent = `You answered ${state.correctCount} out of ${total} questions correctly! Total Score: ${state.totalScore}`;
         }
 
@@ -1305,31 +1434,110 @@
         let sketchCtx = null;
         let drawing = false;
         let sketchColor = '#0284c7';
+        let sketchDpr = 1;
+        let sketchInitialized = false;
+        let sketchPointerBound = false;
+
+        function syncSketchpadSize(preserveDrawing = true) {
+            const canvas = document.getElementById('sketch-canvas');
+            if (!canvas) return;
+            // 使用 clientWidth / clientHeight 避免 .animate-pop 縮放動畫期間 getBoundingClientRect() 取到 0.88x 尺寸
+            const cssW = canvas.clientWidth || (canvas.parentElement ? canvas.parentElement.clientWidth : 0);
+            const cssH = canvas.clientHeight || (canvas.parentElement ? canvas.parentElement.clientHeight : 0);
+            if (!cssW || !cssH) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const targetW = Math.round(cssW * dpr);
+            const targetH = Math.round(cssH * dpr);
+
+            if (!sketchCtx) sketchCtx = canvas.getContext('2d');
+            if (canvas.width !== targetW || canvas.height !== targetH || sketchDpr !== dpr) {
+                let tempCanvas = null;
+                const prevDpr = sketchDpr;
+                if (preserveDrawing && sketchInitialized && canvas.width > 0 && canvas.height > 0) {
+                    tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+                }
+                sketchDpr = dpr;
+                canvas.width = targetW;
+                canvas.height = targetH;
+                sketchCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                if (tempCanvas) {
+                    sketchCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width / prevDpr, tempCanvas.height / prevDpr);
+                }
+            } else {
+                sketchCtx.setTransform(sketchDpr, 0, 0, sketchDpr, 0, 0);
+            }
+
+            sketchCtx.lineCap = 'round';
+            sketchCtx.lineJoin = 'round';
+            sketchCtx.lineWidth = 4;
+            sketchCtx.strokeStyle = sketchColor;
+        }
 
         function openSketchpad() {
             document.getElementById('sketchpad-modal').classList.remove('hidden');
             const canvas = document.getElementById('sketch-canvas');
             if (!canvas) return;
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            sketchCtx = canvas.getContext('2d');
-            sketchCtx.lineCap = 'round';
-            sketchCtx.lineJoin = 'round';
-            sketchCtx.lineWidth = 4;
-            sketchCtx.strokeStyle = sketchColor;
+            syncSketchpadSize(true);
 
-            const getPos = (e) => {
-                const r = canvas.getBoundingClientRect();
-                const t = e.touches ? e.touches[0] : e;
-                return { x: t.clientX - r.left, y: t.clientY - r.top };
-            };
-            canvas.onpointerdown = (e) => { drawing = true; const p = getPos(e); sketchCtx.beginPath(); sketchCtx.moveTo(p.x, p.y); };
-            canvas.onpointermove = (e) => { if (!drawing) return; const p = getPos(e); sketchCtx.lineTo(p.x, p.y); sketchCtx.stroke(); };
-            window.onpointerup = () => { drawing = false; };
+            if (!sketchInitialized) {
+                const getPos = (e) => {
+                    const r = canvas.getBoundingClientRect();
+                    const t = e.touches ? e.touches[0] : e;
+                    const logicalW = canvas.width / sketchDpr;
+                    const logicalH = canvas.height / sketchDpr;
+                    return {
+                        x: (t.clientX - r.left) * (logicalW / (r.width || logicalW)),
+                        y: (t.clientY - r.top) * (logicalH / (r.height || logicalH))
+                    };
+                };
+                const endStroke = (e) => {
+                    drawing = false;
+                    if (canvas.releasePointerCapture && e && e.pointerId !== undefined) {
+                        try {
+                            if (!canvas.hasPointerCapture || canvas.hasPointerCapture(e.pointerId)) {
+                                canvas.releasePointerCapture(e.pointerId);
+                            }
+                        } catch (_) {}
+                    }
+                };
+                canvas.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    drawing = true;
+                    if (canvas.setPointerCapture && e.pointerId !== undefined) {
+                        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+                    }
+                    const p = getPos(e);
+                    sketchCtx.beginPath();
+                    sketchCtx.moveTo(p.x, p.y);
+                }, { passive: false });
+                canvas.addEventListener('pointermove', (e) => {
+                    if (!drawing) return;
+                    e.preventDefault();
+                    const p = getPos(e);
+                    sketchCtx.lineTo(p.x, p.y);
+                    sketchCtx.stroke();
+                }, { passive: false });
+                canvas.addEventListener('pointerup', endStroke);
+                canvas.addEventListener('pointercancel', endStroke);
+                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                sketchInitialized = true;
+            }
+            if (!sketchPointerBound) {
+                window.addEventListener('pointerup', () => { drawing = false; });
+                window.addEventListener('resize', () => {
+                    const modal = document.getElementById('sketchpad-modal');
+                    if (modal && !modal.classList.contains('hidden')) syncSketchpadSize(true);
+                });
+                sketchPointerBound = true;
+            }
         }
 
         function closeSketchpad() {
+            drawing = false;
             document.getElementById('sketchpad-modal').classList.add('hidden');
         }
 
@@ -1340,13 +1548,32 @@
 
         function clearSketchpad() {
             const canvas = document.getElementById('sketch-canvas');
-            if (canvas && sketchCtx) sketchCtx.clearRect(0, 0, canvas.width, canvas.height);
+            if (canvas && sketchCtx) {
+                sketchCtx.save();
+                sketchCtx.setTransform(1, 0, 0, 1, 0, 0);
+                sketchCtx.clearRect(0, 0, canvas.width, canvas.height);
+                sketchCtx.restore();
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof ConfettiEngine !== 'undefined') ConfettiEngine.init();
             loadProgress();
             renderLobby();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            const sketchModal = document.getElementById('sketchpad-modal');
+            const sketchOpen = sketchModal && !sketchModal.classList.contains('hidden');
+            if (e.key === 'Escape' && sketchOpen) {
+                closeSketchpad();
+                return;
+            }
+            const quizView = document.getElementById('quiz-view');
+            if (e.key === 'Enter' && quizView && !quizView.classList.contains('hidden') && !sketchOpen && state.answered) {
+                e.preventDefault();
+                nextQuestion();
+            }
         });
     </script>
 </body>

@@ -2,7 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cambridge PET">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚆</text></svg>">
     <title>Cambridge PET (B1) 倫敦特快車｜劍橋英檢互動特訓</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -116,9 +121,21 @@
         }
 
         /* Input focus & iPad friendly */
-        input.pet-input {
+        input, textarea, input.pet-input {
             user-select: text;
             -webkit-user-select: text;
+        }
+        button, a {
+            touch-action: manipulation;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
         }
 
         /* 粒子畫布 */
@@ -274,7 +291,7 @@
     </main>
 
     <!-- ================= 結算彈窗 ================= -->
-    <div id="result-modal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="result-modal" onclick="if(event.target===this) closeResultToLobby()" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="glass-panel bg-slate-900/95 rounded-3xl w-full max-w-md p-6 sm:p-8 text-center border-2 border-teal-400/60 shadow-2xl animate-slide-up">
             <div id="res-stamp" class="inline-block border-4 border-amber-400 text-amber-300 font-black text-sm tracking-widest uppercase px-4 py-1 rounded-xl mb-3 animate-stamp">
                 PASSPORT STAMPED
@@ -298,6 +315,25 @@
                 </button>
                 <button onclick="closeResultToLobby()" class="btn-express flex-1 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold py-3 rounded-xl text-sm">
                     回關卡大廳
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 重置確認彈窗 ================= -->
+    <div id="reset-modal" onclick="if(event.target===this) closeResetModal()" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-panel bg-slate-900/95 rounded-3xl w-full max-w-sm p-6 text-center border-2 border-rose-400/60 shadow-2xl animate-slide-up space-y-4">
+            <div class="text-4xl">🗑️</div>
+            <h3 class="text-xl font-extrabold text-white">清除學習紀錄？</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                確定要清除目前的星星、積分與錯題紀錄嗎？此動作無法復原。
+            </p>
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeResetModal()" class="btn-express flex-1 bg-slate-700 hover:bg-slate-600 text-white font-extrabold py-2.5 rounded-xl text-sm">
+                    取消
+                </button>
+                <button type="button" onclick="confirmResetProgress()" class="btn-express flex-1 bg-rose-500 hover:bg-rose-400 text-white font-extrabold py-2.5 rounded-xl text-sm">
+                    確定清除
                 </button>
             </div>
         </div>
@@ -876,7 +912,18 @@
     }
 
     function resetProgress() {
-        if (!confirm('確定要清除目前的星星、積分與錯題紀錄嗎？')) return;
+        const modal = document.getElementById('reset-modal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+        const modal = document.getElementById('reset-modal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function confirmResetProgress() {
+        closeResetModal();
+        PetSound.tap();
         localStorage.removeItem(STORAGE_KEY);
         loadStore();
         renderLobby();
@@ -1661,7 +1708,10 @@
             return;
         }
         if (!('speechSynthesis' in window)) {
-            alert('此瀏覽器不支援 Web Speech 語音，題目腳本：\n' + q.script);
+            const fb = document.getElementById('feedback-area');
+            if (fb) {
+                fb.innerHTML = `<div class="bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-4 text-xs sm:text-sm font-bold leading-relaxed animate-slide-up">🔇 此瀏覽器不支援 Web Speech 語音，請改讀題目腳本：<br><span class="font-normal">${q.script}</span></div>`;
+            }
             return;
         }
         window.speechSynthesis.cancel();
@@ -1807,6 +1857,26 @@
         renderLobby();
         if ('speechSynthesis' in window) {
             window.speechSynthesis.getVoices();
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        const resetModal = document.getElementById('reset-modal');
+        const resetOpen = resetModal && !resetModal.classList.contains('hidden');
+        if (e.key === 'Escape' && resetOpen) {
+            closeResetModal();
+            return;
+        }
+        const resultModal = document.getElementById('result-modal');
+        const resultOpen = resultModal && !resultModal.classList.contains('hidden');
+        if (e.key === 'Escape' && resultOpen) {
+            closeResultToLobby();
+            return;
+        }
+        const gameView = document.getElementById('view-game');
+        if (e.key === 'Enter' && gameView && !gameView.classList.contains('hidden') && !resultOpen && !resetOpen && game.answered) {
+            e.preventDefault();
+            nextQuestion();
         }
     });
     </script>

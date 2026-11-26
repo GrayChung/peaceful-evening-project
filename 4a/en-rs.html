@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Grade 4 RS Lab">
+    <meta name="theme-color" content="#10b981">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     <title>Grade 4 RS — Reading Street: The Game of Silence & Grammar Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
@@ -30,11 +35,14 @@
 </head>
 <body class="text-slate-800 pb-12 select-none">
 
+    <!-- 全螢幕過關彩帶畫布 -->
+    <canvas id="confetti-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-50"></canvas>
+
     <!-- Top Navigation Bar -->
     <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-emerald-200 px-4 py-3 shadow-sm">
         <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2 sm:gap-3">
-                <a href="../index.html" onclick="if(window.SoundEngine) SoundEngine.click();"
+                <a href="../index.html" onclick="if(typeof SoundEngine!=='undefined') SoundEngine.click();"
                    class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 font-extrabold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-slate-200 transition">
                     <span>🏠</span>
                     <span>Portal</span>
@@ -98,7 +106,7 @@
                     <div class="flex flex-col items-start md:items-end gap-2 shrink-0">
                         <div class="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-black px-4 py-2 rounded-2xl shadow-md flex items-center gap-2">
                             <span class="text-xl">⭐</span>
-                            <span id="lobby-stars" class="text-lg">0 / 18</span>
+                            <span id="lobby-stars" class="text-lg">0 / 15</span>
                         </div>
                         <button onclick="resetProgress()" class="text-xs font-bold text-slate-400 hover:text-rose-500 underline cursor-pointer">
                             Reset Progress
@@ -157,6 +165,32 @@
                     </div>
                     <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 font-black text-xs px-2.5 py-1 rounded-full">
                         +<span id="session-score">0</span> pts
+                    </div>
+                </div>
+            </div>
+
+            <!-- 錯題怪獸 Boss 戰面板（Stage 99 顯示） -->
+            <div id="mistake-boss-panel" class="hidden bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 rounded-2xl p-3 sm:px-4 sm:py-3 border-2 border-rose-300 shadow-sm">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div id="monster-stage" class="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+                        <div id="monster-svg-wrap" class="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center"></div>
+                        <svg id="slash-overlay" class="hidden absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 160 160">
+                            <path id="slash-path-1" d="M 25,130 Q 80,65 140,22" fill="none" stroke="#facc15" stroke-width="8" stroke-linecap="round"/>
+                            <path id="slash-path-2" d="M 28,128 Q 82,68 138,24" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center justify-between gap-1 mb-1">
+                            <span id="monster-mood" class="text-xs sm:text-sm font-black bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full truncate">
+                                😈 錯題魔王登場！答對題目就能削減它的生命值！
+                            </span>
+                            <span id="hp-text" class="text-xs sm:text-sm font-black text-rose-600 shrink-0">HP 0 / 0</span>
+                        </div>
+                        <div class="relative w-full h-4 sm:h-5 bg-slate-200 rounded-full border-2 border-slate-300 overflow-hidden shadow-inner">
+                            <div id="hp-trail-bar" class="absolute inset-y-0 left-0 bg-amber-300 transition-all duration-500 ease-out" style="width: 100%"></div>
+                            <div id="hp-main-bar" class="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-200 ease-out" style="width: 100%"></div>
+                            <div id="hp-segments" class="absolute inset-0 grid pointer-events-none"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -241,6 +275,25 @@
         </section>
 
     </main>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal" onclick="if(event.target===this) closeResetModal()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl border-4 border-rose-300 animate-pop space-y-4">
+            <div class="text-4xl">🗑️</div>
+            <h3 class="font-display text-xl font-bold text-slate-800">Reset Progress?</h3>
+            <p class="text-sm text-slate-600 font-semibold leading-relaxed">
+                確定要清除所有 Grade 4 RS 的星星、積分與錯題紀錄嗎？此動作無法復原。
+            </p>
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeResetModal()" class="btn-3d flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black py-2.5 rounded-xl text-sm cursor-pointer">
+                    取消
+                </button>
+                <button type="button" onclick="confirmResetProgress()" class="btn-3d flex-1 bg-rose-500 hover:bg-rose-600 text-white font-black py-2.5 rounded-xl text-sm cursor-pointer">
+                    確定重置
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="../Scripts/sound-engine.js"></script>
     <script src="../Scripts/game-effects.js"></script>
@@ -963,7 +1016,9 @@
         let streak = 0;
         let answered = false;
         let selectedOption = null;
+        let currentMcqOptions = [];
         let builtTokens = [];
+        let bossSession = { isMistakeBattle: false, bossMaxHp: 0, bossHp: 0 };
 
         function loadData() {
             try {
@@ -987,7 +1042,18 @@
         }
 
         function resetProgress() {
-            if (!confirm('Reset all Grade 4 RS stars, score, and mistakes?')) return;
+            const modal = document.getElementById('reset-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function confirmResetProgress() {
+            closeResetModal();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
             userData = { stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 99: 0 }, totalScore: 0, mistakes: [] };
             saveData();
             document.getElementById('total-score').textContent = '0';
@@ -995,12 +1061,25 @@
         }
 
         // ==================== SPEECH SYNTHESIS (TTS) ====================
+        function setTtsButtonState(speaking) {
+            const btn = document.getElementById('tts-btn');
+            if (!btn) return;
+            btn.innerHTML = speaking
+                ? '<span>🔊</span><span>Speaking...</span>'
+                : '<span>🗣️</span><span>Read Aloud</span>';
+            btn.classList.toggle('bg-teal-200', speaking);
+            btn.classList.toggle('bg-teal-50', !speaking);
+        }
+
         function speakText(text) {
             if (!('speechSynthesis' in window) || !text) return;
             window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'en-US';
             utter.rate = 0.92;
+            utter.onstart = () => setTtsButtonState(true);
+            utter.onend = () => setTtsButtonState(false);
+            utter.onerror = () => setTtsButtonState(false);
             window.speechSynthesis.speak(utter);
         }
 
@@ -1016,7 +1095,7 @@
 
         // ==================== CHINESE HINT TOGGLE ====================
         function toggleChineseHint() {
-            if (window.SoundEngine) SoundEngine.click();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
             showZhHint = !showZhHint;
             const btn = document.getElementById('hint-toggle');
             const lbl = document.getElementById('hint-toggle-label');
@@ -1053,8 +1132,8 @@
 
         // ==================== LOBBY RENDERING ====================
         function renderLobby() {
-            const totalStars = [1, 2, 3, 4, 5, 99].reduce((sum, id) => sum + (Number(userData.stars[id]) || 0), 0);
-            document.getElementById('lobby-stars').textContent = `${totalStars} / 18`;
+            const totalStars = [1, 2, 3, 4, 5].reduce((sum, id) => sum + (Number(userData.stars[id]) || 0), 0);
+            document.getElementById('lobby-stars').textContent = `${totalStars} / 15`;
             document.getElementById('total-score').textContent = userData.totalScore;
 
             const grid = document.getElementById('stage-grid');
@@ -1092,8 +1171,6 @@
 
             // Mistake Buster Card (Stage 99)
             const mistakeCount = userData.mistakes.length;
-            const mStars = userData.stars[99] || 0;
-            const mStarStr = '⭐'.repeat(mStars) + '☆'.repeat(3 - mStars);
             const mCard = document.createElement('div');
             mCard.className = `lab-card rounded-3xl p-6 border-2 ${mistakeCount > 0 ? 'border-rose-300 bg-rose-50/40' : 'border-emerald-200'} flex flex-col justify-between transition ${mistakeCount > 0 ? 'hover:-translate-y-1 cursor-pointer' : 'opacity-80'}`;
             mCard.onclick = () => {
@@ -1109,7 +1186,6 @@
                             <span class="inline-block text-[11px] font-black ${mistakeCount > 0 ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'} border px-2.5 py-0.5 rounded-full">
                                 ${mistakeCount > 0 ? `${mistakeCount} To Clear` : 'All Clear!'}
                             </span>
-                            <div class="text-base tracking-wider mt-1">${mStarStr}</div>
                         </div>
                     </div>
                     <h3 class="font-display text-xl font-bold text-slate-800">Mistake Buster</h3>
@@ -1145,7 +1221,7 @@
         }
 
         function startStage(stageId) {
-            if (window.SoundEngine) SoundEngine.click();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
             currentStageId = stageId;
 
             if (stageId === 99) {
@@ -1163,6 +1239,12 @@
             sessionCorrect = 0;
             sessionMissed = 0;
             streak = 0;
+            bossSession = {
+                isMistakeBattle: stageId === 99,
+                bossMaxHp: activeQuestions.length,
+                bossHp: activeQuestions.length
+            };
+            if (typeof MonsterBoss !== 'undefined') MonsterBoss.renderUI(bossSession);
 
             document.getElementById('lobby-view').classList.add('hidden');
             document.getElementById('result-view').classList.add('hidden');
@@ -1171,8 +1253,9 @@
         }
 
         function backToLobby() {
-            if (window.SoundEngine) SoundEngine.click();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            setTtsButtonState(false);
             document.getElementById('quiz-view').classList.add('hidden');
             document.getElementById('result-view').classList.add('hidden');
             document.getElementById('lobby-view').classList.remove('hidden');
@@ -1187,11 +1270,20 @@
             const q = activeQuestions[qIndex];
             answered = false;
             selectedOption = null;
+            currentMcqOptions = [];
             builtTokens = [];
+            setTtsButtonState(false);
+
+            const qCard = document.getElementById('question-card');
+            if (qCard) {
+                qCard.classList.remove('animate-slide-up');
+                void qCard.offsetWidth;
+                qCard.classList.add('animate-slide-up');
+            }
 
             const total = activeQuestions.length;
             document.getElementById('quiz-progress-text').textContent = `${qIndex + 1} / ${total}`;
-            document.getElementById('quiz-progress-bar').style.width = `${((qIndex + 1) / total) * 100}%`;
+            document.getElementById('quiz-progress-bar').style.width = `${(qIndex / total) * 100}%`;
             document.getElementById('session-score').textContent = sessionScore;
 
             const streakBadge = document.getElementById('streak-badge');
@@ -1218,13 +1310,16 @@
 
             if (q.type === 'mcq') {
                 document.getElementById('check-btn').classList.add('hidden');
-                q.options.forEach((opt, idx) => {
+                const indexed = q.options.map((text, origIdx) => ({ text, isCorrect: origIdx === q.answer }));
+                const isTrueFalse = q.options.length === 2 && q.options[0] === 'True' && q.options[1] === 'False';
+                currentMcqOptions = isTrueFalse ? indexed : shuffleArray(indexed);
+                currentMcqOptions.forEach((opt, idx) => {
                     const btn = document.createElement('button');
                     btn.className = 'w-full text-left bg-white hover:bg-emerald-50 border-2 border-slate-200 hover:border-emerald-400 rounded-2xl px-4 py-3.5 font-bold text-slate-800 transition flex items-center gap-3 cursor-pointer';
                     btn.dataset.idx = idx;
                     btn.innerHTML = `
                         <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center shrink-0 text-sm">${String.fromCharCode(65 + idx)}</span>
-                        <span class="text-sm sm:text-base">${opt}</span>
+                        <span class="text-sm sm:text-base">${opt.text}</span>
                     `;
                     btn.onclick = () => selectMcq(idx);
                     area.appendChild(btn);
@@ -1248,7 +1343,10 @@
                 inp.placeholder = 'Type the English word here...';
                 inp.className = 'w-full bg-white border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none rounded-2xl px-4 py-3.5 text-lg font-black text-slate-800 tracking-wide';
                 inp.onkeydown = (e) => {
-                    if (e.key === 'Enter' && !answered) checkCurrentAnswer();
+                    if (e.key === 'Enter' && !answered) {
+                        e.stopPropagation();
+                        checkCurrentAnswer();
+                    }
                 };
                 wrap.appendChild(inp);
                 area.appendChild(wrap);
@@ -1284,7 +1382,7 @@
 
         function toggleToken(tok) {
             if (answered) return;
-            if (window.SoundEngine) SoundEngine.click();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
             const existingIdx = builtTokens.findIndex(t => t.id === tok.id);
             const chip = document.getElementById(`tok-${tok.id}`);
             if (existingIdx >= 0) {
@@ -1330,11 +1428,13 @@
 
             if (q.type === 'mcq') {
                 if (selectedOption === null) return;
-                isCorrect = selectedOption === q.answer;
+                const opts = currentMcqOptions.length ? currentMcqOptions : q.options.map((text, i) => ({ text, isCorrect: i === q.answer }));
+                const correctIdx = opts.findIndex(o => o.isCorrect);
+                isCorrect = selectedOption === correctIdx;
                 const btns = document.querySelectorAll('#answer-area button');
                 btns.forEach((btn, idx) => {
                     btn.classList.add('pointer-events-none');
-                    if (idx === q.answer) {
+                    if (idx === correctIdx) {
                         btn.className = 'w-full text-left bg-emerald-100 border-2 border-emerald-500 rounded-2xl px-4 py-3.5 font-black text-emerald-900 flex items-center gap-3';
                     } else if (idx === selectedOption && !isCorrect) {
                         btn.className = 'w-full text-left bg-rose-100 border-2 border-rose-400 rounded-2xl px-4 py-3.5 font-black text-rose-900 flex items-center gap-3 animate-shake';
@@ -1385,15 +1485,20 @@
                 // Remove from mistakes if mastered in Mistake Buster
                 if (currentStageId === 99) {
                     userData.mistakes = userData.mistakes.filter(id => id !== q.id);
+                    if (typeof MonsterBoss !== 'undefined') {
+                        bossSession.bossHp = Math.max(0, bossSession.bossHp - 1);
+                        MonsterBoss.triggerHit();
+                        MonsterBoss.renderUI(bossSession);
+                    }
                 }
 
-                if (window.SoundEngine) SoundEngine.correct(streak);
-                if (window.animateScoreTo) {
+                if (typeof SoundEngine !== 'undefined') SoundEngine.correct(streak);
+                if (typeof animateScoreTo === 'function') {
                     animateScoreTo(userData.totalScore, 'total-score');
                 } else {
                     document.getElementById('total-score').textContent = userData.totalScore;
                 }
-                if (window.spawnFloatingText) {
+                if (typeof spawnFloatingText === 'function') {
                     spawnFloatingText(window.innerWidth * 0.5, 160, `+${gained}`, 'text-emerald-600');
                 }
 
@@ -1405,7 +1510,11 @@
                 if (!userData.mistakes.includes(q.id)) {
                     userData.mistakes.push(q.id);
                 }
-                if (window.SoundEngine) SoundEngine.wrong();
+                if (currentStageId === 99 && typeof MonsterBoss !== 'undefined') {
+                    MonsterBoss.triggerCounter();
+                    MonsterBoss.renderUI(bossSession);
+                }
+                if (typeof SoundEngine !== 'undefined') SoundEngine.wrong();
 
                 fbBox.className = 'rounded-2xl p-4 border-2 bg-rose-50 border-rose-300 space-y-2';
                 const correctText = q.type === 'mcq' ? q.options[q.answer] : q.answer;
@@ -1417,7 +1526,7 @@
         }
 
         function nextQuestion() {
-            if (window.SoundEngine) SoundEngine.click();
+            if (typeof SoundEngine !== 'undefined') SoundEngine.click();
             qIndex += 1;
             if (qIndex < activeQuestions.length) {
                 renderQuestion();
@@ -1427,6 +1536,7 @@
         }
 
         function finishStage() {
+            document.getElementById('quiz-progress-bar').style.width = '100%';
             document.getElementById('quiz-view').classList.add('hidden');
             document.getElementById('result-view').classList.remove('hidden');
 
@@ -1436,12 +1546,16 @@
             if (acc >= 90) stars = 3;
             else if (acc >= 70) stars = 2;
 
-            if (stars > (userData.stars[currentStageId] || 0)) {
+            if (currentStageId !== 99 && stars > (userData.stars[currentStageId] || 0)) {
                 userData.stars[currentStageId] = stars;
             }
             saveData();
 
-            document.getElementById('result-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            document.getElementById('result-stars').innerHTML = [0, 1, 2].map(i =>
+                i < stars
+                    ? `<span class="inline-block animate-star-pop opacity-0" style="animation-delay:${i * 180}ms">⭐</span>`
+                    : `<span class="inline-block opacity-35">☆</span>`
+            ).join('');
             document.getElementById('res-acc').textContent = `${acc}%`;
             document.getElementById('res-pts').textContent = `+${sessionScore}`;
             document.getElementById('res-miss').textContent = sessionMissed;
@@ -1453,17 +1567,31 @@
                     : 'Good practice! Review the hints and try again.';
 
             if (stars >= 2) {
-                if (window.SoundEngine) SoundEngine.victory();
-                if (window.ConfettiEngine) {
+                if (typeof SoundEngine !== 'undefined') SoundEngine.victory();
+                if (typeof ConfettiEngine !== 'undefined') {
                     ConfettiEngine.spawnBurst({ x: window.innerWidth * 0.5, y: window.innerHeight * 0.35, count: 48 });
                 }
             }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (window.ConfettiEngine) ConfettiEngine.init();
+            if (typeof ConfettiEngine !== 'undefined') ConfettiEngine.init();
             loadData();
             renderLobby();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            const resetModal = document.getElementById('reset-modal');
+            const resetOpen = resetModal && !resetModal.classList.contains('hidden');
+            if (e.key === 'Escape' && resetOpen) {
+                closeResetModal();
+                return;
+            }
+            const quizView = document.getElementById('quiz-view');
+            if (e.key === 'Enter' && quizView && !quizView.classList.contains('hidden') && !resetOpen && answered) {
+                e.preventDefault();
+                nextQuestion();
+            }
         });
     </script>
 </body>

@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="親子互動複習">
+    <meta name="theme-color" content="#f59e0b">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
     <title>國小親子互動複習遊樂場｜多科目學習大廳</title>
     <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -54,12 +59,17 @@
     <main class="w-full max-w-6xl xl:max-w-7xl flex-1 my-6">
         
         <!-- iPad 加入主畫面小提醒橫幅 -->
-        <div class="bg-sky-50/95 border-2 border-sky-200 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-sky-900 shadow-sm">
-            <div class="flex items-center gap-2 font-bold">
+        <div id="ipad-tip-banner" class="bg-sky-50/95 border-2 border-sky-200 rounded-2xl px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-sky-900 shadow-sm">
+            <div class="flex items-center gap-2 font-bold flex-1 min-w-[220px]">
                 <span class="text-lg">📱</span>
                 <span>iPad 使用小技巧：在 Safari 點擊右上角「分享 ⬆」➔「加入主畫面」，就能像 App 一樣一鍵開啟所有科目！</span>
             </div>
-            <span class="text-[11px] font-black bg-sky-200/70 text-sky-800 px-2.5 py-0.5 rounded-full">本機自動存檔</span>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[11px] font-black bg-sky-200/70 text-sky-800 px-2.5 py-0.5 rounded-full">本機自動存檔</span>
+                <button type="button" onclick="dismissIpadTip()" class="text-[11px] font-black text-sky-700 hover:text-sky-950 bg-white/80 hover:bg-white border border-sky-200 px-2.5 py-0.5 rounded-full transition cursor-pointer" title="不再顯示此提示">
+                    ✕ 關閉
+                </button>
+            </div>
         </div>
 
         <!-- ==================== 區塊一：國小學科 ==================== -->
@@ -80,21 +90,26 @@
             </div>
 
             <!-- 四科總覽進度橫幅 -->
-            <div id="overall-progress-banner" class="bg-white/90 border-2 border-indigo-200 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-                <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-indigo-900">
-                    <span class="text-lg">📊</span>
-                    <span>四年級上學期學習進度總覽</span>
+            <div id="overall-progress-banner" class="bg-white/90 border-2 border-indigo-200 rounded-2xl px-4 py-3 mb-6 flex flex-col gap-2.5 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-indigo-900">
+                        <span class="text-lg">📊</span>
+                        <span>四年級上學期學習進度總覽</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
+                        <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
+                            ⭐ 總星星 <span id="overall-stars">0</span> / 75
+                        </span>
+                        <span class="bg-indigo-100 text-indigo-800 border border-indigo-300 px-3 py-1 rounded-full">
+                            🏆 總積分 <span id="overall-score">0</span>
+                        </span>
+                        <span id="overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
+                            ✨ 0 錯題
+                        </span>
+                    </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                    <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
-                        ⭐ 總星星 <span id="overall-stars">0</span> / 75
-                    </span>
-                    <span class="bg-indigo-100 text-indigo-800 border border-indigo-300 px-3 py-1 rounded-full">
-                        🏆 總積分 <span id="overall-score">0</span>
-                    </span>
-                    <span id="overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
-                        ✨ 0 錯題
-                    </span>
+                <div class="w-full h-2 bg-indigo-100 rounded-full overflow-hidden">
+                    <div id="school-progress-bar" class="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-indigo-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -295,21 +310,26 @@
             </div>
 
             <!-- 雙語學科總覽進度橫幅 -->
-            <div class="bg-gradient-to-r from-cyan-50 via-white to-emerald-50 border-2 border-cyan-200 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-                <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-cyan-900">
-                    <span class="text-lg">🌍</span>
-                    <span>雙語小學英文學科進度總覽（全英文出題・可切換中文提示與朗讀）</span>
+            <div class="bg-gradient-to-r from-cyan-50 via-white to-emerald-50 border-2 border-cyan-200 rounded-2xl px-4 py-3 mb-6 flex flex-col gap-2.5 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-cyan-900">
+                        <span class="text-lg">🌍</span>
+                        <span>雙語小學英文學科進度總覽（全英文出題・可切換中文提示與朗讀）</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
+                        <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
+                            ⭐ 總星星 <span id="bilingual-overall-stars">0</span> / 30
+                        </span>
+                        <span class="bg-cyan-100 text-cyan-800 border border-cyan-300 px-3 py-1 rounded-full">
+                            🏆 總積分 <span id="bilingual-overall-score">0</span>
+                        </span>
+                        <span id="bilingual-overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
+                            ✨ 0 錯題
+                        </span>
+                    </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                    <span class="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full">
-                        ⭐ 總星星 <span id="bilingual-overall-stars">0</span> / 36
-                    </span>
-                    <span class="bg-cyan-100 text-cyan-800 border border-cyan-300 px-3 py-1 rounded-full">
-                        🏆 總積分 <span id="bilingual-overall-score">0</span>
-                    </span>
-                    <span id="bilingual-overall-mistakes-badge" class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full">
-                        ✨ 0 錯題
-                    </span>
+                <div class="w-full h-2 bg-cyan-100 rounded-full overflow-hidden">
+                    <div id="bilingual-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -340,7 +360,7 @@
 
                     <div>
                         <div id="progress-is" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
+                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 15</span>
                             <span class="bg-cyan-50 text-cyan-700 border border-cyan-200 px-2 py-0.5 rounded-full">🏆 0</span>
                             <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
                         </div>
@@ -354,9 +374,9 @@
 
                 <!-- 雙語卡片 2：四年級上學期 Reading Street (RS) -->
                 <a href="./4a/en-rs.html" data-grade="4" data-status="live"
-                   class="bilingual-card portal-card group bg-white rounded-3xl p-6 border-4 border-emerald-200 hover:border-emerald-400 shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-xs font-black px-3 py-1 rounded-full">
-                        ✅ 已上線
+                   class="bilingual-card portal-card btn-3d group bg-white rounded-3xl p-6 border-4 border-emerald-300 hover:-translate-y-1 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
+                        ● 已開放遊玩
                     </div>
                     <div>
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-4xl shadow-md mb-4 group-hover:scale-110 transition-transform">
@@ -376,7 +396,7 @@
 
                     <div>
                         <div id="progress-rs" class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-black">
-                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 18</span>
+                            <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ 0 / 15</span>
                             <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">🏆 0</span>
                             <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>
                         </div>
@@ -388,27 +408,61 @@
                     </div>
                 </a>
 
+                <!-- 雙語卡片 3：四年級下學期/後續章節預告（預留擴充） -->
+                <div data-grade="4" data-status="coming" onclick="showComingSoon('Grade 4 IS｜Ch.8 Electric Circuits', '4a/en-is.html')"
+                     class="bilingual-card portal-card cursor-pointer bg-white/80 hover:bg-white rounded-3xl p-6 border-4 border-dashed border-cyan-200 flex flex-col justify-between relative transition">
+                    <div class="absolute top-4 right-4 bg-slate-200 text-slate-600 text-xs font-black px-3 py-1 rounded-full">
+                        🛠️ 籌備建置中
+                    </div>
+                    <div>
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 to-cyan-400 flex items-center justify-center text-4xl shadow-sm mb-4 opacity-85">
+                            ⚡
+                        </div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-black bg-cyan-100 text-cyan-700 px-2.5 py-0.5 rounded-lg">Grade 4</span>
+                            <span class="text-xs font-bold text-slate-400">Integrated Science (IS)</span>
+                        </div>
+                        <h2 class="text-xl font-black text-slate-700 mt-1">
+                            IS · Ch.8 Electric Circuits
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
+                            預計收錄全英文電路符號、導電體與絕緣體、串並聯實驗互動與核心科學字彙特訓。
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end">
+                        <span class="text-xs font-black text-cyan-600 bg-cyan-50 px-3 py-1.5 rounded-xl">
+                            查看規劃說明
+                        </span>
+                    </div>
+                </div>
+
             </div>
         </div>
 
         <!-- ==================== 區塊三：劍橋英檢 ==================== -->
         <div id="section-english" class="hidden">
             <!-- 英檢總覽進度橫幅 -->
-            <div class="bg-slate-900/95 text-white border-2 border-teal-400/60 rounded-2xl px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-md">
-                <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-teal-300">
-                    <span class="text-lg">🇬🇧</span>
-                    <span>Cambridge English 劍橋英檢進度總覽</span>
+            <div class="bg-slate-900/95 text-white border-2 border-teal-400/60 rounded-2xl px-4 py-3 mb-6 flex flex-col gap-2.5 shadow-md">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs sm:text-sm font-black text-teal-300">
+                        <span class="text-lg">🇬🇧</span>
+                        <span>Cambridge English 劍橋英檢進度總覽</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
+                        <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-full">
+                            ⭐ 總星星 <span id="english-overall-stars">0</span> / 18
+                        </span>
+                        <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-3 py-1 rounded-full">
+                            🏆 總積分 <span id="english-overall-score">0</span>
+                        </span>
+                        <span id="english-overall-mistakes-badge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-full">
+                            ✨ 0 錯題
+                        </span>
+                    </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-black">
-                    <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-full">
-                        ⭐ 總星星 <span id="english-overall-stars">0</span> / 18
-                    </span>
-                    <span class="bg-teal-500/20 text-teal-300 border border-teal-400/40 px-3 py-1 rounded-full">
-                        🏆 總積分 <span id="english-overall-score">0</span>
-                    </span>
-                    <span id="english-overall-mistakes-badge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-3 py-1 rounded-full">
-                        ✨ 0 錯題
-                    </span>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="english-progress-bar" class="h-full bg-gradient-to-r from-teal-400 via-cyan-400 to-amber-400 transition-all duration-500 rounded-full" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -493,7 +547,7 @@
     </footer>
 
     <!-- 建置中提示小視窗 -->
-    <div id="info-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="info-modal" onclick="if(event.target===this) closeInfoModal()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 text-center shadow-2xl border-4 border-sky-300 animate-pop">
             <div class="text-5xl mb-3">🚧</div>
             <h3 id="modal-title" class="text-xl font-black text-slate-800 mb-2">模組規劃中</h3>
@@ -565,6 +619,12 @@
             document.getElementById('info-modal').classList.add('hidden');
         }
 
+        function dismissIpadTip() {
+            const banner = document.getElementById('ipad-tip-banner');
+            if (banner) banner.classList.add('hidden');
+            try { localStorage.setItem('portal_hide_ipad_tip', '1'); } catch (_) {}
+        }
+
         function renderPortalProgress() {
             const subjects = [
                 { elId: 'progress-math', key: 'hanlin_math_4a_final_v2', maxStars: 18, stageIds: [6, 7, 8, 9, 10, 99] },
@@ -622,6 +682,8 @@
 
             if (starsEl) starsEl.textContent = totalStarsAll;
             if (scoreEl) scoreEl.textContent = totalScoreAll;
+            const schoolBar = document.getElementById('school-progress-bar');
+            if (schoolBar) schoolBar.style.width = `${Math.min(100, Math.round((totalStarsAll / 75) * 100))}%`;
             if (mistakesEl) {
                 if (totalMistakesAll > 0) {
                     mistakesEl.textContent = `📕 ${totalMistakesAll} 題待消滅`;
@@ -632,14 +694,14 @@
                 }
             }
 
-            // 同步渲染雙語英文學科 (IS + RS) 進度
+            // 同步渲染雙語英文學科 (IS + RS) 進度（僅計算正式 5 關，滿星各 15 顆）
             let isStars = 0, isScore = 0, isMistakes = 0;
             try {
                 const rawIs = localStorage.getItem('bilingual_is_4a_v1');
                 if (rawIs) {
                     const isData = JSON.parse(rawIs);
                     if (isData && isData.stars) {
-                        isStars = [71, 72, 73, 74, 75, 99].reduce((sum, id) => sum + (Number(isData.stars[id]) || 0), 0);
+                        isStars = [71, 72, 73, 74, 75].reduce((sum, id) => sum + (Number(isData.stars[id]) || 0), 0);
                     }
                     if (isData && typeof isData.totalScore === 'number') isScore = isData.totalScore;
                     if (isData && Array.isArray(isData.mistakes)) isMistakes = isData.mistakes.length;
@@ -652,7 +714,7 @@
                 if (rawRs) {
                     const rsData = JSON.parse(rawRs);
                     if (rsData && rsData.stars) {
-                        rsStars = [1, 2, 3, 4, 5, 99].reduce((sum, id) => sum + (Number(rsData.stars[id]) || 0), 0);
+                        rsStars = [1, 2, 3, 4, 5].reduce((sum, id) => sum + (Number(rsData.stars[id]) || 0), 0);
                     }
                     if (rsData && typeof rsData.totalScore === 'number') rsScore = rsData.totalScore;
                     if (rsData && Array.isArray(rsData.mistakes)) rsMistakes = rsData.mistakes.length;
@@ -665,7 +727,7 @@
                     ? `<span class="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">📕 ${isMistakes} 題待消滅</span>`
                     : `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
                 isProgressEl.innerHTML = `
-                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${isStars} / 18</span>
+                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${isStars} / 15</span>
                     <span class="bg-cyan-50 text-cyan-700 border border-cyan-200 px-2 py-0.5 rounded-full">🏆 ${isScore}</span>
                     ${isMistakeBadge}
                 `;
@@ -677,7 +739,7 @@
                     ? `<span class="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">📕 ${rsMistakes} 題待消滅</span>`
                     : `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✨ 0 錯題</span>`;
                 rsProgressEl.innerHTML = `
-                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${rsStars} / 18</span>
+                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">⭐ ${rsStars} / 15</span>
                     <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">🏆 ${rsScore}</span>
                     ${rsMistakeBadge}
                 `;
@@ -692,6 +754,8 @@
             const biMistakesEl = document.getElementById('bilingual-overall-mistakes-badge');
             if (biStarsEl) biStarsEl.textContent = biTotalStars;
             if (biScoreEl) biScoreEl.textContent = biTotalScore;
+            const biBar = document.getElementById('bilingual-progress-bar');
+            if (biBar) biBar.style.width = `${Math.min(100, Math.round((biTotalStars / 30) * 100))}%`;
             if (biMistakesEl) {
                 if (biTotalMistakes > 0) {
                     biMistakesEl.textContent = `📕 ${biTotalMistakes} 題待消滅`;
@@ -732,6 +796,8 @@
             const engMistakesEl = document.getElementById('english-overall-mistakes-badge');
             if (engStarsEl) engStarsEl.textContent = petStars;
             if (engScoreEl) engScoreEl.textContent = petScore;
+            const engBar = document.getElementById('english-progress-bar');
+            if (engBar) engBar.style.width = `${Math.min(100, Math.round((petStars / 18) * 100))}%`;
             if (engMistakesEl) {
                 if (petMistakes > 0) {
                     engMistakesEl.textContent = `📕 ${petMistakes} 題待消滅`;
@@ -744,6 +810,12 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (localStorage.getItem('portal_hide_ipad_tip') === '1') {
+                    const banner = document.getElementById('ipad-tip-banner');
+                    if (banner) banner.classList.add('hidden');
+                }
+            } catch (_) {}
             renderPortalProgress();
             try {
                 const savedSec = sessionStorage.getItem('portal_active_section');
@@ -751,6 +823,9 @@
             } catch (_) {}
         });
         window.addEventListener('pageshow', renderPortalProgress);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeInfoModal();
+        });
     </script>
 </body>
 </html>
