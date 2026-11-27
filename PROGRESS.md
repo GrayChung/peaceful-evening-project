@@ -5,7 +5,7 @@
 ## 1. 專案基本資訊
 * **專案名稱**：國小親子互動複習遊樂場（`peaceful-evening-project`）
 * **最後更新日期**：`2026-11-27`
-* **目前 Git 分支**：`main`（基準 Commit：`4f26290`，遠端：`https://github.com/GrayChung/peaceful-evening-project`）
+* **目前 Git 分支**：`main`（基準 Commit：`09c41e9`，遠端：`https://github.com/GrayChung/peaceful-evening-project`）
 * **技術架構**：純前端架構（HTML5 + Tailwind Play CDN + CSS3 + Vanilla JavaScript ES6+），無需前端建置工具，支援 GitHub Pages 部署與本機離線開啟。
 
 ---
@@ -14,6 +14,8 @@
 
 ### 2.1 設定與專案文件
 * [`.antigravity/rules.md`](./.antigravity/rules.md)：AI 開發與 `PracticeResources/` 唯讀保護鐵則、前端與題庫 JSON 規範、跨電腦開發與進度交接規範。
+* [`.antigravity/workflows/start.md`](./.antigravity/workflows/start.md)：跨電腦啟動交接自訂工作流（讀取規範與進度並簡報待辦事項）。
+* [`.antigravity/workflows/handoff.md`](./.antigravity/workflows/handoff.md)：開發收尾交接自訂工作流（依規範更新 `PROGRESS.md` 並提醒推送）。
 * [`.gitignore`](./.gitignore)：排除 macOS / Windows 系統暫存檔、編輯器暫存檔與 `node_modules/`；保留 `.antigravity/` 與 `PROGRESS.md` 納入版控。
 * [`PROGRESS.md`](./PROGRESS.md)：本專案跨電腦開發進度交接紀錄。
 * [`LICENSE`](./LICENSE)：專案授權條款。
