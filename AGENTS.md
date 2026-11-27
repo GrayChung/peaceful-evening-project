@@ -64,11 +64,12 @@
 ## 4. 跨電腦開發與進度交接規範
 為確保在多台電腦之間切換開發與開啟新對話時能無縫銜接上下文，所有協作與 AI Agent 必須遵守以下交接準則：
 
-1. **新對話與跨電腦啟動必讀**：
-   * 每次開啟新對話或於不同電腦接續開發時，必須優先讀取 `peaceful-evening-project/.antigravity/rules.md` 與 `peaceful-evening-project/PROGRESS.md`，完整掌握專案規範、現有檔案結構、已完成進度與待辦事項（Next Steps）後，再開始執行任務。
+1. **自動載入與啟動簡報**：
+   * 本文件（`peaceful-evening-project/AGENTS.md`）位於專案根目錄，由 Antigravity 於每次對話自動載入。
+   * 跨電腦或開新對話想快速掌握專案現況與待辦事項時，可透過 `/start` 指令讀取 `peaceful-evening-project/PROGRESS.md` 取得進度簡報。
 2. **主動維護進度交接檔（`PROGRESS.md`）**：
-   * 每次完成功能新增或修改、介面／架構調整、Bug 修復，或根據 `PracticeResources/` 生成／擴充題庫後，必須主動更新 `peaceful-evening-project/PROGRESS.md`。
+   * 每次完成功能新增或修改、介面／架構調整、Bug 修復，或根據 `PracticeResources/` 生成／擴充題庫後，必須主動更新 `peaceful-evening-project/PROGRESS.md`（亦可於收尾時透過 `/handoff` 執行）。
    * 更新內容應同步反映最新狀態：更新日期與基準資訊、新增或異動的檔案／模組清單、已完成的功能與題庫進度，以及最新的待辦事項與建議（Next Steps）。
 3. **版本控制同步原則**：
-   * `.antigravity/rules.md` 與 `PROGRESS.md` 皆須納入 Git 版本控制，嚴禁被 `.gitignore` 排除。
+   * `AGENTS.md`、`.agents/` 與 `PROGRESS.md` 皆須納入 Git 版本控制，嚴禁被 `.gitignore` 排除。
    * 完成階段性變更並更新 `PROGRESS.md` 後，應確認工作區狀態乾淨無誤，以便隨時提交（commit）並推送（push）至 GitHub 進行跨機同步。

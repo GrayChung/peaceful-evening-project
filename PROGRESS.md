@@ -1,11 +1,11 @@
 # 專案開發進度交接紀錄（PROGRESS.md）
 
-> **交接說明**：每次於新對話或跨電腦接手開發時，請優先閱讀 [rules.md](./.antigravity/rules.md) 與本文件；每次修改功能、調整架構或生成／擴充題庫後，請主動更新本文件並同步推送至 GitHub。
+> **交接說明**：專案規則主檔 [`AGENTS.md`](./AGENTS.md) 位於專案根目錄，會於每次對話由 Antigravity 自動載入；跨電腦或開新對話想快速掌握進度時，可輸入 `/start` 讀取本文件取得簡報；每次修改功能、調整架構或生成／擴充題庫後，請主動（或透過 `/handoff`）更新本文件並同步推送至 GitHub。
 
 ## 1. 專案基本資訊
 * **專案名稱**：國小親子互動複習遊樂場（`peaceful-evening-project`）
 * **最後更新日期**：`2026-11-27`
-* **目前 Git 分支**：`main`（基準 Commit：`30bae97`，遠端：`https://github.com/GrayChung/peaceful-evening-project`）
+* **目前 Git 分支**：`main`（基準 Commit：`5cb0fa1`，遠端：`https://github.com/GrayChung/peaceful-evening-project`）
 * **技術架構**：純前端架構（HTML5 + Tailwind Play CDN + CSS3 + Vanilla JavaScript ES6+），無需前端建置工具，支援 GitHub Pages 部署與本機離線開啟。
 
 ---
@@ -13,12 +13,10 @@
 ## 2. 專案現有檔案與模組清單
 
 ### 2.1 設定與專案文件
-* [`.agents/skills/start/SKILL.md`](./.agents/skills/start/SKILL.md)：正式 `/` 斜線指令技能檔（`/start`），用於跨電腦或新對話啟動時讀取規範與進度並簡報待辦事項。
-* [`.agents/skills/handoff/SKILL.md`](./.agents/skills/handoff/SKILL.md)：正式 `/` 斜線指令技能檔（`/handoff`），用於開發收尾時依規範更新 `PROGRESS.md` 並提醒推送。
-* [`.antigravity/rules.md`](./.antigravity/rules.md)：AI 開發與 `PracticeResources/` 唯讀保護鐵則、前端與題庫 JSON 規範、跨電腦開發與進度交接規範。
-* [`.antigravity/workflows/start.md`](./.antigravity/workflows/start.md)：跨電腦啟動交接工作流檔案（備份／歷史相容用）。
-* [`.antigravity/workflows/handoff.md`](./.antigravity/workflows/handoff.md)：開發收尾交接工作流檔案（備份／歷史相容用）。
-* [`.gitignore`](./.gitignore)：排除 macOS / Windows 系統暫存檔、編輯器暫存檔與 `node_modules/`；保留 `.antigravity/` 與 `PROGRESS.md` 納入版控。
+* [`AGENTS.md`](./AGENTS.md)：自動載入之專案規則主檔（`PracticeResources/` 唯讀保護鐵則、前端與題庫 JSON 規範、跨電腦開發與進度交接規範）。
+* [`.agents/skills/start/SKILL.md`](./.agents/skills/start/SKILL.md)：正式 `/` 斜線指令技能檔（`/start`），讀取 `PROGRESS.md` 並簡報目前專案狀態與第一項待辦事項。
+* [`.agents/skills/handoff/SKILL.md`](./.agents/skills/handoff/SKILL.md)：正式 `/` 斜線指令技能檔（`/handoff`），依 `AGENTS.md` 交接規範更新 `PROGRESS.md` 並提醒推送。
+* [`.gitignore`](./.gitignore)：排除 macOS / Windows 系統暫存檔、編輯器暫存檔與 `node_modules/`；保留 `AGENTS.md`、`.agents/` 與 `PROGRESS.md` 納入版控。
 * [`PROGRESS.md`](./PROGRESS.md)：本專案跨電腦開發進度交接紀錄。
 * [`LICENSE`](./LICENSE)：專案授權條款。
 
@@ -83,7 +81,7 @@
 
 1. **題庫資料與頁面邏輯抽離（建立 `data/`）**：
    * 目前 7 個科目 HTML 單檔行數介於 2,369 至 4,088 行，題庫與前端邏輯耦合於同檔內。
-   * 建議後續新建單元或大量擴充題庫時，依 [rules.md](./.antigravity/rules.md) 第 3.3 節規範逐步抽離至 `data/*.json`；若需保留本機 `file://` 直接雙擊開啟的離線相容性，需留意瀏覽器對 `fetch()` 的 CORS 限制，可評估搭配本機靜態伺服器／GitHub Pages，或以 `data/*.js` 掛載資料的相容方案。
+   * 建議後續新建單元或大量擴充題庫時，依 [AGENTS.md](./AGENTS.md) 第 3.3 節規範逐步抽離至 `data/*.json`；若需保留本機 `file://` 直接雙擊開啟的離線相容性，需留意瀏覽器對 `fetch()` 的 CORS 限制，可評估搭配本機靜態伺服器／GitHub Pages，或以 `data/*.js` 掛載資料的相容方案。
 2. **2.5D 地圖與跨科共用 UI 模組化**：
    * `4f26290` 升級後，7 個科目頁皆包含相似的雙排 Header、主題角色同步、作答區互動舞台與初次指南彈窗程式碼。後續可評估將共用 UI 元件邏輯抽離至 `Scripts/`（例如主題與指南管理器），降低跨頁維護成本。
 3. **後續新單元與題庫擴充方向**：
@@ -95,6 +93,6 @@
 ---
 
 ## 5. 跨電腦交接 SOP 速查
-1. **換電腦接手時**：先執行 `git pull origin main`，並讓 AI Agent 優先讀取 `.antigravity/rules.md` 與 `PROGRESS.md`。
-2. **開發或生成題庫後**：更新 `PROGRESS.md` 的進度紀錄與更新日期。
+1. **換電腦接手時**：先執行 `git pull origin main`；開啟對話後 Antigravity 會自動載入 `AGENTS.md`，如需快速回顧現況與待辦事項可直接輸入 `/start`。
+2. **開發或生成題庫後**：主動（或輸入 `/handoff`）更新 `PROGRESS.md` 的進度紀錄、異動清單與更新日期。
 3. **結束前同步**：檢查 `git status` 確認未誤觸 `PracticeResources/` 與暫存檔，執行 `git add`、`git commit` 與 `git push origin main`。
