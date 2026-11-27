@@ -1,0 +1,23 @@
+# 本專案跨電腦開發交接環境設定（.antigravity/ 與 PROGRESS.md 保留納入版控，不予忽略）
+
+# macOS 系統暫存檔
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows 系統暫存檔
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 編輯器與一般暫存檔
+*.swp
+*.swo
+*~
+*.tmp
+*.bak
+*.log
+
+# 本機輔助工具暫存目錄
+node_modules/
