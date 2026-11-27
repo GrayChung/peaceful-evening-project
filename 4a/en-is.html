@@ -53,6 +53,12 @@
         .word-chip:active {
             transform: scale(0.95);
         }
+        #sketch-canvas {
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
         /* 2.5D Adventure Map & Theme Stage Animations */
         body.theme-bakery {
@@ -482,8 +488,8 @@
                 </div>
                 <button onclick="closeSketchpad()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-black px-3 py-1.5 rounded-xl text-sm">✕ Close</button>
             </div>
-            <div class="relative bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden touch-none">
-                <canvas id="sketch-canvas" class="w-full h-64 sm:h-80 cursor-crosshair block"></canvas>
+            <div class="relative bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden touch-none select-none">
+                <canvas id="sketch-canvas" class="w-full h-64 sm:h-80 cursor-crosshair block touch-none select-none"></canvas>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
@@ -2167,10 +2173,20 @@
         // ==================== iPad 手寫草稿畫板 ====================
         let sketchCtx = null;
         let drawing = false;
+        let activeSketchPointerId = null;
+        let activeSketchPointerType = null;
+        let lastSketchX = 0;
+        let lastSketchY = 0;
         let sketchColor = '#0284c7';
         let sketchDpr = 1;
         let sketchInitialized = false;
         let sketchPointerBound = false;
+
+        function resetSketchPointerState() {
+            drawing = false;
+            activeSketchPointerId = null;
+            activeSketchPointerType = null;
+        }
 
         function syncSketchpadSize(preserveDrawing = true) {
             const canvas = document.getElementById('sketch-canvas');
@@ -2229,39 +2245,106 @@
                     };
                 };
                 const endStroke = (e) => {
-                    drawing = false;
-                    if (canvas.releasePointerCapture && e && e.pointerId !== undefined) {
+                    if (!drawing) return;
+                    if (activeSketchPointerId !== null && e && e.pointerId !== undefined && e.pointerId !== activeSketchPointerId) {
+                        return;
+                    }
+                    const finishedId = activeSketchPointerId;
+                    resetSketchPointerState();
+                    if (canvas.releasePointerCapture && finishedId !== null) {
                         try {
-                            if (!canvas.hasPointerCapture || canvas.hasPointerCapture(e.pointerId)) {
-                                canvas.releasePointerCapture(e.pointerId);
+                            if (!canvas.hasPointerCapture || canvas.hasPointerCapture(finishedId)) {
+                                canvas.releasePointerCapture(finishedId);
                             }
                         } catch (_) {}
                     }
                 };
+                const blockTouchGesture = (e) => {
+                    if (e.cancelable) e.preventDefault();
+                };
+
                 canvas.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
+                    if (e.pointerType === 'mouse' && e.button !== 0) return;
+                    if (e.cancelable) e.preventDefault();
+
+                    if (drawing && activeSketchPointerId !== null && activeSketchPointerId !== e.pointerId) {
+                        if (e.pointerType === 'pen' || e.isPrimary === true) {
+                            if (canvas.releasePointerCapture) {
+                                try {
+                                    if (!canvas.hasPointerCapture || canvas.hasPointerCapture(activeSketchPointerId)) {
+                                        canvas.releasePointerCapture(activeSketchPointerId);
+                                    }
+                                } catch (_) {}
+                            }
+                        } else {
+                            return;
+                        }
+                    }
+
                     drawing = true;
-                    if (canvas.setPointerCapture && e.pointerId !== undefined) {
+                    activeSketchPointerId = e.pointerId !== undefined ? e.pointerId : null;
+                    activeSketchPointerType = e.pointerType || 'mouse';
+                    if (activeSketchPointerType === 'mouse' && canvas.setPointerCapture && e.pointerId !== undefined) {
                         try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
                     }
+
                     const p = getPos(e);
+                    lastSketchX = p.x;
+                    lastSketchY = p.y;
+                    sketchCtx.lineCap = 'round';
+                    sketchCtx.lineJoin = 'round';
+                    sketchCtx.lineWidth = 4;
+                    sketchCtx.strokeStyle = sketchColor;
                     sketchCtx.beginPath();
                     sketchCtx.moveTo(p.x, p.y);
+                    sketchCtx.lineTo(p.x + 0.01, p.y + 0.01);
+                    sketchCtx.stroke();
                 }, { passive: false });
                 canvas.addEventListener('pointermove', (e) => {
                     if (!drawing) return;
-                    e.preventDefault();
-                    const p = getPos(e);
-                    sketchCtx.lineTo(p.x, p.y);
-                    sketchCtx.stroke();
+                    if (activeSketchPointerId !== null && e.pointerId !== activeSketchPointerId) return;
+                    if (e.cancelable) e.preventDefault();
+
+                    const coalesced = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
+                    const events = (coalesced && coalesced.length > 0) ? coalesced : [e];
+                    sketchCtx.lineCap = 'round';
+                    sketchCtx.lineJoin = 'round';
+                    sketchCtx.lineWidth = 4;
+                    sketchCtx.strokeStyle = sketchColor;
+                    for (let i = 0; i < events.length; i++) {
+                        const ev = events[i];
+                        const hasValidCoords = ev && Number.isFinite(ev.clientX) && Number.isFinite(ev.clientY) &&
+                            !(ev.clientX === 0 && ev.clientY === 0 && (e.clientX !== 0 || e.clientY !== 0));
+                        const p = getPos(hasValidCoords ? ev : e);
+                        sketchCtx.beginPath();
+                        sketchCtx.moveTo(lastSketchX, lastSketchY);
+                        sketchCtx.lineTo(p.x, p.y);
+                        sketchCtx.stroke();
+                        lastSketchX = p.x;
+                        lastSketchY = p.y;
+                    }
                 }, { passive: false });
                 canvas.addEventListener('pointerup', endStroke);
                 canvas.addEventListener('pointercancel', endStroke);
+                canvas.addEventListener('lostpointercapture', (e) => {
+                    if (activeSketchPointerType === 'mouse') endStroke(e);
+                });
+                canvas.addEventListener('touchstart', blockTouchGesture, { passive: false });
+                canvas.addEventListener('touchmove', blockTouchGesture, { passive: false });
                 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
                 sketchInitialized = true;
             }
             if (!sketchPointerBound) {
-                window.addEventListener('pointerup', () => { drawing = false; });
+                const endWindowStroke = (e) => {
+                    if (!drawing) return;
+                    if (activeSketchPointerId !== null && e && e.pointerId !== undefined && e.pointerId !== activeSketchPointerId) {
+                        return;
+                    }
+                    resetSketchPointerState();
+                };
+                window.addEventListener('pointerup', endWindowStroke);
+                window.addEventListener('pointercancel', endWindowStroke);
+                window.addEventListener('blur', resetSketchPointerState);
                 window.addEventListener('resize', () => {
                     const modal = document.getElementById('sketchpad-modal');
                     if (modal && !modal.classList.contains('hidden')) syncSketchpadSize(true);
@@ -2271,7 +2354,7 @@
         }
 
         function closeSketchpad() {
-            drawing = false;
+            resetSketchPointerState();
             document.getElementById('sketchpad-modal').classList.add('hidden');
         }
 
@@ -2281,6 +2364,7 @@
         }
 
         function clearSketchpad() {
+            resetSketchPointerState();
             const canvas = document.getElementById('sketch-canvas');
             if (canvas && sketchCtx) {
                 sketchCtx.save();

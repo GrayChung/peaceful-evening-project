@@ -22,11 +22,11 @@
 
 ### 2.2 主大廳與科目網頁（共 8 份 HTML）
 * [`index.html`](./index.html)（1,092 行）：全站 2.5D 冒險總島大廳。包含三大分頁（國小學科／雙語英文／劍橋英檢）、3D 主角主題切換、動態貓頭鷹隨機鼓勵、全站進度總覽、卡片預載（`setupCardPrefetch`）與初次指南彈窗（`localStorage`: `playground_guide_hub_v1`、`playground_theme_v1`、`portal_hide_ipad_tip`）。
-* [`4a/math.html`](./4a/math.html)（4,088 行）：四上期末考數學冒險島（翰林版第 6～10 單元＋模擬考＋錯題消滅戰）。具備 iPad Apple Pencil 防誤觸計算草稿紙（橡皮擦／15 步復原／加高）、寬螢幕雙欄工作台與動態 SVG 幾何／折線圖表（`localStorage`: `hanlin_math_4a_final_v2`）。
-* [`4a/chinese.html`](./4a/chinese.html)（3,409 行）：四上期末考國語文勇者試煉（南一版第 7～12 課 6 關＋模擬考＋錯題消滅戰）。具備第 6 關田字格生字手寫板、手寫題寬螢幕雙欄排版（`localStorage`: `nani_chinese_4a_final_v1`）。
+* [`4a/math.html`](./4a/math.html)（4,120 行）：四上期末考數學冒險島（翰林版第 6～10 單元＋模擬考＋錯題消滅戰）。具備 iPad 觸控與 Apple Pencil 防誤觸計算草稿紙（橡皮擦／15 步復原／加高）、寬螢幕雙欄工作台與動態 SVG 幾何／折線圖表（`localStorage`: `hanlin_math_4a_final_v2`）。
+* [`4a/chinese.html`](./4a/chinese.html)（3,437 行）：四上期末考國語文勇者試煉（南一版第 7～12 課 6 關＋模擬考＋錯題消滅戰）。具備第 6 關田字格生字手寫板（已強化 iPad Safari 觸控書寫相容性）、手寫題寬螢幕雙欄排版（`localStorage`: `nani_chinese_4a_final_v1`）。
 * [`4a/science.html`](./4a/science.html)（2,981 行）：四上期末考自然科學探險營（康軒版第 3～4 單元 5 關＋模擬考＋錯題消滅戰）。具備聲光／電路動態 SVG 實驗圖解與 4-2 電池／燈泡串並聯互動圖（`localStorage`: `knsh_science_4a_final_v1`）。
 * [`4a/society.html`](./4a/society.html)（2,692 行）：四上期末考社會探險家（康軒版第 3～4 單元 5 關＋模擬考＋錯題消滅戰）（`localStorage`: `knsh_society_4a_final_v1`）。
-* [`4a/en-is.html`](./4a/en-is.html)（2,369 行）：Grade 4 IS Lab 雙語自然實驗室（Ch.7 Properties of Light ＋ 習作 Activity 7A，5 關＋Stage 99 錯題消滅戰）。支援互動式 SVG 光線圖（Ray Diagram）組裝、光線草稿畫板、英文 TTS 語音朗讀與繁體中文提示切換（`localStorage`: `bilingual_is_4a_v1`）。
+* [`4a/en-is.html`](./4a/en-is.html)（2,453 行）：Grade 4 IS Lab 雙語自然實驗室（Ch.7 Properties of Light ＋ 習作 Activity 7A，5 關＋Stage 99 錯題消滅戰）。支援互動式 SVG 光線圖（Ray Diagram）組裝、iPad 觸控相容光線草稿畫板、英文 TTS 語音朗讀與繁體中文提示切換（`localStorage`: `bilingual_is_4a_v1`）。
 * [`4a/en-rs.html`](./4a/en-rs.html)（2,380 行）：Grade 4 RS Lab 雙語英文（*The Game of Silence* & Grammar 4.1/4.2/4.4，5 關＋Stage 99 錯題消滅戰）。涵蓋短／長母音 u 聽寫拼字、歷史小說理解、修辭描寫與文法綜合練習（`localStorage`: `bilingual_rs_4a_v1`）。
 * [`cambridge/pet.html`](./cambridge/pet.html)（2,692 行）：Cambridge PET (B1) 倫敦特快車（5 大備考關卡＋Stage 99 全真衝刺賽＋錯題特訓營）。支援英／美口音與 `0.85x` / `1.0x` 聽寫語速切換、詞彙拼字與段落句子還原（`localStorage`: `cambridge_pet_v1`）。
 
@@ -61,7 +61,7 @@
 * **全站 2.5D 立體微縮地圖與主題互動舞台**：大廳與 7 個正式科目頁統一配備 2.5D 地圖背景、雙排狀態列 Header、高對比定錨圓盤節點、下方關卡情報條、快速選關列、作答區 3D 主角互動舞台（跨頁主題同步）與初次指南彈窗。
 * **流暢轉場與跨平台優化**：支援原生 `@view-transition`、Anti-FOUC 進場淡入、首頁懸停／觸控卡片預載、PWA 主畫面標籤、SVG Favicon、Enter/Esc 鍵盤快捷操作與 `prefers-reduced-motion`。
 * **遊戲化回饋與錯題消滅戰**：全站（國小 4 科、雙語 IS/RS、Cambridge PET）整合 `SoundEngine` 音效、`ConfettiEngine` 彩帶煙火、`MonsterBoss` 雙層殘影 RPG 血條與斬擊反擊動畫，以及 Toast／自訂圓角彈窗（無原生 `alert`/`confirm`）。
-* **觸控手寫與寬螢幕排版**：數學草稿板與雙語 IS 光線畫板支援單一 `activePointerId` 防誤觸、手寫筆優先與 DPR 座標補償；數學與國語手寫題於寬螢幕提供雙欄工作台，含 SVG 圖表題目支援左右並排。
+* **觸控手寫與寬螢幕排版**：數學草稿板（`4a/math.html`）、國語田字格手寫板（`4a/chinese.html`）與雙語 IS 光線畫板（`4a/en-is.html`）全面統一 iPadOS Safari 觸控手寫防護（外層／畫布 `touch-action: none`、`{ passive: false }` `touchstart`/`touchmove` 手勢攔截、`setPointerCapture` 僅限滑鼠避免觸控提前 `lostpointercapture`、`isPrimary`/筆接管防止 `activePointerId` 殘留鎖死、`getCoalescedEvents()` 異常座標防護與 `blur`/清除重置）；數學與國語手寫題於寬螢幕提供雙欄工作台，含 SVG 圖表題目支援左右並排。
 
 ### 3.2 各科目題庫與關卡進度總表
 

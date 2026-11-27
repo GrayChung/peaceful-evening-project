@@ -51,7 +51,14 @@
         }
 
         /* 田字格手寫板樣式 */
+        #hanzi-canvas-wrap {
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
         #hanzi-canvas {
+            display: block;
             touch-action: none;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -1204,6 +1211,12 @@
             maxHistory: 15,
             resizeObserver: null,
 
+            resetPointerState() {
+                this.drawing = false;
+                this.activePointerId = null;
+                this.activePointerType = null;
+            },
+
             init() {
                 this.canvas = document.getElementById('hanzi-canvas');
                 if (!this.canvas) return;
@@ -1230,7 +1243,7 @@
                     if (e.cancelable) e.preventDefault();
 
                     if (this.drawing && this.activePointerId !== null && this.activePointerId !== e.pointerId) {
-                        if (e.pointerType === 'pen' && this.activePointerType === 'touch') {
+                        if (e.pointerType === 'pen' || e.isPrimary === true) {
                             if (this.canvas.releasePointerCapture) {
                                 try {
                                     if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(this.activePointerId)) {
@@ -1264,7 +1277,7 @@
                     const warnEl = document.getElementById('hanzi-empty-warn');
                     if (warnEl) warnEl.classList.add('hidden');
 
-                    if (this.canvas.setPointerCapture && e.pointerId !== undefined) {
+                    if (this.activePointerType === 'mouse' && this.canvas.setPointerCapture && e.pointerId !== undefined) {
                         try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
                     }
 
@@ -1298,7 +1311,9 @@
 
                     for (let i = 0; i < events.length; i++) {
                         const ev = events[i];
-                        const pos = getPos(ev.clientX !== undefined ? ev : e);
+                        const hasValidCoords = ev && Number.isFinite(ev.clientX) && Number.isFinite(ev.clientY) &&
+                            !(ev.clientX === 0 && ev.clientY === 0 && (e.clientX !== 0 || e.clientY !== 0));
+                        const pos = getPos(hasValidCoords ? ev : e);
                         this.ctx.beginPath();
                         this.ctx.moveTo(this.lastX, this.lastY);
                         this.ctx.lineTo(pos.x, pos.y);
@@ -1310,13 +1325,11 @@
 
                 const endDraw = (e) => {
                     if (!this.drawing) return;
-                    if (this.activePointerId !== null && e.pointerId !== undefined && e.pointerId !== this.activePointerId) {
+                    if (this.activePointerId !== null && e && e.pointerId !== undefined && e.pointerId !== this.activePointerId) {
                         return;
                     }
-                    this.drawing = false;
                     const finishedId = this.activePointerId;
-                    this.activePointerId = null;
-                    this.activePointerType = null;
+                    this.resetPointerState();
                     if (this.canvas.releasePointerCapture && finishedId !== null) {
                         try {
                             if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(finishedId)) {
@@ -1326,12 +1339,26 @@
                     }
                 };
 
+                const blockTouchGesture = (e) => {
+                    if (!currentSession.answered && e.cancelable) {
+                        e.preventDefault();
+                    }
+                };
+
                 this.canvas.addEventListener('pointerdown', startDraw, { passive: false });
                 this.canvas.addEventListener('pointermove', moveDraw, { passive: false });
                 this.canvas.addEventListener('pointerup', endDraw);
                 this.canvas.addEventListener('pointercancel', endDraw);
-                this.canvas.addEventListener('lostpointercapture', endDraw);
+                this.canvas.addEventListener('lostpointercapture', (e) => {
+                    if (this.activePointerType === 'mouse') endDraw(e);
+                });
+                this.canvas.addEventListener('touchstart', blockTouchGesture, { passive: false });
+                this.canvas.addEventListener('touchmove', blockTouchGesture, { passive: false });
                 this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                window.addEventListener('pointerup', endDraw);
+                window.addEventListener('pointercancel', endDraw);
+                window.addEventListener('blur', () => this.resetPointerState());
 
                 if (typeof ResizeObserver === 'function' && this.canvas.parentElement) {
                     this.resizeObserver = new ResizeObserver(() => this.resize(true));
@@ -1421,6 +1448,7 @@
             },
 
             clear(fromUser = false) {
+                this.resetPointerState();
                 if (fromUser && this.hasStrokes) {
                     this.saveHistory();
                 } else if (!fromUser) {

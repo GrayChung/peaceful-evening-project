@@ -72,7 +72,14 @@
         }
 
         /* 手寫草稿畫布：點點紙與直式方格紙雙模式 */
+        #scratch-canvas-wrap {
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
         #scratch-canvas {
+            display: block;
             touch-action: none;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -871,6 +878,15 @@
             maxHistory: 15,
             resizeObserver: null,
 
+            resetPointerState() {
+                this.drawing = false;
+                this.activePointerId = null;
+                this.activePointerType = null;
+                if (this.ctx) {
+                    this.ctx.globalCompositeOperation = 'source-over';
+                }
+            },
+
             init() {
                 this.canvas = document.getElementById('scratch-canvas');
                 if (!this.canvas) return;
@@ -896,9 +912,9 @@
                     if (e.pointerType === 'mouse' && e.button !== 0) return;
                     if (e.cancelable) e.preventDefault();
 
-                    // 鎖定單一 activePointerId 防止手掌與多指誤觸；手寫筆 (pen) 可接管觸控 (touch)
+                    // 鎖定單一 activePointerId 防止手掌與多指誤觸；手寫筆 (pen) 或主指標 (isPrimary) 可接管殘留狀態
                     if (this.drawing && this.activePointerId !== null && this.activePointerId !== e.pointerId) {
-                        if (e.pointerType === 'pen' && this.activePointerType === 'touch') {
+                        if (e.pointerType === 'pen' || e.isPrimary === true) {
                             if (this.canvas.releasePointerCapture) {
                                 try {
                                     if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(this.activePointerId)) {
@@ -928,7 +944,7 @@
                     this.activePointerId = e.pointerId !== undefined ? e.pointerId : null;
                     this.activePointerType = e.pointerType || 'mouse';
 
-                    if (this.canvas.setPointerCapture && e.pointerId !== undefined) {
+                    if (this.activePointerType === 'mouse' && this.canvas.setPointerCapture && e.pointerId !== undefined) {
                         try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {}
                     }
 
@@ -955,7 +971,9 @@
                     this.applyStrokeStyle(pointerType);
                     for (let i = 0; i < events.length; i++) {
                         const ev = events[i];
-                        const pos = getPos(ev.clientX !== undefined ? ev : e);
+                        const hasValidCoords = ev && Number.isFinite(ev.clientX) && Number.isFinite(ev.clientY) &&
+                            !(ev.clientX === 0 && ev.clientY === 0 && (e.clientX !== 0 || e.clientY !== 0));
+                        const pos = getPos(hasValidCoords ? ev : e);
                         this.ctx.beginPath();
                         this.ctx.moveTo(this.lastX, this.lastY);
                         this.ctx.lineTo(pos.x, pos.y);
@@ -967,14 +985,11 @@
 
                 const endDraw = (e) => {
                     if (!this.drawing) return;
-                    if (this.activePointerId !== null && e.pointerId !== undefined && e.pointerId !== this.activePointerId) {
+                    if (this.activePointerId !== null && e && e.pointerId !== undefined && e.pointerId !== this.activePointerId) {
                         return;
                     }
-                    this.drawing = false;
                     const finishedId = this.activePointerId;
-                    this.activePointerId = null;
-                    this.activePointerType = null;
-                    this.ctx.globalCompositeOperation = 'source-over';
+                    this.resetPointerState();
                     if (this.canvas.releasePointerCapture && finishedId !== null) {
                         try {
                             if (!this.canvas.hasPointerCapture || this.canvas.hasPointerCapture(finishedId)) {
@@ -984,12 +999,26 @@
                     }
                 };
 
+                const blockTouchGesture = (e) => {
+                    if (e.cancelable) {
+                        e.preventDefault();
+                    }
+                };
+
                 this.canvas.addEventListener('pointerdown', startDraw, { passive: false });
                 this.canvas.addEventListener('pointermove', moveDraw, { passive: false });
                 this.canvas.addEventListener('pointerup', endDraw);
                 this.canvas.addEventListener('pointercancel', endDraw);
-                this.canvas.addEventListener('lostpointercapture', endDraw);
+                this.canvas.addEventListener('lostpointercapture', (e) => {
+                    if (this.activePointerType === 'mouse') endDraw(e);
+                });
+                this.canvas.addEventListener('touchstart', blockTouchGesture, { passive: false });
+                this.canvas.addEventListener('touchmove', blockTouchGesture, { passive: false });
                 this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+                window.addEventListener('pointerup', endDraw);
+                window.addEventListener('pointercancel', endDraw);
+                window.addEventListener('blur', () => this.resetPointerState());
 
                 if (typeof ResizeObserver === 'function' && this.canvas.parentElement) {
                     this.resizeObserver = new ResizeObserver(() => this.resize(true));
@@ -1126,6 +1155,8 @@
             if (!panel.classList.contains('hidden')) {
                 Scratchpad.resize(true);
                 requestAnimationFrame(() => Scratchpad.resize(true));
+            } else {
+                Scratchpad.resetPointerState();
             }
         }
 
@@ -1187,6 +1218,7 @@
 
         function clearScratchpad(fromUser = false) {
             if (fromUser) SoundEngine.click();
+            Scratchpad.resetPointerState();
             if (Scratchpad.ctx && Scratchpad.canvas) {
                 if (fromUser) {
                     Scratchpad.saveHistory();
